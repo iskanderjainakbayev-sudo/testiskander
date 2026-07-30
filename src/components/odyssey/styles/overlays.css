@@ -1,0 +1,36 @@
+.odx-pause { position:absolute; inset:0; display:grid; place-items:center; padding:32px; background:radial-gradient(circle at 68% 48%,rgba(20,44,48,.12),transparent 31%),rgba(1,5,7,.78); backdrop-filter:blur(11px) saturate(.6); pointer-events:auto; }
+.odx-pause__panel { width:min(820px,92vw); padding:31px 38px 25px; border:1px solid rgba(192,219,221,.18); background:linear-gradient(135deg,rgba(11,20,23,.87),rgba(3,8,10,.68)); box-shadow:0 40px 100px rgba(0,0,0,.45); }
+.odx-pause__panel > header { display:flex; justify-content:space-between; padding-bottom:16px; border-bottom:1px solid rgba(190,214,216,.12); color:var(--odx-dim); font-size:7px; letter-spacing:.18em; }
+.odx-pause__panel header p { margin:0; }.odx-pause__panel header p i { display:inline-block;width:5px;height:5px;margin-right:7px;border-radius:50%;background:var(--odx-amber);box-shadow:0 0 8px var(--odx-amber)}
+.odx-pause__title { margin:30px 0 25px; }
+.odx-pause__title p { margin:0 0 9px; color:var(--odx-amber); font-size:7px; letter-spacing:.22em; }
+.odx-pause__title h1 { margin:0; font:200 clamp(35px,5vw,62px)/1 "Helvetica Neue",Arial,sans-serif; letter-spacing:-.045em; }
+.odx-pause__title h1 em { color:rgba(217,229,229,.38); font-family:Georgia,serif; font-weight:400; }
+.odx-pause__stats { display:grid; grid-template-columns:repeat(3,1fr); margin-bottom:30px; border-top:1px solid rgba(190,214,216,.12); border-bottom:1px solid rgba(190,214,216,.12); }
+.odx-pause__stats div { padding:18px 16px 18px 0; border-right:1px solid rgba(190,214,216,.1); }
+.odx-pause__stats div+div { padding-left:16px; }
+.odx-pause__stats div:last-child { border:0; }
+.odx-pause__stats span,.odx-pause__stats strong,.odx-pause__stats small { display:block; }
+.odx-pause__stats span { color:var(--odx-dim); font-size:6px; letter-spacing:.18em; }
+.odx-pause__stats strong { margin-top:9px; font:300 18px/1 "Helvetica Neue",Arial,sans-serif; }
+.odx-pause__stats small { margin-top:7px; color:rgba(187,208,210,.36); font-size:7px; }
+.odx-pause__actions { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.odx-pause__actions .odx-button { width:230px; }.odx-pause__actions .odx-menu__exit { margin-left:auto; }
+.odx-pause__panel > footer { margin-top:25px; color:rgba(187,208,210,.24); font-size:6px; letter-spacing:.15em; }
+.odx-pause__panel > footer i { display:inline-block;width:18px;height:1px;margin:0 8px 2px;background:rgba(187,208,210,.22)}
+
+.odx-ending { position:absolute; inset:0; display:grid; place-items:center; overflow:hidden; background:radial-gradient(circle at 77% 45%,rgba(167,196,187,.13),transparent 2%,rgba(48,82,80,.12) 11%,transparent 34%),linear-gradient(90deg,rgba(1,4,6,.96),rgba(2,7,9,.7) 63%,rgba(1,4,6,.47)); pointer-events:auto; }
+.odx-ending__flare { position:absolute; right:18%; top:45%; width:5px; height:5px; border-radius:50%; background:#fff; box-shadow:0 0 15px 5px #dce9df,0 0 80px 25px rgba(162,199,188,.5),0 0 240px 80px rgba(103,150,145,.2); }
+.odx-ending__story { position:relative; width:min(690px,82vw); margin-right:15vw; animation:odx-reveal 1.5s .3s ease both; }
+.odx-ending__story > span { color:var(--odx-amber); font-size:7px; letter-spacing:.24em; }
+.odx-ending h1 { margin:23px 0 25px; font:200 clamp(43px,6.8vw,94px)/.92 "Helvetica Neue",Arial,sans-serif; letter-spacing:-.055em; }
+.odx-ending h1 em { color:rgba(219,230,228,.48); font-family:Georgia,serif; font-weight:400; }
+.odx-ending__story > p { width:min(510px,100%); color:rgba(201,216,216,.62); font:14px/1.75 Georgia,serif; }
+.odx-ending blockquote { margin:27px 0; padding-left:17px; border-left:1px solid var(--odx-amber); color:rgba(226,232,230,.8); font:italic 13px/1.7 Georgia,serif; }
+.odx-ending__rule { display:flex; align-items:center; gap:14px; width:min(510px,100%); margin:25px 0; color:rgba(198,215,215,.4); font-size:6px; letter-spacing:.18em; }
+.odx-ending__rule i { flex:1; height:1px; background:rgba(198,215,215,.17); }
+.odx-ending__actions { display:flex; gap:8px; }.odx-ending__actions .odx-button { width:240px; }
+.odx-ending__credit { position:absolute; right:3.5vw; bottom:5vh; text-align:right; }
+.odx-ending__credit span,.odx-ending__credit small { display:block; }
+.odx-ending__credit span { font-size:9px; letter-spacing:.22em; }.odx-ending__credit small { margin-top:6px;color:var(--odx-dim);font-size:6px;letter-spacing:.16em}
+
