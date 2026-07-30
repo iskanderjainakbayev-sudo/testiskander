@@ -165,14 +165,14 @@ def oriented_cylinder(
     start_v, end_v = Vector(start), Vector(end)
     direction = end_v - start_v
     midpoint = (start_v + end_v) * 0.5
-    obj = cylinder(name, radius, direction.length, midpoint, material, parent, vertices, bevel=0.03)
+    bpy.ops.mesh.primitive_cylinder_add(
+        vertices=vertices, radius=radius, depth=direction.length, location=midpoint
+    )
+    obj = bpy.context.object
+    obj.name = name
     obj.rotation_mode = "QUATERNION"
     obj.rotation_quaternion = direction.to_track_quat("Z", "Y")
-    bpy.context.view_layer.objects.active = obj
-    obj.select_set(True)
-    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-    obj.select_set(False)
-    return obj
+    return finish_mesh(obj, parent, material, bevel=0.03, bevel_segments=2, smooth=True)
 
 
 def curve_tube(
@@ -210,4 +210,15 @@ def triangulate_meshes(root: bpy.types.Object) -> None:
         obj.select_set(True)
         modifier = obj.modifiers.new("Runtime triangles", "TRIANGULATE")
         bpy.ops.object.modifier_apply(modifier=modifier.name)
+        obj.select_set(False)
+
+
+def convert_curves(root: bpy.types.Object) -> None:
+    for obj in tuple(root.children_recursive):
+        if obj.type != "CURVE":
+            continue
+        bpy.ops.object.select_all(action="DESELECT")
+        obj.select_set(True)
+        bpy.context.view_layer.objects.active = obj
+        bpy.ops.object.convert(target="MESH")
         obj.select_set(False)

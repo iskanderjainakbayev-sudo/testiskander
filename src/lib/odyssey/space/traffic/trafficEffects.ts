@@ -28,7 +28,7 @@ export function createTrafficEffects(
   const strobeGeometry = new THREE.IcosahedronGeometry(.3, 1);
   const portStrobes = new THREE.InstancedMesh(strobeGeometry, materials.port, vesselCount);
   const starboardStrobes = new THREE.InstancedMesh(
-    strobeGeometry.clone(),
+    strobeGeometry,
     materials.starboard,
     vesselCount,
   );

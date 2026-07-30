@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { HULL_IDS, VESSELS } from './fleetManifest';
+import { HULL_IDS, HULL_PROFILES, VESSELS } from './fleetManifest';
 import { createShipGeometry } from './shipGeometry';
 import { createTrafficEffects, type TrafficEffects } from './trafficEffects';
 import type { HullId, TrafficMaterials } from './types';
@@ -52,9 +52,7 @@ export function createFleetVisuals(materials: TrafficMaterials): FleetVisuals {
   });
 
   const plumeCount = VESSELS.reduce(
-    (count, spec) => count + (
-      spec.hull === 'orison' ? 1 : 2
-    ),
+    (count, spec) => count + HULL_PROFILES[spec.hull].engines.length,
     0,
   );
   const effects = createTrafficEffects(plumeCount, VESSELS.length, materials);

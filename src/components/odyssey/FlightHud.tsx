@@ -13,11 +13,12 @@ interface FlightHudProps {
   onInteract: () => void;
   onScan: () => void;
   onCycleTarget: () => void;
+  onLand: () => void;
 }
 
 type ScanStyle = CSSProperties & { '--odx-scan': string };
 
-export function FlightHud({ snapshot, onInteract, onScan, onCycleTarget }: FlightHudProps) {
+export function FlightHud({ snapshot, onInteract, onScan, onCycleTarget, onLand }: FlightHudProps) {
   const scan = normalizePercent(snapshot.scanProgress);
   const inRange = snapshot.targetDistance < DISCOVERIES[snapshot.target].scanRange;
   const scanStyle: ScanStyle = { '--odx-scan': `${scan * 3.6}deg` };
@@ -42,8 +43,14 @@ export function FlightHud({ snapshot, onInteract, onScan, onCycleTarget }: Fligh
         <span><small>{scan > 0 ? 'SPECTRAL RESOLUTION' : 'DEEP FIELD ARRAY'}</small><strong>{scan > 0 ? `${Math.round(scan)}%` : inRange ? 'HOLD Q · ACQUIRE ECHO' : 'APPROACH TARGET'}</strong></span>
       </button>
       <div className="odx-flight__hints">
-        <span><kbd>MOUSE</kbd> STEER</span><span><kbd>W S</kbd> THRUST</span><span><kbd>A D</kbd> ROLL</span><span><kbd>SPACE</kbd> BRAKE</span><span><kbd>SHIFT</kbd> PULSE</span><span><kbd>F</kbd> ALIGN</span><span><kbd>T</kbd> TARGET</span>
+        <span><kbd>MOUSE</kbd> STEER</span><span><kbd>W S</kbd> THRUST</span><span><kbd>A D</kbd> ROLL</span><span><kbd>SPACE</kbd> BRAKE</span><span><kbd>SHIFT</kbd> PULSE</span><span><kbd>F</kbd> ALIGN</span><span><kbd>T</kbd> TARGET</span>{snapshot.canLand && <span><kbd>L</kbd> LAND</span>}
       </div>
+      {snapshot.canLand && (
+        <button className="odx-land" onClick={onLand}>
+          <span><small>SOLACE DESCENT CORRIDOR</small><strong>LAND ON RAINSHELF 04</strong></span>
+          <i aria-hidden="true">↓</i>
+        </button>
+      )}
       {snapshot.nearbyInteraction && (
         <button className="odx-helm-exit" onClick={onInteract}><kbd>E</kbd> LEAVE HELM</button>
       )}

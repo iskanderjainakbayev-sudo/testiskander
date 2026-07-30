@@ -4,8 +4,10 @@ import { CinematicFrame } from './CinematicFrame';
 import { EndingSequence } from './EndingSequence';
 import { FlightHud } from './FlightHud';
 import { FocusPrompt } from './FocusPrompt';
+import { LandingSequence } from './LandingSequence';
 import { MainMenu } from './MainMenu';
 import { PauseOverlay } from './PauseOverlay';
+import { SurfaceHud } from './SurfaceHud';
 import { WalkingHud } from './WalkingHud';
 
 export interface OdysseyInterfaceProps {
@@ -18,6 +20,7 @@ export interface OdysseyInterfaceProps {
   onInteract: () => void;
   onScan: () => void;
   onCycleTarget: () => void;
+  onLand: () => void;
   onReturnToMenu: () => void;
 }
 
@@ -31,9 +34,10 @@ export function OdysseyInterface({
   onInteract,
   onScan,
   onCycleTarget,
+  onLand,
   onReturnToMenu,
 }: OdysseyInterfaceProps) {
-  const isActive = snapshot.mode === 'walking' || snapshot.mode === 'flight';
+  const isActive = ['walking', 'flight', 'surface'].includes(snapshot.mode);
 
   return (
     <div className={`odx-interface odx-interface--${snapshot.mode}`}>
@@ -51,10 +55,17 @@ export function OdysseyInterface({
           onInteract={onInteract}
           onScan={onScan}
           onCycleTarget={onCycleTarget}
+          onLand={onLand}
         />
       )}
       {snapshot.mode === 'walking' && (
         <WalkingHud snapshot={snapshot} onInteract={onInteract} />
+      )}
+      {snapshot.mode === 'surface' && (
+        <SurfaceHud snapshot={snapshot} onInteract={onInteract} />
+      )}
+      {(snapshot.mode === 'landing' || snapshot.mode === 'takeoff') && (
+        <LandingSequence mode={snapshot.mode} progress={snapshot.transitionProgress} />
       )}
       {snapshot.mode === 'paused' && (
         <PauseOverlay

@@ -48,6 +48,7 @@ export function OdysseyGame() {
         onInteract={() => worldRef.current?.interact()}
         onScan={() => worldRef.current?.scan()}
         onCycleTarget={() => worldRef.current?.cycleTarget()}
+        onLand={() => worldRef.current?.land()}
         onReturnToMenu={() => worldRef.current?.returnToMenu()}
       />
     </div>

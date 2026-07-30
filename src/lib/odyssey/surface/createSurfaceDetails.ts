@@ -80,7 +80,7 @@ export function createSurfaceDetails(): SurfaceDetails {
     update: (time) => {
       sampleSites.forEach((site, index) => {
         site.rotation.y = time * (0.08 + index * 0.015);
-        const light = site.children.at(-1);
+        const light = site.children[site.children.length - 1];
         if (light instanceof THREE.PointLight) {
           light.intensity = 3.5 + Math.sin(time * 1.4 + index) * 0.65;
         }

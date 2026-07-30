@@ -51,7 +51,7 @@ export function createCarrier(materials: TrafficMaterials): CarrierRig {
   const lightGeometry = new THREE.IcosahedronGeometry(.46, 1);
   const approachPort = new THREE.InstancedMesh(lightGeometry, materials.port, 12);
   const approachStarboard = new THREE.InstancedMesh(
-    lightGeometry.clone(),
+    lightGeometry,
     materials.starboard,
     12,
   );

@@ -1,0 +1,54 @@
+.odx-surface,.odx-landing { position:absolute; inset:0; }
+.odx-surface__header { position:absolute; top:28px; left:4vw; right:4vw; display:flex; justify-content:space-between; padding-bottom:11px; border-bottom:1px solid rgba(203,227,225,.13); color:rgba(213,230,228,.48); font-size:7px; letter-spacing:.18em; }
+.odx-surface__header i { display:inline-block; width:5px; height:5px; margin-right:8px; border-radius:50%; background:#9dcabc; box-shadow:0 0 10px #9dcabc; }
+.odx-surface__reticle { position:absolute; left:50%; top:50%; width:54px; height:54px; transform:translate(-50%,-50%); }
+.odx-surface__reticle::before,.odx-surface__reticle::after { content:""; position:absolute; background:rgba(218,234,231,.44); }
+.odx-surface__reticle::before { left:50%; top:3px; bottom:3px; width:1px; }
+.odx-surface__reticle::after { top:50%; left:3px; right:3px; height:1px; }
+.odx-surface__reticle i { position:absolute; inset:18px; border:1px solid rgba(234,181,110,.72); border-radius:50%; background:rgba(1,7,8,.06); }
+.odx-surface__reticle b { position:absolute; inset:25px; background:#e7eee9; border-radius:50%; box-shadow:0 0 7px rgba(231,238,233,.7); }
+.odx-surface__vitals,.odx-surface__samples { position:absolute; bottom:7.7vh; width:190px; padding:15px 17px; border-top:1px solid rgba(201,224,221,.25); background:linear-gradient(90deg,rgba(4,12,13,.7),transparent); backdrop-filter:blur(3px); }
+.odx-surface__vitals { left:4vw; }
+.odx-surface__samples { right:4vw; text-align:right; background:linear-gradient(-90deg,rgba(4,12,13,.7),transparent); }
+.odx-surface__vitals>span,.odx-surface__samples>span { color:#eab56e; font-size:6px; letter-spacing:.2em; }
+.odx-surface__vitals strong,.odx-surface__samples strong { display:block; margin:8px 0 5px; font:300 29px/1 "Helvetica Neue",Arial,sans-serif; }
+.odx-surface__vitals strong small,.odx-surface__samples strong small { margin-left:4px; color:rgba(208,225,222,.45); font:600 7px/1 Inter,sans-serif; letter-spacing:.12em; }
+.odx-surface__vitals p,.odx-surface__samples p { margin:0; color:rgba(203,221,218,.42); font-size:6px; letter-spacing:.14em; }
+.odx-surface__vitals>i { display:block; height:1px; margin:11px 0; background:linear-gradient(90deg,#9ccbc3 84%,rgba(201,224,221,.14) 84%); box-shadow:0 0 8px rgba(156,203,195,.25); }
+.odx-surface__vitals>b { margin-right:12px; color:rgba(216,230,227,.53); font-size:6px; letter-spacing:.12em; }
+.odx-interact--surface { top:auto; bottom:17vh; }
+.odx-surface__hints { position:absolute; left:50%; bottom:2.7vh; display:flex; gap:24px; transform:translateX(-50%); color:rgba(208,225,222,.38); font-size:7px; letter-spacing:.12em; }
+.odx-surface__hints kbd { margin-right:6px; color:rgba(228,237,234,.72); }
+.odx-surface .odx-transmission { top:19vh; bottom:auto; }
+
+.odx-land { position:absolute; right:4vw; top:35%; display:flex; align-items:center; gap:24px; min-width:270px; padding:15px 16px 14px 19px; border:1px solid rgba(234,181,110,.34); color:rgba(226,235,233,.84)!important; background:linear-gradient(120deg,rgba(12,22,22,.78),rgba(4,10,11,.47)); box-shadow:0 16px 45px rgba(0,0,0,.23),inset 2px 0 #eab56e; backdrop-filter:blur(5px); cursor:pointer; pointer-events:auto; text-align:left; }
+.odx-land span,.odx-land small,.odx-land strong { display:block; }
+.odx-land small { margin-bottom:6px; color:#eab56e; font-size:6px; letter-spacing:.18em; }
+.odx-land strong { font-size:8px; letter-spacing:.14em; }
+.odx-land i { margin-left:auto; font:300 24px/1 Georgia,serif; animation:odx-descent 1.4s ease-in-out infinite; }
+
+.odx-landing { overflow:hidden; background:rgba(1,5,7,calc(var(--odx-cloud) * .18)); }
+.odx-landing__clouds { position:absolute; inset:-30%; opacity:var(--odx-cloud); background:radial-gradient(ellipse at 24% 54%,rgba(212,225,218,.78),transparent 22%),radial-gradient(ellipse at 72% 42%,rgba(168,193,189,.72),transparent 26%),radial-gradient(ellipse at 51% 70%,rgba(218,225,215,.66),transparent 30%),linear-gradient(125deg,rgba(116,153,155,.82),rgba(223,228,213,.88),rgba(77,118,125,.7)); filter:blur(18px) contrast(1.18); transform:scale(1.18); mix-blend-mode:screen; }
+.odx-landing__clouds i { position:absolute; width:48vw; height:19vw; border-radius:50%; background:rgba(230,234,222,.32); filter:blur(35px); animation:odx-cloud-drift 4.8s linear infinite; }
+.odx-landing__clouds i:nth-child(1){left:5%;top:28%}.odx-landing__clouds i:nth-child(2){right:4%;top:48%;animation-delay:-2.1s}.odx-landing__clouds i:nth-child(3){left:28%;bottom:7%;animation-delay:-3.4s}
+.odx-landing>header { position:absolute; top:7vh; left:5vw; padding-left:14px; border-left:1px solid #eab56e; text-shadow:0 2px 8px #020607; }
+.odx-landing>header span,.odx-landing>header strong { display:block; }
+.odx-landing>header span { color:#eab56e; font-size:6px; letter-spacing:.22em; }
+.odx-landing>header strong { margin-top:8px; font-size:10px; letter-spacing:.16em; }
+.odx-landing>aside { position:absolute; right:5vw; bottom:10vh; width:195px; text-align:right; text-shadow:0 2px 8px #020607; }
+.odx-landing>aside span { display:block; color:rgba(217,230,228,.47); font-size:6px; letter-spacing:.22em; }
+.odx-landing>aside b { display:block; margin:7px 0 5px; font:200 47px/1 "Helvetica Neue",Arial,sans-serif; }
+.odx-landing>aside small { color:#eab56e; font-size:6px; letter-spacing:.14em; }
+.odx-landing__rule { position:absolute; left:5vw; right:5vw; bottom:5.8vh; height:1px; background:rgba(213,230,227,.15); }
+.odx-landing__rule i { display:block; width:var(--odx-transition); height:1px; background:linear-gradient(90deg,rgba(234,181,110,.3),#eab56e); box-shadow:0 0 9px rgba(234,181,110,.55); }
+
+@keyframes odx-descent { 50% { transform:translateY(4px); opacity:.45; } }
+@keyframes odx-cloud-drift { from { transform:translateX(-8%) scale(.9); } to { transform:translateX(13%) scale(1.08); } }
+
+@media (max-width:760px) {
+  .odx-surface__header { left:24px; right:24px; }
+  .odx-surface__vitals { left:24px; bottom:80px; width:145px; }
+  .odx-surface__samples { right:24px; bottom:80px; width:145px; }
+  .odx-surface__hints { display:none; }
+  .odx-land { right:24px; top:auto; bottom:145px; min-width:240px; }
+}
