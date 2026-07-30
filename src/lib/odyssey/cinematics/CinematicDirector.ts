@@ -32,6 +32,7 @@ export class CinematicDirector {
   private readonly timeline = new ShotTimeline();
   private preset = CINEMATIC_PRESETS['discovery-flyby'];
   private targetRadius = 22;
+  private shipScale = 1;
   private interruptElapsed = 0;
   private interruptDuration = 0.9;
   private interrupting = false;
@@ -46,6 +47,7 @@ export class CinematicDirector {
     if (!preserveReturn) this.returnPose.capture(this.camera);
     this.preset = CINEMATIC_PRESETS[kind];
     this.targetRadius = Math.max(1, options.targetRadius ?? 22);
+    this.shipScale = Math.max(1, options.shipScale ?? 1);
     this.clock.reset(this.preset.duration);
     this.timeline.reset(this.preset, options);
     this.interrupting = false;
@@ -69,6 +71,18 @@ export class CinematicDirector {
     if (!this.state.active || this.interrupting) return;
     this.clock.requestSkip();
     this.state.skipRequested = true;
+  }
+
+  cancel(): void {
+    if (this.state.active) this.returnPose.apply(this.camera);
+    this.interrupting = false;
+    this.state.active = false;
+    this.state.completed = false;
+    this.state.justCompleted = false;
+    this.state.kind = null;
+    this.state.currentShot = 'idle';
+    this.state.caption = '';
+    this.state.progress = 0;
   }
 
   interrupt(duration = 0.9): void {
@@ -101,7 +115,7 @@ export class CinematicDirector {
     const { entryEnd, exitStart, rail } = this.preset;
     if (progress < entryEnd) {
       sampleRail(rail, 0, this.railPose);
-      this.composer.compose(this.railPose, frame, this.targetRadius);
+      this.composer.compose(this.railPose, frame, this.targetRadius, this.shipScale);
       this.blender.fromPose(
         this.startPose,
         this.composer.position,
@@ -114,12 +128,12 @@ export class CinematicDirector {
     if (progress < exitStart) {
       const railProgress = smootherstep((progress - entryEnd) / (exitStart - entryEnd));
       sampleRail(rail, railProgress, this.railPose);
-      this.composer.compose(this.railPose, frame, this.targetRadius);
+      this.composer.compose(this.railPose, frame, this.targetRadius, this.shipScale);
       this.blender.apply(this.composer.position, this.composer.quaternion, this.railPose.fov);
       return;
     }
     sampleRail(rail, 1, this.railPose);
-    this.composer.compose(this.railPose, frame, this.targetRadius);
+    this.composer.compose(this.railPose, frame, this.targetRadius, this.shipScale);
     this.blender.toPose(
       this.composer.position,
       this.composer.quaternion,

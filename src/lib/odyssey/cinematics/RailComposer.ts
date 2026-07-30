@@ -14,7 +14,12 @@ export class RailComposer {
   private readonly lookMatrix = new THREE.Matrix4();
   private readonly rollQuaternion = new THREE.Quaternion();
 
-  compose(sample: RailPose, frame: CinematicFrame, targetRadius: number): void {
+  compose(
+    sample: RailPose,
+    frame: CinematicFrame,
+    targetRadius: number,
+    shipScale: number,
+  ): void {
     this.targetLocal.copy(frame.targetPosition);
     if (frame.targetSpace !== 'scene') {
       this.inverseShip.copy(frame.shipQuaternion).invert();
@@ -27,11 +32,11 @@ export class RailComposer {
     const offsetScale = THREE.MathUtils.lerp(1, radiusRatio, sample.radiusScale);
     this.position
       .copy(sample.position)
-      .multiplyScalar(offsetScale)
+      .multiplyScalar(offsetScale * shipScale)
       .addScaledVector(this.targetLocal, sample.targetAnchor);
     this.focus
       .copy(sample.focus)
-      .multiplyScalar(offsetScale)
+      .multiplyScalar(offsetScale * shipScale)
       .addScaledVector(this.targetLocal, sample.targetFocus);
     if (this.position.distanceToSquared(this.focus) < 0.0001) {
       this.focus.z -= 1;

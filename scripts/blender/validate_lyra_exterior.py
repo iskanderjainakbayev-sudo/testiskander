@@ -115,8 +115,8 @@ def main() -> None:
         failures.append("LOD1 draw-call mesh target")
     if report["materials"] != 8:
         failures.append("material budget")
-    if report["images"] != 1:
-        failures.append("embedded atlas image count")
+    if report["images"] != 3:
+        failures.append("embedded color/roughness/normal atlas image count")
     if report["file_bytes"] >= 8 * 1024 * 1024:
         failures.append("8 MiB preferred GLB size")
     if not 64.0 <= max(dimensions) <= 66.0:

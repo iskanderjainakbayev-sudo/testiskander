@@ -2,13 +2,15 @@ export type GameMode =
   | 'menu'
   | 'walking'
   | 'flight'
+  | 'cinematic'
   | 'landing'
   | 'surface'
   | 'takeoff'
   | 'paused'
   | 'ending';
 
-export type DiscoveryId = 'solace' | 'veil' | 'pilgrim' | 'atlas';
+export type DiscoveryId = 'solace' | 'nacre' | 'veil' | 'pilgrim' | 'atlas';
+export type LandablePlanetId = Extract<DiscoveryId, 'solace' | 'nacre'>;
 
 export interface Discovery {
   id: DiscoveryId;
@@ -46,7 +48,9 @@ export interface GameSnapshot {
   transitionProgress: number;
   surfaceSamples: number;
   solaceSurveyed: boolean;
+  nacreSurveyed: boolean;
   locationName: string;
+  landingSiteName: string;
   nearestShipName: string | null;
   nearestShipDistance: number;
   canLand: boolean;
@@ -54,6 +58,9 @@ export interface GameSnapshot {
   frameTimeP95: number;
   frameTimeP99: number;
   longFramePercent: number;
+  cinematicCaption: string;
+  cinematicProgress: number;
+  cinematicShot: string;
 }
 
 export interface WorldCallbacks {
@@ -69,4 +76,6 @@ export interface SaveData {
   shipPosition: [number, number, number];
   solaceSurveyed?: boolean;
   surfaceSamples?: number[];
+  nacreSurveyed?: boolean;
+  nacreSurfaceSamples?: number[];
 }

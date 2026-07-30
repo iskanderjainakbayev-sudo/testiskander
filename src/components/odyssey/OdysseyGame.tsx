@@ -49,6 +49,7 @@ export function OdysseyGame() {
         onScan={() => worldRef.current?.scan()}
         onCycleTarget={() => worldRef.current?.cycleTarget()}
         onLand={() => worldRef.current?.land()}
+        onSkipCinematic={() => worldRef.current?.skipCinematic()}
         onReturnToMenu={() => worldRef.current?.returnToMenu()}
       />
     </div>

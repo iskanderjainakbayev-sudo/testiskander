@@ -1,4 +1,5 @@
 import type * as THREE from 'three';
+import type { CinematicState } from '../cinematics';
 import type { TrafficUpdate } from '../space/traffic/createTrafficSystem';
 import type { WorldCallbacks } from '../types';
 import type { OdysseySession } from './OdysseySession';
@@ -18,6 +19,7 @@ export class SnapshotPublisher {
     expedition: SolaceExpedition,
     traffic: TrafficUpdate,
     metrics: FrameMetrics,
+    cinematic: CinematicState,
   ) {
     this.elapsed += delta;
     if (this.elapsed < 0.075) return;
@@ -42,6 +44,9 @@ export class SnapshotPublisher {
       nearestShipName: traffic.nearestShipName,
       nearestShipDistance: traffic.nearestShipDistance,
       canLand: session.canLand(),
+      cinematicCaption: cinematic.caption,
+      cinematicProgress: cinematic.progress,
+      cinematicShot: cinematic.currentShot,
     }));
   }
 }

@@ -17,10 +17,12 @@ export class SurfaceController {
   constructor(
     private readonly getHeight: (x: number, z: number) => number,
     private readonly sampleSites: THREE.Object3D[],
+    readonly rampZ = 45,
+    readonly spawnZ = rampZ - 17,
   ) {}
 
   reset() {
-    this.position.set(0, this.getHeight(0, 28) + 1.68, 28);
+    this.position.set(0, this.getHeight(0, this.spawnZ) + 1.68, this.spawnZ);
     this.yaw = 0;
     this.pitch = -0.03;
     this.stepDistance = 0;
@@ -88,7 +90,7 @@ export class SurfaceController {
         return { action: { type: 'sample', index }, label: 'RESONATE WITH ECHO BLOOM' };
       }
     }
-    const ramp = this.toTarget.set(0, this.getHeight(0, 45) + 1.2, 45);
+    const ramp = this.toTarget.set(0, this.getHeight(0, this.rampZ) + 1.2, this.rampZ);
     if (this.samples.size >= 3 && this.isFacing(ramp, 5.5)) {
       return { action: { type: 'takeoff', index: -1 }, label: 'BOARD LYRA / LAUNCH' };
     }

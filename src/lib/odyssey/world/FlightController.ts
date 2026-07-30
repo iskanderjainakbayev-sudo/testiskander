@@ -18,6 +18,7 @@ export class FlightController {
   private readonly targetPosition = new THREE.Vector3();
   private readonly targetDirection = new THREE.Vector3();
   private readonly desiredQuaternion = new THREE.Quaternion();
+  private readonly inverseQuaternion = new THREE.Quaternion();
 
   reset() {
     this.position.set(0, 0, 0);
@@ -66,7 +67,7 @@ export class FlightController {
     this.quaternion.slerp(this.desiredQuaternion, Math.min(1, delta * 1.35)).normalize();
   }
 
-  getInverseQuaternion(target = new THREE.Quaternion()) {
+  getInverseQuaternion(target = this.inverseQuaternion) {
     return target.copy(this.quaternion).invert();
   }
 }

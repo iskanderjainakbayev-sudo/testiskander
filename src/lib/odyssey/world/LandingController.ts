@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { DISCOVERIES } from '../discoveries';
+import type { LandablePlanetId } from '../types';
 import type { FlightController } from './FlightController';
 
 export class LandingController {
@@ -9,8 +10,8 @@ export class LandingController {
   readonly exit = new THREE.Vector3();
   private readonly normal = new THREE.Vector3();
 
-  beginLanding(flight: FlightController) {
-    const center = new THREE.Vector3(...DISCOVERIES.solace.position);
+  beginLanding(flight: FlightController, planet: LandablePlanetId) {
+    const center = new THREE.Vector3(...DISCOVERIES[planet].position);
     this.start.copy(flight.position);
     this.normal.copy(flight.position).sub(center).normalize();
     this.atmosphere.copy(center).addScaledVector(this.normal, 70.5);

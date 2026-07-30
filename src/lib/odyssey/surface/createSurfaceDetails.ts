@@ -18,10 +18,14 @@ function addRockField(root: THREE.Group) {
   const rocks = new THREE.InstancedMesh(geometry, material, 230);
   const dummy = new THREE.Object3D();
   for (let index = 0; index < 230; index += 1) {
-    const angle = random() * Math.PI * 2;
-    const radius = 26 + Math.pow(random(), 0.55) * 390;
-    const x = Math.cos(angle) * radius;
-    const z = Math.sin(angle) * radius;
+    let x = 0;
+    let z = 0;
+    do {
+      const angle = random() * Math.PI * 2;
+      const radius = 26 + Math.pow(random(), 0.55) * 390;
+      x = Math.cos(angle) * radius;
+      z = Math.sin(angle) * radius;
+    } while ((x / 30) ** 2 + ((z - 70) / 51) ** 2 < 1);
     const height = surfaceHeight(x, z);
     const scale = 0.45 + random() * random() * 4.8;
     dummy.position.set(x, height - scale * 0.18, z);

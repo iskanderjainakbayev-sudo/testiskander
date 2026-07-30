@@ -13,7 +13,7 @@ export function loadSave(): SaveData | null {
   }
 }
 
-const IDS: DiscoveryId[] = ['solace', 'veil', 'pilgrim', 'atlas'];
+const IDS: DiscoveryId[] = ['solace', 'nacre', 'veil', 'pilgrim', 'atlas'];
 
 function isSaveData(value: unknown): value is SaveData {
   if (!value || typeof value !== 'object') return false;
@@ -27,9 +27,14 @@ function isSaveData(value: unknown): value is SaveData {
     && save.shipPosition.length === 3
     && save.shipPosition.every((coordinate) => typeof coordinate === 'number' && Number.isFinite(coordinate))
     && (save.solaceSurveyed === undefined || typeof save.solaceSurveyed === 'boolean')
+    && (save.nacreSurveyed === undefined || typeof save.nacreSurveyed === 'boolean')
     && (save.surfaceSamples === undefined || (
       Array.isArray(save.surfaceSamples)
       && save.surfaceSamples.every((index) => Number.isInteger(index) && index >= 0 && index < 3)
+    ))
+    && (save.nacreSurfaceSamples === undefined || (
+      Array.isArray(save.nacreSurfaceSamples)
+      && save.nacreSurfaceSamples.every((index) => Number.isInteger(index) && index >= 0 && index < 3)
     ));
 }
 

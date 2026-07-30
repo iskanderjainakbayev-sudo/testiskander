@@ -8,6 +8,7 @@ import bpy
 
 from lyra_common import box, curve_tube, empty, finish_mesh, torus
 from lyra_materials import atlas_uv
+from lyra_surface_hardware import add_hull_hardware
 
 HULL_SECTIONS = (
     (-30.0, 2.8, 2.4, 2.2, -0.20, 2.1),
@@ -246,10 +247,24 @@ def _wing_panel(
 
 def build_hull(root: bpy.types.Object, materials: dict[str, bpy.types.Material]) -> None:
     hull = empty("HULL_PRIMARY", root)
-    loft_hull("Hull_LiftingBody_LOD0", smooth_sections(HULL_SECTIONS, 5), 80, hull, materials["hull"])
+    loft_hull("Hull_LiftingBody_LOD0", smooth_sections(HULL_SECTIONS, 5), 72, hull, materials["hull"])
     outline = ((4.8, -21.5), (11.4, -17.0), (18.7, -4.0), (17.0, 8.5), (9.2, 15.0), (3.6, 11.5))
     _wing("Hull_Port_LiftingSurface", -1.0, outline, hull, materials["hull"], 1.15)
     _wing("Hull_Starboard_LiftingSurface", 1.0, outline, hull, materials["hull"], 1.15)
+    shell_patch(
+        "Canopy_Interior_ShadowShell",
+        14.15,
+        28.25,
+        0.76,
+        2.38,
+        hull,
+        materials["armor"],
+        "armor",
+        0.105,
+        12,
+        24,
+        0.08,
+    )
     shell_patch(
         "Canopy_Inset_Glass", 14.2, 28.2, 0.78, 2.36, hull, materials["glass"], None, 0.22, 18, 34, 0.16
     )
@@ -270,6 +285,7 @@ def build_hull(root: bpy.types.Object, materials: dict[str, bpy.types.Material])
         )
     _add_armor_layers(hull, materials)
     _add_service_shell(hull, materials)
+    add_hull_hardware(hull, materials, surface_point)
 
 
 def _add_armor_layers(parent: bpy.types.Object, materials: dict[str, bpy.types.Material]) -> None:
@@ -281,6 +297,8 @@ def _add_armor_layers(parent: bpy.types.Object, materials: dict[str, bpy.types.M
         ("Starboard_Mid", -9.5, 3.5, 0.08, 0.56),
         ("Starboard_Aft", -22.0, -11.2, 0.12, 0.62),
         ("Dorsal_Aft", -20.0, -7.5, 1.18, 1.86),
+        ("Dorsal_Port_Mid", -5.5, 7.5, 1.63, 2.08),
+        ("Dorsal_Starboard_Mid", -5.5, 7.5, 1.06, 1.51),
     )
     for name, y_start, y_end, angle_start, angle_end in panel_specs:
         shell_patch(

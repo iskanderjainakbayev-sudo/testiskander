@@ -3,6 +3,7 @@ export class InputController {
   private readonly justPressed = new Set<string>();
   private mouseX = 0;
   private mouseY = 0;
+  private readonly look = { x: 0, y: 0 };
   private readonly touchKeys = new Set<string>();
   private movementTouchId: number | null = null;
   private lookTouchId: number | null = null;
@@ -36,10 +37,11 @@ export class InputController {
   }
 
   takeLook() {
-    const look = { x: this.mouseX, y: this.mouseY };
+    this.look.x = this.mouseX;
+    this.look.y = this.mouseY;
     this.mouseX = 0;
     this.mouseY = 0;
-    return look;
+    return this.look;
   }
 
   requestLock() {

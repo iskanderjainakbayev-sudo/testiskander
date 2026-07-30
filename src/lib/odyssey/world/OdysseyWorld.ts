@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { audioSceneFor } from '../audio/AmbientBed';
 import { loadSave } from '../save';
 import { createLyraExterior, type LyraExterior } from '../ship/createLyraExterior';
 import { createSpaceScene, type SpaceSceneRig } from '../space/createSpaceScene';
@@ -7,12 +8,12 @@ import type { WorldCallbacks } from '../types';
 import { createRenderer, type RenderRig } from './createRenderer';
 import { createShipInterior, type ShipInterior } from './createShipInterior';
 import { InputController } from './InputController';
+import { OdysseyCinematics } from './OdysseyCinematics';
+import { OdysseyModeUpdater } from './OdysseyModeUpdater';
 import { OdysseySession } from './OdysseySession';
 import { PerformanceMonitor } from './PerformanceMonitor';
 import { SnapshotPublisher } from './SnapshotPublisher';
 import { SolaceExpedition } from './SolaceExpedition';
-import { updateLandingSequence, updateTakeoffSequence } from './updateLanding';
-import { updateEnding, updateFlight, updateMenu, updateSurface, updateWalking } from './updateWorld';
 
 export class OdysseyWorld {
   readonly hasSave = Boolean(loadSave());
@@ -24,6 +25,8 @@ export class OdysseyWorld {
   private readonly input: InputController;
   private readonly session = new OdysseySession();
   private readonly snapshots: SnapshotPublisher;
+  private readonly cinematics: OdysseyCinematics;
+  private readonly modeUpdater: OdysseyModeUpdater;
   private frameId = 0;
   private lastTime = performance.now();
   private readonly performanceMonitor = new PerformanceMonitor();
@@ -47,6 +50,20 @@ export class OdysseyWorld {
     );
     this.snapshots = new SnapshotPublisher(callbacks);
     this.input = new InputController(canvas, this.handlePointerLock);
+    this.cinematics = new OdysseyCinematics(
+      this.render.camera,
+      this.input,
+      this.session,
+      callbacks,
+      this.exterior,
+    );
+    this.modeUpdater = new OdysseyModeUpdater(
+      this.session,
+      this.input,
+      this.render.camera,
+      this.cinematics,
+      this.expedition,
+    );
     this.placeMenuCamera();
     this.frameId = requestAnimationFrame(this.animate);
   }
@@ -63,12 +80,10 @@ export class OdysseyWorld {
   };
   scan = () => this.session.scan();
   cycleTarget = () => this.session.cycleTarget();
-  land = () => this.session.beginLanding(this.input);
-  private readonly handleSurfaceInteraction = () => {
-    this.expedition.interact(this.session, this.input);
-  };
-
+  land = () => this.cinematics.beginLanding();
+  skipCinematic = () => this.cinematics.skip();
   returnToMenu = () => {
+    this.cinematics.cancel();
     this.session.returnToMenu(this.input);
     this.placeMenuCamera();
   };
@@ -79,6 +94,7 @@ export class OdysseyWorld {
     this.input.releaseLock();
     this.input.dispose();
     this.session.audio.stop();
+    this.cinematics.cancel();
     this.space.dispose();
     this.expedition.dispose();
     this.exterior.dispose();
@@ -93,48 +109,15 @@ export class OdysseyWorld {
     this.lastTime = time;
     this.performanceMonitor.push(elapsed);
     const { mode, flight } = this.session;
-    if (mode === 'walking') updateWalking(this.session, this.input, this.render.camera, delta);
-    if (mode === 'flight') {
-      updateFlight(
-        this.session,
-        this.input,
-        this.render.camera,
-        this.callbacks,
-        this.land,
-        delta,
-        time,
-      );
-    }
-    if (mode === 'landing') {
-      updateLandingSequence(
-        this.session,
-        this.expedition.surface,
-        this.expedition.walker,
-        this.render.camera,
-        delta,
-      );
-    }
-    if (mode === 'surface') {
-      updateSurface(
-        this.session,
-        this.expedition.walker,
-        this.input,
-        this.render.camera,
-        delta,
-        this.handleSurfaceInteraction,
-      );
-    }
-    if (mode === 'takeoff') {
-      updateTakeoffSequence(this.session, this.expedition.surface, this.render.camera, delta);
-    }
-    if (mode === 'menu') updateMenu(this.render.camera, time);
-    if (mode === 'ending') updateEnding(this.session, this.render.camera, delta, time);
+    this.modeUpdater.update(delta, time);
+    this.session.audio.setScene(audioSceneFor(this.session.mode));
     this.expedition.syncVisibility(
       this.session.mode,
       this.session.landing.progress,
       this.space.group,
       this.ship.group,
     );
+    this.cinematics.syncShipVisibility(this.ship.group);
     this.render.setAtmosphere(
       this.expedition.atmosphereBlend(this.session.mode, this.session.landing.progress),
     );
@@ -162,6 +145,7 @@ export class OdysseyWorld {
       this.expedition,
       this.traffic,
       this.performanceMonitor.read(),
+      this.cinematics.state,
     );
   };
 

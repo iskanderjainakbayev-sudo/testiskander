@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { DISCOVERIES } from '../discoveries';
+import { createNacrePlanet } from '../nacre';
 import type { DiscoveryId } from '../types';
 import { createAtlas } from './atlas';
 import { createDeepSky } from './deepSky';
@@ -44,11 +45,13 @@ export function createSpaceScene(): SpaceSceneRig {
 
   const traffic = createTrafficSystem();
   const solace = createSolace();
+  const nacre = createNacrePlanet();
   const veil = createVeil();
   const pilgrim = createPilgrim();
   const atlas = createAtlas();
   const bodies: Record<DiscoveryId, THREE.Object3D> = {
     solace: solace.root,
+    nacre: nacre.root,
     veil: veil.root,
     pilgrim: pilgrim.root,
     atlas: atlas.root,
@@ -72,6 +75,7 @@ export function createSpaceScene(): SpaceSceneRig {
     distantStars.material,
     nearStars.material,
     ...solace.materials,
+    ...nacre.materials,
     ...veil.materials,
     ...atlas.materials,
   ];
@@ -120,6 +124,7 @@ export function createSpaceScene(): SpaceSceneRig {
     });
 
     solace.update(time);
+    nacre.update(time);
     veil.update(time, cameraInertial);
     pilgrim.update(time);
     atlas.update(time);

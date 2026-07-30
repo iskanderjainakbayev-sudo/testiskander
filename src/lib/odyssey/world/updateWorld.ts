@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { DISCOVERIES } from '../discoveries';
-import type { WorldCallbacks } from '../types';
+import type { DiscoveryId } from '../types';
 import type { InputController } from './InputController';
 import type { OdysseySession } from './OdysseySession';
 import type { SurfaceController } from './SurfaceController';
@@ -23,8 +23,8 @@ export function updateFlight(
   session: OdysseySession,
   input: InputController,
   camera: THREE.PerspectiveCamera,
-  callbacks: WorldCallbacks,
   onLand: () => void,
+  onDiscovery: (id: DiscoveryId) => void,
   delta: number,
   time: number,
 ) {
@@ -57,7 +57,10 @@ export function updateFlight(
     alignment,
   );
   if (scanning) audio.scan(mission.scanProgress);
-  if (completed) session.finishDiscovery(completed, input, callbacks);
+  if (completed) {
+    session.finishDiscovery(completed);
+    onDiscovery(completed);
+  }
 }
 
 export function updateSurface(

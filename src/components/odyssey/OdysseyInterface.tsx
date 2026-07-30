@@ -1,6 +1,7 @@
 import type { GameSnapshot } from '../../lib/odyssey/types';
 import '../../styles/odyssey.css';
 import { CinematicFrame } from './CinematicFrame';
+import { CinematicHud } from './CinematicHud';
 import { EndingSequence } from './EndingSequence';
 import { FlightHud } from './FlightHud';
 import { FocusPrompt } from './FocusPrompt';
@@ -21,6 +22,7 @@ export interface OdysseyInterfaceProps {
   onScan: () => void;
   onCycleTarget: () => void;
   onLand: () => void;
+  onSkipCinematic: () => void;
   onReturnToMenu: () => void;
 }
 
@@ -35,6 +37,7 @@ export function OdysseyInterface({
   onScan,
   onCycleTarget,
   onLand,
+  onSkipCinematic,
   onReturnToMenu,
 }: OdysseyInterfaceProps) {
   const isActive = ['walking', 'flight', 'surface'].includes(snapshot.mode);
@@ -62,6 +65,9 @@ export function OdysseyInterface({
           onCycleTarget={onCycleTarget}
           onLand={onLand}
         />
+      )}
+      {snapshot.mode === 'cinematic' && (
+        <CinematicHud snapshot={snapshot} onSkip={onSkipCinematic} />
       )}
       {snapshot.mode === 'walking' && (
         <WalkingHud snapshot={snapshot} onInteract={onInteract} />

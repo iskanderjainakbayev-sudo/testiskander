@@ -9,6 +9,14 @@ export const DISCOVERIES: Record<DiscoveryId, Discovery> = {
     position: [340, -55, -760],
     scanRange: 185,
   },
+  nacre: {
+    id: 'nacre',
+    name: 'NACRE',
+    classification: 'Silica canyon world',
+    description: 'Its mineral forests refract the Solace echo into a navigable key.',
+    position: [670, 35, -980],
+    scanRange: 180,
+  },
   veil: {
     id: 'veil',
     name: 'THE VEIL',
@@ -35,13 +43,15 @@ export const DISCOVERIES: Record<DiscoveryId, Discovery> = {
   },
 };
 
-export const TARGET_ORDER: DiscoveryId[] = ['solace', 'veil', 'pilgrim', 'atlas'];
+export const TARGET_ORDER: DiscoveryId[] = ['solace', 'nacre', 'veil', 'pilgrim', 'atlas'];
 
 export function getObjective(
   scanned: DiscoveryId[],
   mode: string,
   surfaceSamples = 0,
   solaceSurveyed = false,
+  nacreSurveyed = false,
+  landingSite = 'solace',
 ): Objective {
   if (mode === 'walking') {
     return {
@@ -65,6 +75,17 @@ export function getObjective(
     };
   }
   if (mode === 'surface') {
+    if (landingSite === 'nacre') {
+      return surfaceSamples < 3 ? {
+        eyebrow: `NACRE EXPEDITION / PRISM ${surfaceSamples + 1} OF 3`,
+        title: 'Triangulate the prism choir',
+        detail: 'Follow the amber refractions between the mineral groves.',
+      } : {
+        eyebrow: 'NACRE EXPEDITION / CALIBRATION COMPLETE',
+        title: 'Return to Lyra',
+        detail: 'The silica lattice has stabilized the first echo. Board at the landing beacon.',
+      };
+    }
     return surfaceSamples < 3 ? {
       eyebrow: `SOLACE EXPEDITION / SAMPLE ${surfaceSamples + 1} OF 3`,
       title: 'Follow the echo blooms',
@@ -82,8 +103,15 @@ export function getObjective(
       detail: 'The living signal is beneath the cloud deck. Enter the amber landing corridor.',
     };
   }
+  if (mode === 'flight' && nacreSurveyed && !scanned.includes('nacre')) {
+    return {
+      eyebrow: 'NACRE / ORBITAL SURVEY COMPLETE',
+      title: 'Enter the silica canyons',
+      detail: 'The calibration chorus is strongest inside the ochre landing corridor.',
+    };
+  }
 
-  const echoes = scanned.filter((id) => id !== 'atlas').length;
+  const echoes = scanned.filter((id) => id !== 'atlas' && id !== 'nacre').length;
   if (echoes < 3) {
     const next = TARGET_ORDER.find((id) => id !== 'atlas' && !scanned.includes(id));
     return {

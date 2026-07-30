@@ -1,3 +1,5 @@
+import { AmbientBed, type AudioScene } from './audio/AmbientBed';
+
 type UiSound = 'hover' | 'select' | 'error';
 
 export class OdysseyAudio {
@@ -5,6 +7,7 @@ export class OdysseyAudio {
   private master: GainNode | null = null; private engine: GainNode | null = null;
   private engineFilter: BiquadFilterNode | null = null;
   private engineTones: OscillatorNode[] = [];
+  private ambient: AmbientBed | null = null;
   private noiseBuffer: AudioBuffer | null = null; private musicTimer: number | null = null;
   private musicStep = 0; private scanStep = -1;
   private throttle = 0; private boosting = false;
@@ -24,6 +27,7 @@ export class OdysseyAudio {
       window.setTimeout(() => { void context.close().catch(() => undefined); }, 180);
     }
     this.context = this.master = this.engine = this.engineFilter = null;
+    this.ambient = null;
     this.engineTones = []; this.noiseBuffer = null; this.musicTimer = null;
     this.musicStep = 0; this.scanStep = -1;
   }
@@ -37,6 +41,9 @@ export class OdysseyAudio {
     this.engineFilter.frequency.setTargetAtTime(190 + thrust * 720, now, 0.15);
     this.engineTones[0]?.frequency.setTargetAtTime(34 + thrust * 31, now, 0.12);
     this.engineTones[1]?.frequency.setTargetAtTime(69 + thrust * 74, now, 0.1);
+  }
+  setScene(scene: AudioScene): void {
+    if (this.context) this.ambient?.setScene(this.context, scene);
   }
   ui(kind: UiSound = 'select'): void {
     if (kind === 'hover') this.tone(720, 0.045, 0.018, 'sine', 870);
@@ -76,6 +83,7 @@ export class OdysseyAudio {
     this.context = context; this.master = master;
     this.noiseBuffer = this.makeNoise(context);
     this.createEngine(context, master);
+    this.ambient = new AmbientBed(context, master, this.noiseBuffer);
     this.musicPhrase();
     this.musicTimer = window.setInterval(() => this.musicPhrase(), 6800);
     this.setFlight(this.throttle, this.boosting);

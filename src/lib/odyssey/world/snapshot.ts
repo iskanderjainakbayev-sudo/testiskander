@@ -4,6 +4,10 @@ import type { GameMode, GameSnapshot } from '../types';
 import type { FlightController } from './FlightController';
 import type { MissionController } from './MissionController';
 
+const localTarget = new THREE.Vector3();
+const projectedTarget = new THREE.Vector3();
+const inverseFlight = new THREE.Quaternion();
+
 export const INITIAL_SNAPSHOT: GameSnapshot = {
   mode: 'menu',
   objective: getObjective([], 'walking'),
@@ -33,6 +37,9 @@ export const INITIAL_SNAPSHOT: GameSnapshot = {
   frameTimeP95: 16.67,
   frameTimeP99: 16.67,
   longFramePercent: 0,
+  cinematicCaption: '',
+  cinematicProgress: 0,
+  cinematicShot: 'idle',
 };
 
 interface SnapshotOptions {
@@ -52,20 +59,23 @@ interface SnapshotOptions {
   frameTimeP95?: number;
   frameTimeP99?: number;
   longFramePercent?: number;
+  cinematicCaption?: string;
+  cinematicProgress?: number;
+  cinematicShot?: string;
 }
 
 export function createSnapshot(options: SnapshotOptions): GameSnapshot {
   const { mode, mission, flight, camera } = options;
   const discovery = DISCOVERIES[mission.target];
-  const inverse = flight.getInverseQuaternion();
-  const localTarget = new THREE.Vector3(...discovery.position)
+  flight.getInverseQuaternion(inverseFlight);
+  localTarget.fromArray(discovery.position)
     .sub(flight.position)
-    .applyQuaternion(inverse);
-  const projected = localTarget.clone().project(camera);
+    .applyQuaternion(inverseFlight);
+  projectedTarget.copy(localTarget).project(camera);
   const inFront = localTarget.z < camera.position.z;
   if (!inFront) {
-    projected.x *= -1;
-    projected.y *= -1;
+    projectedTarget.x *= -1;
+    projectedTarget.y *= -1;
   }
   return {
     mode,
@@ -80,9 +90,9 @@ export function createSnapshot(options: SnapshotOptions): GameSnapshot {
     targetDistance: localTarget.length(),
     targetBearing: THREE.MathUtils.radToDeg(Math.atan2(localTarget.x, -localTarget.z)),
     targetScreen: {
-      x: THREE.MathUtils.clamp(projected.x, -1.4, 1.4),
-      y: THREE.MathUtils.clamp(projected.y, -1.25, 1.25),
-      visible: inFront && Math.abs(projected.x) < 1 && Math.abs(projected.y) < 1,
+      x: THREE.MathUtils.clamp(projectedTarget.x, -1.4, 1.4),
+      y: THREE.MathUtils.clamp(projectedTarget.y, -1.25, 1.25),
+      visible: inFront && Math.abs(projectedTarget.x) < 1 && Math.abs(projectedTarget.y) < 1,
     },
     speed: flight.speed,
     throttle: flight.throttle,
@@ -105,5 +115,8 @@ export function createSnapshot(options: SnapshotOptions): GameSnapshot {
     frameTimeP95: options.frameTimeP95 ?? 16.67,
     frameTimeP99: options.frameTimeP99 ?? 16.67,
     longFramePercent: options.longFramePercent ?? 0,
+    cinematicCaption: options.cinematicCaption ?? '',
+    cinematicProgress: options.cinematicProgress ?? 0,
+    cinematicShot: options.cinematicShot ?? 'idle',
   };
 }

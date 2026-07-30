@@ -162,6 +162,7 @@ def oriented_cylinder(
     material: bpy.types.Material,
     parent: bpy.types.Object,
     vertices: int = 24,
+    bevel: float = 0.03,
 ) -> bpy.types.Object:
     start_v, end_v = Vector(start), Vector(end)
     direction = end_v - start_v
@@ -173,7 +174,7 @@ def oriented_cylinder(
     obj.name = name
     obj.rotation_mode = "QUATERNION"
     obj.rotation_quaternion = direction.to_track_quat("Z", "Y")
-    return finish_mesh(obj, parent, material, bevel=0.03, bevel_segments=2, smooth=True)
+    return finish_mesh(obj, parent, material, bevel=bevel, bevel_segments=2, smooth=True)
 
 
 def curve_tube(

@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "validate:odyssey": "node scripts/validate-odyssey.mjs",
     "preview": "vite preview",
     "assets:weapons": "node scripts/create-tactical-assets.mjs",
     "db:login": "supabase login",

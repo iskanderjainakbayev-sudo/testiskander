@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 from pathlib import Path
 
 import bpy
@@ -44,35 +43,45 @@ def hide_runtime_helpers(root: bpy.types.Object) -> None:
             child.hide_render = True
 
 
-def add_stars() -> None:
-    mesh = bpy.data.meshes.new("Review_Stars_Mesh")
-    vertices = []
-    for index in range(1400):
-        longitude = (index * 2.399963229728653) % math.tau
-        latitude = math.acos(1.0 - 2.0 * ((index + 0.5) / 1400.0))
-        radius = 180.0
-        vertices.append(
-            (
-                radius * math.sin(latitude) * math.cos(longitude),
-                radius * math.sin(latitude) * math.sin(longitude),
-                radius * math.cos(latitude),
-            )
-        )
-    mesh.from_pydata(vertices, [], [])
-    stars = bpy.data.objects.new("Review_Stars", mesh)
-    bpy.context.scene.collection.objects.link(stars)
-    material = bpy.data.materials.new("Review_Stars_Material")
-    material.diffuse_color = (0.7, 0.82, 1.0, 1.0)
+def _ground_plane() -> bpy.types.Object:
+    bpy.ops.mesh.primitive_plane_add(size=180.0, location=(0.0, 0.0, -8.02))
+    ground = bpy.context.object
+    ground.name = "Review_NeutralGround"
+    material = bpy.data.materials.new("Review_NeutralGround_Material")
     material.use_nodes = True
     shader = next(node for node in material.node_tree.nodes if node.type == "BSDF_PRINCIPLED")
-    shader.inputs["Base Color"].default_value = (0.55, 0.72, 1.0, 1.0)
-    emission = shader.inputs.get("Emission Color") or shader.inputs.get("Emission")
-    if emission:
-        emission.default_value = (0.55, 0.72, 1.0, 1.0)
-    mesh.materials.append(material)
+    shader.inputs["Base Color"].default_value = (0.024, 0.028, 0.034, 1.0)
+    shader.inputs["Metallic"].default_value = 0.12
+    shader.inputs["Roughness"].default_value = 0.68
+    ground.data.materials.append(material)
+    ground.hide_render = True
+    return ground
 
 
-def configure_scene() -> bpy.types.Object:
+def _gradient_world() -> None:
+    world = bpy.context.scene.world
+    world.use_nodes = True
+    nodes = world.node_tree.nodes
+    nodes.clear()
+    output = nodes.new("ShaderNodeOutputWorld")
+    background = nodes.new("ShaderNodeBackground")
+    coordinates = nodes.new("ShaderNodeTexCoord")
+    separate = nodes.new("ShaderNodeSeparateXYZ")
+    map_range = nodes.new("ShaderNodeMapRange")
+    ramp = nodes.new("ShaderNodeValToRGB")
+    map_range.inputs["From Min"].default_value = -1.0
+    map_range.inputs["From Max"].default_value = 1.0
+    ramp.color_ramp.elements[0].color = (0.012, 0.018, 0.028, 1.0)
+    ramp.color_ramp.elements[1].color = (0.16, 0.19, 0.23, 1.0)
+    background.inputs["Strength"].default_value = 0.24
+    world.node_tree.links.new(coordinates.outputs["Normal"], separate.inputs["Vector"])
+    world.node_tree.links.new(separate.outputs["Z"], map_range.inputs["Value"])
+    world.node_tree.links.new(map_range.outputs["Result"], ramp.inputs["Fac"])
+    world.node_tree.links.new(ramp.outputs["Color"], background.inputs["Color"])
+    world.node_tree.links.new(background.outputs["Background"], output.inputs["Surface"])
+
+
+def configure_scene() -> tuple[bpy.types.Object, bpy.types.Object]:
     scene = bpy.context.scene
     scene.render.engine = "BLENDER_EEVEE"
     scene.render.resolution_x = 960
@@ -82,25 +91,20 @@ def configure_scene() -> bpy.types.Object:
     scene.render.image_settings.color_mode = "RGBA"
     scene.render.film_transparent = False
     scene.render.image_settings.color_depth = "8"
-    scene.view_settings.exposure = 1.15
-    scene.world.color = (0.001, 0.002, 0.006)
-    world = scene.world
-    world.use_nodes = True
-    background = next(node for node in world.node_tree.nodes if node.type == "BACKGROUND")
-    background.inputs["Color"].default_value = (0.001, 0.003, 0.009, 1.0)
-    background.inputs["Strength"].default_value = 0.12
+    scene.view_settings.exposure = 1.02
+    _gradient_world()
     camera_data = bpy.data.cameras.new("Review_Camera")
     camera_data.lens = 55.0
     camera_data.sensor_width = 36.0
     camera = bpy.data.objects.new("Review_Camera", camera_data)
     bpy.context.scene.collection.objects.link(camera)
     scene.camera = camera
-    area_light("Key_Softbox", (34.0, 28.0, 38.0), (0.0, 0.0, 0.0), (0.78, 0.88, 1.0), 52000, 18.0)
-    area_light("Port_Fill", (-35.0, 5.0, 14.0), (-2.0, 0.0, 0.0), (0.22, 0.42, 1.0), 34000, 22.0)
-    area_light("Engine_Rim", (4.0, -42.0, 13.0), (0.0, -8.0, 0.0), (1.0, 0.18, 0.035), 46000, 13.0)
-    area_light("Belly_Bounce", (0.0, 2.0, -30.0), (0.0, 0.0, -1.0), (0.12, 0.32, 0.48), 26000, 20.0)
-    add_stars()
-    return camera
+    area_light("Key_Softbox", (34.0, 28.0, 38.0), (0.0, 0.0, 0.0), (1.0, 0.95, 0.88), 76000, 22.0)
+    area_light("Port_Fill", (-35.0, 5.0, 14.0), (-2.0, 0.0, 0.0), (0.53, 0.66, 0.82), 52000, 26.0)
+    area_light("Top_Ambient", (0.0, 3.0, 55.0), (0.0, 0.0, 0.0), (0.82, 0.88, 0.94), 68000, 30.0)
+    area_light("Engine_Rim", (4.0, -42.0, 13.0), (0.0, -8.0, 0.0), (1.0, 0.52, 0.22), 34000, 15.0)
+    area_light("Belly_Bounce", (0.0, 2.0, -30.0), (0.0, 0.0, -1.0), (0.30, 0.42, 0.54), 24000, 22.0)
+    return camera, _ground_plane()
 
 
 def main() -> None:
@@ -109,7 +113,7 @@ def main() -> None:
     if root is None:
         raise RuntimeError("LYRA source scene is not loaded")
     hide_runtime_helpers(root)
-    camera = configure_scene()
+    camera, ground = configure_scene()
     views = {
         "three-quarter-front": ((47.0, 55.0, 25.0), (0.0, 2.0, 0.2), 61.0),
         "port-profile": ((-62.0, 1.0, 11.0), (0.0, 0.0, 0.0), 62.0),
@@ -118,6 +122,7 @@ def main() -> None:
         "landed-gear": ((55.0, 46.0, 10.0), (0.0, 2.0, -2.0), 58.0),
     }
     for name, (location, target, lens) in views.items():
+        ground.hide_render = name != "landed-gear"
         camera.location = location
         camera.data.lens = lens
         look_at(camera, target)

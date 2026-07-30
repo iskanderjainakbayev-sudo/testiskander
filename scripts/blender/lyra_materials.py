@@ -2,59 +2,9 @@
 
 from __future__ import annotations
 
-import math
-from array import array
-
 import bpy
 
-ATLAS_SIZE = 1024
-
-
-def _noise(x: int, y: int) -> float:
-    return (
-        math.sin(x * 0.071 + y * 0.013)
-        + math.sin(x * 0.017 - y * 0.053)
-        + math.sin((x + y) * 0.031)
-    ) / 3.0
-
-
-def _atlas_color(x: int, y: int) -> tuple[float, float, float]:
-    half = ATLAS_SIZE // 2
-    u, v = x % half, y % half
-    grain = _noise(x, y)
-    seam = u % 128 < 3 or v % 112 < 3
-    scratch = (x * 37 + y * 17) % 997 < 2
-    if x < half and y >= half:
-        base = 0.61 + grain * 0.022
-        wear = -0.11 if seam else 0.0
-        fleck = 0.08 if scratch else 0.0
-        return base + 0.12 + wear + fleck, base + 0.11 + wear, base + 0.08 + wear
-    if x >= half and y >= half:
-        weave = 0.018 * math.sin((u + v) * 0.22) * math.sin((u - v) * 0.19)
-        line = 0.035 if seam else 0.0
-        return 0.045 + grain * 0.012 + line, 0.055 + weave + line, 0.063 + weave
-    if x < half:
-        radial = math.hypot(u - half * 0.5, v - half * 0.5) / (half * 0.72)
-        heat = max(0.0, 1.0 - radial) * 0.11
-        soot = 0.035 * (grain + 1.0)
-        return 0.10 + heat + soot, 0.085 + heat * 0.45, 0.075 + heat * 0.18
-    rib = 0.13 if u % 34 < 5 else 0.0
-    oxidation = 0.025 * (grain + 1.0)
-    return 0.26 + rib + oxidation, 0.105 + rib * 0.35, 0.045 + oxidation
-
-
-def create_atlas() -> bpy.types.Image:
-    image = bpy.data.images.new("TEX_LYRA_SurfaceAtlas_1K", ATLAS_SIZE, ATLAS_SIZE, alpha=True)
-    pixels = array("f")
-    append = pixels.extend
-    for y in range(ATLAS_SIZE):
-        for x in range(ATLAS_SIZE):
-            r, g, b = _atlas_color(x, y)
-            append((max(0.0, min(1.0, r)), max(0.0, min(1.0, g)), max(0.0, min(1.0, b)), 1.0))
-    image.pixels.foreach_set(pixels)
-    image.colorspace_settings.name = "sRGB"
-    image.pack()
-    return image
+from lyra_texture_atlas import create_texture_atlases
 
 
 def _socket(shader: bpy.types.ShaderNodeBsdfPrincipled, names: tuple[str, ...]):
@@ -69,7 +19,7 @@ def _material(
     color: tuple[float, float, float, float],
     metallic: float,
     roughness: float,
-    atlas: bpy.types.Image | None = None,
+    atlases: dict[str, bpy.types.Image] | None = None,
     emission: tuple[float, float, float] | None = None,
     emission_strength: float = 0.0,
 ) -> bpy.types.Material:
@@ -83,11 +33,22 @@ def _material(
     shader.inputs["Base Color"].default_value = color
     shader.inputs["Metallic"].default_value = metallic
     shader.inputs["Roughness"].default_value = roughness
-    if atlas is not None:
-        texture = nodes.new("ShaderNodeTexImage")
-        texture.name = "LYRA shared procedural atlas"
-        texture.image = atlas
-        material.node_tree.links.new(texture.outputs["Color"], shader.inputs["Base Color"])
+    if atlases is not None:
+        color_texture = nodes.new("ShaderNodeTexImage")
+        color_texture.name = "LYRA shared color atlas"
+        color_texture.image = atlases["color"]
+        rough_texture = nodes.new("ShaderNodeTexImage")
+        rough_texture.name = "LYRA shared roughness atlas"
+        rough_texture.image = atlases["roughness"]
+        normal_texture = nodes.new("ShaderNodeTexImage")
+        normal_texture.name = "LYRA shared tangent normal atlas"
+        normal_texture.image = atlases["normal"]
+        normal_map = nodes.new("ShaderNodeNormalMap")
+        normal_map.inputs["Strength"].default_value = 0.34
+        material.node_tree.links.new(color_texture.outputs["Color"], shader.inputs["Base Color"])
+        material.node_tree.links.new(rough_texture.outputs["Color"], shader.inputs["Roughness"])
+        material.node_tree.links.new(normal_texture.outputs["Color"], normal_map.inputs["Color"])
+        material.node_tree.links.new(normal_map.outputs["Normal"], shader.inputs["Normal"])
     if emission is not None:
         emission_socket = _socket(shader, ("Emission Color", "Emission"))
         strength_socket = _socket(shader, ("Emission Strength",))
@@ -100,20 +61,20 @@ def _material(
 
 
 def create_materials() -> dict[str, bpy.types.Material]:
-    atlas = create_atlas()
+    atlases = create_texture_atlases()
     materials = {
-        "hull": _material("MAT_LYRA_Hull_Ivory", (0.66, 0.65, 0.60, 1), 0.24, 0.39, atlas),
-        "armor": _material("MAT_LYRA_Armor_Graphite", (0.04, 0.05, 0.06, 1), 0.62, 0.36, atlas),
+        "hull": _material("MAT_LYRA_Hull_Ivory", (0.66, 0.65, 0.60, 1), 0.08, 0.50, atlases),
+        "armor": _material("MAT_LYRA_Armor_Graphite", (0.04, 0.05, 0.06, 1), 0.55, 0.36, atlases),
         "metal": _material("MAT_LYRA_Metal_Satin", (0.12, 0.15, 0.17, 1), 0.88, 0.22),
         "glass": _material("MAT_LYRA_Canopy_Glass", (0.008, 0.027, 0.035, 1), 0.15, 0.07),
-        "heat": _material("MAT_LYRA_Heat_Ceramic", (0.10, 0.075, 0.055, 1), 0.76, 0.41, atlas),
+        "heat": _material("MAT_LYRA_Heat_Ceramic", (0.10, 0.075, 0.055, 1), 0.68, 0.41, atlases),
         "cyan": _material(
             "MAT_LYRA_Emission_Cyan", (0.01, 0.22, 0.31, 1), 0.35, 0.18, emission=(0.0, 0.78, 1.0), emission_strength=5.0
         ),
         "amber": _material(
             "MAT_LYRA_Emission_Amber", (0.31, 0.10, 0.01, 1), 0.28, 0.24, emission=(1.0, 0.20, 0.01), emission_strength=4.2
         ),
-        "radiator": _material("MAT_LYRA_Radiator_Copper", (0.30, 0.10, 0.035, 1), 0.91, 0.25, atlas),
+        "radiator": _material("MAT_LYRA_Radiator_Copper", (0.30, 0.10, 0.035, 1), 0.88, 0.25, atlases),
     }
     glass = materials["glass"]
     glass.surface_render_method = "DITHERED"

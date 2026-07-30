@@ -68,6 +68,7 @@ def identity_transform_violations(root: bpy.types.Object) -> list[str]:
 
 def main() -> None:
     clear_scene()
+    bpy.context.preferences.filepaths.save_version = 0
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     materials = create_materials()
     root = empty("LYRA_EXPLORER_65M")
@@ -113,6 +114,7 @@ def main() -> None:
         export_yup=True,
         export_apply=True,
         export_extras=True,
+        export_tangents=True,
         export_animations=False,
         export_cameras=False,
         export_lights=False,

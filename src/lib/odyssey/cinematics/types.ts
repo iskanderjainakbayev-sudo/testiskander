@@ -23,6 +23,7 @@ export interface CinematicFrame {
 export interface CinematicPlayOptions {
   subjectName?: string;
   targetRadius?: number;
+  shipScale?: number;
   captions?: Partial<Record<CinematicShot, string>>;
 }
 
