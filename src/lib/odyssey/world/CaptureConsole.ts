@@ -27,7 +27,8 @@ export function installCaptureConsole(
   cinematics: OdysseyCinematics,
   showMenu: () => void,
 ) {
-  if (!new URLSearchParams(window.location.search).has('capture')) return () => undefined;
+  const captureScene = new URLSearchParams(window.location.search).get('capture');
+  if (captureScene === null) return () => undefined;
   const captureWindow = window as CaptureWindow;
   const scenes = buildSceneList();
   const api: OdysseyCaptureApi = {
@@ -47,6 +48,7 @@ export function installCaptureConsole(
     ),
   };
   captureWindow.__ODYSSEY_CAPTURE__ = api;
+  if (captureScene !== '' && captureScene !== '1') api.show(captureScene);
   return () => {
     if (captureWindow.__ODYSSEY_CAPTURE__ === api) delete captureWindow.__ODYSSEY_CAPTURE__;
   };

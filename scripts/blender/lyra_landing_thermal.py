@@ -19,14 +19,27 @@ def build_landing_gear(root: bpy.types.Object, materials: dict[str, bpy.types.Ma
     )
     for name, mount, knee, pad_location, pad_dimensions in stations:
         pivot = empty(f"Gear_{name}_Pivot", gear)
-        oriented_cylinder(f"Gear_{name}_PrimaryStrut", mount, knee, 0.36, materials["metal"], pivot, 28)
+        _add_gear_well(name, mount, pivot, materials)
+        oriented_cylinder(f"Gear_{name}_PrimaryStrut", mount, knee, 0.46, materials["metal"], pivot, 28)
         brace_end = (knee[0] * 0.82, knee[1] + 1.15, knee[2] + 0.35)
-        oriented_cylinder(f"Gear_{name}_Brace", mount, brace_end, 0.21, materials["metal"], pivot, 20)
+        oriented_cylinder(f"Gear_{name}_Brace", mount, brace_end, 0.26, materials["metal"], pivot, 20)
+        if "Main" in name:
+            secondary_mount = (mount[0] * 0.91, mount[1] + 1.35, mount[2] + 0.12)
+            secondary_knee = (knee[0], knee[1] + 0.58, knee[2] + 0.16)
+            oriented_cylinder(
+                f"Gear_{name}_AFrameSecondary",
+                secondary_mount,
+                secondary_knee,
+                0.31,
+                materials["metal"],
+                pivot,
+                24,
+            )
         side = 1.0 if knee[0] >= 0.0 else -1.0
         piston_start = (mount[0] + side * 0.26, mount[1] + 0.18, mount[2] - 0.18)
         piston_end = (knee[0] + side * 0.18, knee[1] + 0.12, knee[2] + 0.82)
         oriented_cylinder(
-            f"Gear_{name}_HydraulicPiston", piston_start, piston_end, 0.135, materials["metal"], pivot, 18
+            f"Gear_{name}_HydraulicPiston", piston_start, piston_end, 0.16, materials["metal"], pivot, 18
         )
         curve_tube(
             f"Gear_{name}_HydraulicHose",
@@ -94,7 +107,58 @@ def build_landing_gear(root: bpy.types.Object, materials: dict[str, bpy.types.Ma
                 12,
                 6,
             )
+        if name == "Nose":
+            for side in (-1.0, 1.0):
+                oriented_cylinder(
+                    f"Gear_Nose_LowerFork_{'P' if side < 0 else 'S'}",
+                    (knee[0], knee[1], knee[2] + 0.48),
+                    (
+                        pad_location[0] + side * pad_dimensions[0] * 0.27,
+                        pad_location[1],
+                        pad_location[2] + 0.34,
+                    ),
+                    0.19,
+                    materials["metal"],
+                    pivot,
+                    20,
+                )
         _add_footpad_claws(name, pad_location, pad_dimensions, pivot, materials)
+
+
+def _add_gear_well(
+    name: str,
+    mount: tuple[float, float, float],
+    parent: bpy.types.Object,
+    materials: dict[str, bpy.types.Material],
+) -> None:
+    is_nose = name == "Nose"
+    dimensions = (2.8, 4.4, 0.22) if is_nose else (3.4, 5.2, 0.24)
+    well_center = (mount[0], mount[1], mount[2] + 0.12)
+    box(
+        f"Gear_{name}_RecessedWell",
+        dimensions,
+        well_center,
+        materials["heat"],
+        parent,
+        bevel=0.18,
+        segments=3,
+    )
+    door_width = dimensions[0] * 0.32
+    for side in (-1.0, 1.0):
+        box(
+            f"Gear_{name}_WellDoor_{'P' if side < 0 else 'S'}",
+            (door_width, dimensions[1] * 0.92, 0.13),
+            (
+                mount[0] + side * dimensions[0] * 0.58,
+                mount[1],
+                mount[2] + 0.03,
+            ),
+            materials["hull"],
+            parent,
+            rotation=(0.0, side * 0.13, 0.0),
+            bevel=0.08,
+            segments=2,
+        )
 
 
 def _add_footpad_claws(

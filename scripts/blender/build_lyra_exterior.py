@@ -33,6 +33,16 @@ def triangle_count(node: bpy.types.Object) -> int:
     return total
 
 
+def source_triangle_profile(node: bpy.types.Object) -> list[tuple[str, int]]:
+    profile = []
+    for obj in node.children_recursive:
+        if obj.type != "MESH":
+            continue
+        triangles = sum(max(1, len(polygon.vertices) - 2) for polygon in obj.data.polygons)
+        profile.append((obj.name, triangles))
+    return sorted(profile, key=lambda item: item[1], reverse=True)
+
+
 def apply_atlas_regions(root: bpy.types.Object) -> None:
     name_to_region = {
         "MAT_LYRA_Hull_Ivory": "hull",
@@ -88,6 +98,7 @@ def main() -> None:
     convert_curves(root)
     apply_atlas_regions(root)
     triangulate_meshes(root)
+    print("LYRA_SOURCE_TRIANGLES_TOP", json.dumps(source_triangle_profile(lod0)[:32]))
     lod0_batches = batch_by_material(lod0, "LOD0")
     lod1_batches = batch_by_material(lod1, "LOD1")
     violations = identity_transform_violations(root)

@@ -41,6 +41,48 @@ def _open_nozzle(
 
 def build_engines(root: bpy.types.Object, materials: dict[str, bpy.types.Material]) -> None:
     engines = empty("PROPULSION_THREE_VECTOR", root)
+    box(
+        "Propulsion_RecessedThrustBulkhead",
+        (14.4, 1.55, 5.35),
+        (0.0, -26.35, -0.15),
+        materials["heat"],
+        engines,
+        bevel=0.52,
+        segments=4,
+    )
+    for name, x, z in (
+        ("Top", 0.0, 2.32),
+        ("Bottom", 0.0, -2.55),
+    ):
+        box(
+            f"Propulsion_ThrustFrame_{name}",
+            (13.2, 1.72, 0.48),
+            (x, -26.52, z),
+            materials["metal"],
+            engines,
+            bevel=0.11,
+            segments=3,
+        )
+    for index, x in enumerate((-6.55, -2.4, 2.4, 6.55)):
+        box(
+            f"Propulsion_ThrustFrame_Vertical_{index + 1:02d}",
+            (0.48, 1.72, 4.45),
+            (x, -26.52, -0.12),
+            materials["metal"],
+            engines,
+            bevel=0.11,
+            segments=3,
+        )
+    for side in (-1.0, 1.0):
+        oriented_cylinder(
+            f"Propulsion_ShoulderBrace_{'P' if side < 0 else 'S'}",
+            (side * 3.1, -23.8, 2.25),
+            (side * 5.4, -26.7, 2.15),
+            0.16,
+            materials["metal"],
+            engines,
+            20,
+        )
     aft = -1.5
     stations = ((-4.8, -0.4, 0.92), (0.0, -0.7, 1.12), (4.8, -0.4, 0.92))
     for index, (x, z, scale) in enumerate(stations):
@@ -54,7 +96,7 @@ def build_engines(root: bpy.types.Object, materials: dict[str, bpy.types.Materia
             1.22 * scale,
             2.15 * scale,
             3.8,
-            64,
+            48,
             materials["heat"],
             engine,
         )
@@ -66,7 +108,7 @@ def build_engines(root: bpy.types.Object, materials: dict[str, bpy.types.Materia
             0.74 * scale,
             1.58 * scale,
             3.0,
-            56,
+            40,
             materials["metal"],
             engine,
         )
@@ -77,7 +119,7 @@ def build_engines(root: bpy.types.Object, materials: dict[str, bpy.types.Materia
             (x, -26.25 + aft, z),
             materials["armor"],
             engine,
-            56,
+            40,
             (math.pi / 2.0, 0.0, 0.0),
             0.14,
         )
@@ -88,8 +130,8 @@ def build_engines(root: bpy.types.Object, materials: dict[str, bpy.types.Materia
             (x, -30.72 + aft, z),
             materials["heat"],
             engine,
-            major_segments=64,
-            minor_segments=12,
+            major_segments=40,
+            minor_segments=8,
         )
         torus(
             f"Engine_{index + 1:02d}_VectorRing",
@@ -98,8 +140,8 @@ def build_engines(root: bpy.types.Object, materials: dict[str, bpy.types.Materia
             (x, -27.42 + aft, z),
             materials["metal"],
             engine,
-            major_segments=56,
-            minor_segments=10,
+            major_segments=36,
+            minor_segments=6,
         )
         cylinder(
             f"Engine_{index + 1:02d}_PlasmaAperture",
@@ -108,7 +150,7 @@ def build_engines(root: bpy.types.Object, materials: dict[str, bpy.types.Materia
             (x, -29.65 + aft, z),
             materials["amber"],
             engine,
-            56,
+            40,
             (math.pi / 2.0, 0.0, 0.0),
             0.0,
         )

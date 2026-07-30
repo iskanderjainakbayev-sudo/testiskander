@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createNacreGrounding, placeNacreGrounding } from './createNacreGrounding';
 import { nacreHeight, nacreRandom } from './nacreNoise';
 import {
   NACRE_INSTANCE_VERTEX,
@@ -47,7 +48,10 @@ function createMountains(shader: THREE.ShaderMaterial): THREE.InstancedMesh {
   mesh.name = 'Wind-eroded mountain horizon';
   return finalize(mesh);
 }
-function createRocks(shader: THREE.ShaderMaterial): THREE.InstancedMesh {
+function createRocks(
+  shader: THREE.ShaderMaterial,
+  grounding: THREE.InstancedMesh,
+): THREE.InstancedMesh {
   const random = nacreRandom(0x51ca17);
   const mesh = new THREE.InstancedMesh(new THREE.DodecahedronGeometry(1, 1), shader, 175);
   const dummy = new THREE.Object3D();
@@ -58,12 +62,15 @@ function createRocks(shader: THREE.ShaderMaterial): THREE.InstancedMesh {
     const z = Math.sin(angle) * radius + 12;
     const scale = 0.4 + random() * random() * 4.1;
     dummy.position.set(x, nacreHeight(x, z) - scale * 0.16, z);
+    placeNacreGrounding(grounding, index, x, z, scale);
     dummy.rotation.set(random() * 2.4, random() * Math.PI, random() * 1.8);
     dummy.scale.set(scale * (0.7 + random()), scale, scale * (0.7 + random() * 0.8));
     dummy.updateMatrix();
     mesh.setMatrixAt(index, dummy.matrix);
   }
   mesh.name = 'Canyon talus';
+  grounding.instanceMatrix.needsUpdate = true;
+  grounding.computeBoundingSphere();
   return finalize(mesh);
 }
 
@@ -125,12 +132,11 @@ export function createNacreDetails(): NacreDetails {
   const root = new THREE.Group();
   const rockMaterial = material(NACRE_ROCK_FRAGMENT);
   const mountainMaterial = material(NACRE_MOUNTAIN_FRAGMENT);
-  const mineralMaterial = material(NACRE_MINERAL_FRAGMENT, {
-    transparent: true, depthWrite: true,
-  });
+  const mineralMaterial = material(NACRE_MINERAL_FRAGMENT);
   const spire = new THREE.ConeGeometry(0.62, 6, 7, 2);
   const crown = new THREE.ConeGeometry(0.42, 3.3, 6, 1);
-  root.add(createMountains(mountainMaterial), createRocks(rockMaterial));
+  const grounding = createNacreGrounding(175);
+  root.add(createMountains(mountainMaterial), createRocks(rockMaterial, grounding), grounding);
   root.add(createForest(spire, mineralMaterial, 205, 0xf012e57, false));
   root.add(createForest(crown, mineralMaterial, 126, 0xc20a7, true));
   const coordinates: Array<[number, number]> = [[48, -34], [-79, -91], [91, -146]];

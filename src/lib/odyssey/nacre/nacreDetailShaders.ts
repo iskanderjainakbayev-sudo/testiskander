@@ -78,5 +78,5 @@ void main(){
   color+=fresnel*vec3(1.0,0.53,0.17)*0.82;
   color+=pow(max(dot(n,normalize(l+v)),0.0),54.0)*vec3(1.0,0.88,0.55);
   color=mix(color,vec3(0.34,0.145,0.065),fogFactor()*0.74);
-  gl_FragColor=vec4(color,0.76+fresnel*0.2);
+  gl_FragColor=vec4(color,1.0);
 }`;

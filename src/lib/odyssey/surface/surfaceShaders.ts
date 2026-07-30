@@ -92,10 +92,11 @@ uniform float uTime;
 varying float vTail;
 void main() {
   float fall=mod(position.y-uTime*aSpeed+42.0,42.0);
+  float drift=mod(position.z+uTime*0.22+50.0,100.0)-50.0;
   vec3 p=vec3(
     position.x+sin(uTime*0.7+position.z)*0.34,
     fall-aTail*(0.42+aSpeed*0.035),
-    position.z+uTime*0.22
+    drift
   );
   vTail=aTail;
   gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);

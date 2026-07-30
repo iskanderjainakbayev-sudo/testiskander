@@ -189,7 +189,7 @@ def curve_tube(
     curve.dimensions = "3D"
     curve.resolution_u = resolution
     curve.bevel_depth = radius
-    curve.bevel_resolution = 3
+    curve.bevel_resolution = 2
     spline = curve.splines.new("BEZIER")
     point_list = list(points)
     spline.bezier_points.add(len(point_list) - 1)

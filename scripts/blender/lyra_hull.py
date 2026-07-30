@@ -159,6 +159,7 @@ def shell_patch(
     rows: int = 8,
     columns: int = 18,
     thickness: float = 0.11,
+    bevel: float = 0.04,
 ) -> bpy.types.Object:
     vertices = []
     for row in range(rows):
@@ -167,7 +168,7 @@ def shell_patch(
             angle = angle_start + (angle_end - angle_start) * column / (columns - 1)
             vertices.append(surface_point(y, angle, offset))
     return _grid_mesh(
-        name, vertices, rows, columns, parent, material, atlas_region, thickness, bevel=0.04
+        name, vertices, rows, columns, parent, material, atlas_region, thickness, bevel=bevel
     )
 
 
@@ -193,6 +194,7 @@ def _framed_recess(
         rows=6,
         columns=14,
         thickness=0.055,
+        bevel=0.025,
     )
     boundaries = (
         [surface_point(y, angle_start, 0.27) for y in (y_start, (y_start + y_end) * 0.5, y_end)],
@@ -306,7 +308,7 @@ def build_hull(root: bpy.types.Object, materials: dict[str, bpy.types.Material])
     loft_hull(
         "Hull_LiftingBody_LOD0",
         smooth_sections(HULL_SECTIONS, 5),
-        72,
+        56,
         hull,
         materials["armor"],
         "armor",
@@ -324,12 +326,25 @@ def build_hull(root: bpy.types.Object, materials: dict[str, bpy.types.Material])
         materials["armor"],
         "armor",
         0.105,
-        12,
-        24,
+        10,
+        20,
         0.08,
+        0.025,
     )
     shell_patch(
-        "Canopy_Inset_Glass", 14.2, 28.2, 0.78, 2.36, hull, materials["glass"], None, 0.22, 18, 34, 0.16
+        "Canopy_Inset_Glass",
+        14.2,
+        28.2,
+        0.78,
+        2.36,
+        hull,
+        materials["glass"],
+        None,
+        0.22,
+        14,
+        26,
+        0.16,
+        0.025,
     )
     frame_points = (
         [surface_point(y, 0.77, 0.34) for y in (14.0, 18.0, 22.0, 25.5, 28.3)],
@@ -384,6 +399,7 @@ def _add_integrated_recesses(
         7,
         12,
         0.10,
+        0.03,
     )
     shell_patch(
         "PressureDoor_Port_OffWhite",
@@ -398,6 +414,7 @@ def _add_integrated_recesses(
         7,
         12,
         0.10,
+        0.03,
     )
 
 
@@ -416,8 +433,9 @@ def _add_section_breaks(
             "heat",
             0.038,
             2,
-            48,
-            0.035,
+            32,
+            0.025,
+            0.0,
         )
     chines = (
         ("StarboardUpper", 0.60, 0.67),
@@ -439,6 +457,7 @@ def _add_section_breaks(
             18,
             3,
             0.09,
+            0.02,
         )
     shell_patch(
         "Hull_VentralStructuralKeel",
@@ -453,6 +472,7 @@ def _add_section_breaks(
         16,
         6,
         0.13,
+        0.025,
     )
 
 
@@ -476,6 +496,10 @@ def _add_armor_layers(parent: bpy.types.Object, materials: dict[str, bpy.types.M
             materials[material_key],
             material_key,
             0.18,
+            6,
+            12,
+            0.08,
+            0.025,
         )
     panel_shapes = (
         ((5.8, -15.5), (10.7, -13.4), (12.6, -5.0), (9.7, -1.8), (5.4, -3.6)),
@@ -528,6 +552,8 @@ def _add_service_shell(parent: bpy.types.Object, materials: dict[str, bpy.types.
         materials["metal"],
         docking,
         rotation=(0.0, math.pi / 2.0, 0.0),
+        major_segments=32,
+        minor_segments=8,
     )
     torus(
         "Docking_Collar_Seal",
@@ -537,4 +563,6 @@ def _add_service_shell(parent: bpy.types.Object, materials: dict[str, bpy.types.
         materials["cyan"],
         docking,
         rotation=(0.0, math.pi / 2.0, 0.0),
+        major_segments=32,
+        minor_segments=8,
     )

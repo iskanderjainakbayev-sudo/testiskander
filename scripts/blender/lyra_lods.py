@@ -48,8 +48,8 @@ def build_lod1(root: bpy.types.Object, materials: dict[str, bpy.types.Material])
         )
     box(
         "LOD1_Port_Radiator",
-        (0.4, 12.8, 6.2),
-        (-17.15, -2.7, 3.2),
+        (0.4, 10.8, 5.4),
+        (-17.15, -8.25, 3.1),
         materials["radiator"],
         lod,
         bevel=0.1,
@@ -88,8 +88,8 @@ def build_collider(root: bpy.types.Object, materials: dict[str, bpy.types.Materi
     for side, label in ((-1.0, "Port"), (1.0, "Starboard")):
         wing = box(
             f"COLLIDER_{label}Wing",
-            (15.0, 23.0, 1.2),
-            (side * 11.0, -2.0, 0.0),
+            (11.5, 23.0, 1.2),
+            (side * 9.3, -2.0, 0.0),
             materials["armor"],
             collider,
             rotation=(0.0, 0.0, side * 0.08),

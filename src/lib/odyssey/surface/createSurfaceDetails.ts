@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createSurfaceGrounding, placeSurfaceGrounding } from './createSurfaceGrounding';
 import { seededRandom, surfaceHeight } from './terrainNoise';
 
 export interface SurfaceDetails {
@@ -16,7 +17,9 @@ function addRockField(root: THREE.Group) {
     metalness: 0.08,
   });
   const rocks = new THREE.InstancedMesh(geometry, material, 230);
+  const grounding = createSurfaceGrounding(230);
   const dummy = new THREE.Object3D();
+  const shadowDummy = new THREE.Object3D();
   for (let index = 0; index < 230; index += 1) {
     let x = 0;
     let z = 0;
@@ -28,6 +31,7 @@ function addRockField(root: THREE.Group) {
     } while ((x / 30) ** 2 + ((z - 70) / 51) ** 2 < 1);
     const height = surfaceHeight(x, z);
     const scale = 0.45 + random() * random() * 4.8;
+    placeSurfaceGrounding(grounding, shadowDummy, index, x, z, scale);
     dummy.position.set(x, height - scale * 0.18, z);
     dummy.rotation.set(random() * 2.5, random() * Math.PI, random() * 1.7);
     dummy.scale.set(scale * (0.7 + random() * 0.8), scale, scale * (0.65 + random() * 0.7));
@@ -35,9 +39,11 @@ function addRockField(root: THREE.Group) {
     rocks.setMatrixAt(index, dummy.matrix);
   }
   rocks.instanceMatrix.needsUpdate = true;
+  grounding.instanceMatrix.needsUpdate = true;
+  grounding.computeBoundingSphere();
   rocks.castShadow = true;
   rocks.receiveShadow = true;
-  root.add(rocks);
+  root.add(rocks, grounding);
 }
 
 function createSampleSite(position: THREE.Vector3, index: number) {
@@ -50,9 +56,8 @@ function createSampleSite(position: THREE.Vector3, index: number) {
     emissiveIntensity: 1.8,
     roughness: 0.18,
     metalness: 0.05,
-    transmission: 0.16,
-    transparent: true,
-    opacity: 0.9,
+    transmission: 0.08,
+    clearcoat: 0.24,
   });
   for (let shard = 0; shard < 7; shard += 1) {
     const height = 1.1 + ((shard * 1.73) % 1) * 2.8;

@@ -7,7 +7,7 @@ import math
 import bpy
 from mathutils import Vector
 
-from lyra_common import box, cone, cylinder, empty, finish_mesh, oriented_cylinder, sphere
+from lyra_common import box, cone, curve_tube, cylinder, empty, finish_mesh, oriented_cylinder, sphere
 from lyra_hull import surface_point
 
 
@@ -43,7 +43,7 @@ def _dish(
     parent: bpy.types.Object,
     material: bpy.types.Material,
 ) -> bpy.types.Object:
-    rings, segments = 10, 56
+    rings, segments = 8, 40
     vertices = [(0.0, 0.0, 0.0)]
     for ring in range(1, rings + 1):
         ring_radius = radius * ring / rings
@@ -71,13 +71,22 @@ def _dish(
     solidify.thickness = 0.06
     bpy.ops.object.modifier_apply(modifier=solidify.name)
     obj.select_set(False)
-    return finish_mesh(obj, parent, material, bevel=0.035, bevel_segments=2, smooth=True)
+    return finish_mesh(obj, parent, material, bevel=0.025, bevel_segments=2, smooth=True)
 
 
 def build_sensor_suite(root: bpy.types.Object, materials: dict[str, bpy.types.Material]) -> None:
     sensors = empty("SENSOR_SUITE_STARBOARD", root)
     oriented_cylinder("Sensor_Mast_ForeLeg", (7.1, 0.2, 4.1), (9.3, -0.4, 7.4), 0.18, materials["metal"], sensors, 24)
     oriented_cylinder("Sensor_Mast_AftLeg", (7.9, -3.2, 4.2), (9.3, -0.4, 7.4), 0.18, materials["metal"], sensors, 24)
+    oriented_cylinder(
+        "Sensor_Mast_OutboardBrace",
+        (10.1, -1.5, 1.15),
+        (9.3, -0.4, 7.4),
+        0.15,
+        materials["metal"],
+        sensors,
+        20,
+    )
     cylinder("Sensor_Mast_Gimbal", 0.76, 0.42, (9.3, -0.4, 7.32), materials["armor"], sensors, 36, bevel=0.08)
     _oriented_torus(
         "Sensor_Mast_AzimuthRing",
@@ -87,7 +96,7 @@ def build_sensor_suite(root: bpy.types.Object, materials: dict[str, bpy.types.Ma
         0.105,
         sensors,
         materials["metal"],
-        (32, 8),
+        (28, 6),
     )
     for side in (-1.0, 1.0):
         oriented_cylinder(
@@ -107,6 +116,19 @@ def build_sensor_suite(root: bpy.types.Object, materials: dict[str, bpy.types.Ma
         materials["metal"],
         sensors,
         20,
+    )
+    curve_tube(
+        "Sensor_Mast_ServiceCable",
+        (
+            (7.15, 0.1, 4.15),
+            (8.1, -0.1, 5.8),
+            (8.75, -0.55, 7.2),
+            (9.05, -0.72, 7.78),
+        ),
+        0.052,
+        materials["radiator"],
+        sensors,
+        1,
     )
     direction = (0.38, 0.78, 0.5)
     _dish("Sensor_DeepRange_Dish", (9.3, -0.4, 7.85), direction, 2.65, sensors, materials["metal"])
@@ -149,7 +171,7 @@ def _add_dish_cage(
         0.075,
         parent,
         materials["metal"],
-        (40, 6),
+        (32, 5),
     )
     _oriented_torus(
         "Sensor_Dish_ReceiverCage",
@@ -159,8 +181,9 @@ def _add_dish_cage(
         0.04,
         parent,
         materials["metal"],
-        (20, 4),
+        (16, 4),
     )
+    rear_hub = Vector(center) - axis * 0.32
     for index, angle in enumerate((0.0, math.tau / 3.0, math.tau * 2.0 / 3.0)):
         rim_point = rim_center + (tangent * math.cos(angle) + bitangent * math.sin(angle)) * radius
         oriented_cylinder(
@@ -171,6 +194,17 @@ def _add_dish_cage(
             materials["metal"],
             parent,
             14,
+        )
+    for index, angle in enumerate((0.0, math.pi * 0.5, math.pi, math.pi * 1.5)):
+        rib_point = rim_center + (tangent * math.cos(angle) + bitangent * math.sin(angle)) * radius * 0.93
+        oriented_cylinder(
+            f"Sensor_Dish_RearRib_{index + 1:02d}",
+            tuple(rib_point),
+            tuple(rear_hub),
+            0.037,
+            materials["metal"],
+            parent,
+            12,
         )
 
 

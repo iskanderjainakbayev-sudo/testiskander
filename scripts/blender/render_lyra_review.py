@@ -73,7 +73,7 @@ def _gradient_world() -> None:
     map_range.inputs["From Max"].default_value = 1.0
     ramp.color_ramp.elements[0].color = (0.012, 0.018, 0.028, 1.0)
     ramp.color_ramp.elements[1].color = (0.16, 0.19, 0.23, 1.0)
-    background.inputs["Strength"].default_value = 0.24
+    background.inputs["Strength"].default_value = 0.12
     world.node_tree.links.new(coordinates.outputs["Normal"], separate.inputs["Vector"])
     world.node_tree.links.new(separate.outputs["Z"], map_range.inputs["Value"])
     world.node_tree.links.new(map_range.outputs["Result"], ramp.inputs["Fac"])
@@ -84,14 +84,14 @@ def _gradient_world() -> None:
 def configure_scene() -> tuple[bpy.types.Object, bpy.types.Object]:
     scene = bpy.context.scene
     scene.render.engine = "BLENDER_EEVEE"
-    scene.render.resolution_x = 960
+    scene.render.resolution_x = 1152
     scene.render.resolution_y = 720
     scene.render.resolution_percentage = 100
     scene.render.image_settings.file_format = "PNG"
     scene.render.image_settings.color_mode = "RGBA"
     scene.render.film_transparent = False
     scene.render.image_settings.color_depth = "8"
-    scene.view_settings.exposure = 1.02
+    scene.view_settings.exposure = 0.22
     _gradient_world()
     camera_data = bpy.data.cameras.new("Review_Camera")
     camera_data.lens = 55.0
@@ -99,11 +99,9 @@ def configure_scene() -> tuple[bpy.types.Object, bpy.types.Object]:
     camera = bpy.data.objects.new("Review_Camera", camera_data)
     bpy.context.scene.collection.objects.link(camera)
     scene.camera = camera
-    area_light("Key_Softbox", (34.0, 28.0, 38.0), (0.0, 0.0, 0.0), (1.0, 0.95, 0.88), 76000, 22.0)
-    area_light("Port_Fill", (-35.0, 5.0, 14.0), (-2.0, 0.0, 0.0), (0.53, 0.66, 0.82), 52000, 26.0)
-    area_light("Top_Ambient", (0.0, 3.0, 55.0), (0.0, 0.0, 0.0), (0.82, 0.88, 0.94), 68000, 30.0)
-    area_light("Engine_Rim", (4.0, -42.0, 13.0), (0.0, -8.0, 0.0), (1.0, 0.52, 0.22), 34000, 15.0)
-    area_light("Belly_Bounce", (0.0, 2.0, -30.0), (0.0, 0.0, -1.0), (0.30, 0.42, 0.54), 24000, 22.0)
+    area_light("Key_Neutral_Grazing", (40.0, 24.0, 32.0), (0.0, -2.0, 0.0), (0.98, 0.98, 0.97), 50000, 20.0)
+    area_light("Fill_Neutral", (-34.0, -2.0, 12.0), (-2.0, -3.0, 0.0), (0.82, 0.86, 0.90), 12500, 28.0)
+    area_light("Top_Separation", (0.0, -4.0, 48.0), (0.0, -4.0, 0.0), (0.91, 0.93, 0.95), 6500, 24.0)
     return camera, _ground_plane()
 
 
@@ -115,11 +113,12 @@ def main() -> None:
     hide_runtime_helpers(root)
     camera, ground = configure_scene()
     views = {
-        "three-quarter-front": ((47.0, 55.0, 25.0), (0.0, 2.0, 0.2), 61.0),
-        "port-profile": ((-62.0, 1.0, 11.0), (0.0, 0.0, 0.0), 62.0),
-        "rear-engines": ((39.0, -68.0, 17.0), (0.0, -14.0, -0.4), 62.0),
-        "dorsal": ((38.0, 22.0, 90.0), (0.0, 0.0, 0.0), 52.0),
-        "landed-gear": ((55.0, 46.0, 10.0), (0.0, 2.0, -2.0), 58.0),
+        "three-quarter-front": ((44.0, 57.0, 24.0), (0.0, 1.0, 0.0), 59.0),
+        "port-profile": ((-59.0, -1.0, 9.0), (-1.0, -1.0, 0.0), 61.0),
+        "landed-gear": ((48.0, 48.0, 7.0), (0.0, 1.0, -2.2), 58.0),
+        "engine-closeup": ((17.5, -49.0, 6.5), (0.0, -29.0, -0.2), 70.0),
+        "surface-detail-closeup": ((-27.0, -6.0, 8.5), (-8.2, -7.4, 1.4), 72.0),
+        "dorsal": ((35.0, 17.0, 82.0), (0.0, -1.0, 0.0), 53.0),
     }
     for name, (location, target, lens) in views.items():
         ground.hide_render = name != "landed-gear"

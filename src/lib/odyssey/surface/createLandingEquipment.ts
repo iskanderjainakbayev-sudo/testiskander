@@ -6,6 +6,7 @@ export function createLandingEquipment(
   const root = new THREE.Group();
   root.name = 'LYRA deployed boarding ramp';
   const ground = getHeight(0, rampZ);
+  root.add(createShipContactShadow(getHeight, rampZ + 30));
   const rise = 6.5;
   const length = 13;
   const angle = Math.atan2(rise, length);
@@ -61,4 +62,37 @@ export function createLandingEquipment(
   beacons.instanceMatrix.needsUpdate = true;
   root.add(beacons);
   return root;
+}
+
+function createShipContactShadow(
+  getHeight: (x: number, z: number) => number,
+  shipZ: number,
+) {
+  const material = new THREE.ShaderMaterial({
+    vertexShader: `
+      varying vec2 vUv;
+      void main(){
+        vUv=uv;
+        gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);
+      }`,
+    fragmentShader: `
+      precision highp float;
+      varying vec2 vUv;
+      void main(){
+        vec2 p=(vUv-0.5)*2.0;
+        float body=1.0-smoothstep(0.08,1.0,dot(p,p));
+        gl_FragColor=vec4(0.004,0.008,0.009,body*0.36);
+      }`,
+    transparent: true,
+    depthWrite: false,
+    polygonOffset: true,
+    polygonOffsetFactor: -2,
+    polygonOffsetUnits: -2,
+  });
+  const shadow = new THREE.Mesh(new THREE.PlaneGeometry(22, 48), material);
+  shadow.name = 'LYRA soft planetary contact shadow';
+  shadow.rotation.x = -Math.PI / 2;
+  shadow.position.set(1.4, getHeight(0, shipZ) + 0.045, shipZ - 1.2);
+  shadow.renderOrder = 1;
+  return shadow;
 }
