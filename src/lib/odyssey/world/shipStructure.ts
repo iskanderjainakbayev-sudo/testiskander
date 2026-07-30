@@ -42,8 +42,12 @@ export function buildShipStructure(group: THREE.Group) {
 
   group.add(box([6.2, 0.18, 19.2], floor, [0, -0.1, 2]));
   group.add(box([5.7, 0.14, 18.5], hull, [0, 3.25, 2]));
-  group.add(box([0.38, 3.25, 17], hull, [-3.02, 1.55, 2.6]));
-  group.add(box([0.38, 3.25, 17], hull, [3.02, 1.55, 2.6]));
+  for (const side of [-1, 1]) {
+    group.add(box([0.38, 0.9, 17], hull, [side * 3.02, 0.36, 2.6]));
+    group.add(box([0.38, 0.72, 17], hull, [side * 3.02, 2.88, 2.6]));
+    group.add(box([0.38, 1.65, 7.2], hull, [side * 3.02, 1.56, -2.1]));
+    group.add(box([0.38, 1.65, 4.5], hull, [side * 3.02, 1.56, 8.25]));
+  }
 
   for (let z = -4; z <= 10; z += 2) {
     group.add(box([6.4, 0.17, 0.21], dark, [0, 3.1, z]));

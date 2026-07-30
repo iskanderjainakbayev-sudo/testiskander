@@ -12,7 +12,8 @@ type MarkerStyle = CSSProperties & {
 };
 
 export function TargetMarker({ snapshot, onCycleTarget }: TargetMarkerProps) {
-  const x = 50 + clamp(snapshot.targetScreen.x, -0.92, 0.92) * 46;
+  const projectedX = edgeAwareX(snapshot);
+  const x = 50 + clamp(projectedX, -0.92, 0.92) * 46;
   const y = 50 - clamp(snapshot.targetScreen.y, -0.84, 0.84) * 42;
   const style: MarkerStyle = {
     '--odx-target-x': `${x}%`,
@@ -35,6 +36,13 @@ export function TargetMarker({ snapshot, onCycleTarget }: TargetMarkerProps) {
   );
 }
 
+function edgeAwareX(snapshot: GameSnapshot) {
+  if (snapshot.targetScreen.visible || Math.abs(snapshot.targetScreen.x) > 0.2) {
+    return snapshot.targetScreen.x;
+  }
+  return Math.sign(snapshot.targetBearing || 1);
+}
+
 export function formatDistance(distance: number) {
   if (distance >= 1000) return `${(distance / 1000).toFixed(distance >= 10000 ? 0 : 1)} km`;
   return `${Math.max(0, Math.round(distance))} m`;
@@ -43,4 +51,3 @@ export function formatDistance(distance: number) {
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, Number.isFinite(value) ? value : 0));
 }
-
