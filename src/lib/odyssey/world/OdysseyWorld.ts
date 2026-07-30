@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { loadSave } from '../save';
+import { createLyraExterior, type LyraExterior } from '../ship/createLyraExterior';
 import { createSpaceScene, type SpaceSceneRig } from '../space/createSpaceScene';
 import type { TrafficUpdate } from '../space/traffic/createTrafficSystem';
 import type { WorldCallbacks } from '../types';
@@ -18,6 +19,7 @@ export class OdysseyWorld {
   private readonly render: RenderRig;
   private readonly space: SpaceSceneRig;
   private readonly ship: ShipInterior;
+  private readonly exterior: LyraExterior;
   private readonly expedition: SolaceExpedition;
   private readonly input: InputController;
   private readonly session = new OdysseySession();
@@ -38,6 +40,11 @@ export class OdysseyWorld {
     this.space = createSpaceScene();
     this.render.scene.add(this.space.group);
     this.expedition = new SolaceExpedition(this.render.scene);
+    this.exterior = createLyraExterior(
+      this.render.scene,
+      this.expedition.surface.getHeight,
+      this.render.renderer.capabilities.getMaxAnisotropy(),
+    );
     this.snapshots = new SnapshotPublisher(callbacks);
     this.input = new InputController(canvas, this.handlePointerLock);
     this.placeMenuCamera();
@@ -74,6 +81,7 @@ export class OdysseyWorld {
     this.session.audio.stop();
     this.space.dispose();
     this.expedition.dispose();
+    this.exterior.dispose();
     this.ship.dispose();
     this.render.dispose();
   }
@@ -130,6 +138,7 @@ export class OdysseyWorld {
     this.render.setAtmosphere(
       this.expedition.atmosphereBlend(this.session.mode, this.session.landing.progress),
     );
+    this.exterior.update(this.render.camera, this.session.mode, this.session.landing.progress);
     flight.getInverseQuaternion(this.inverseQuaternion);
     if (this.space.group.visible) {
       this.traffic = this.space.update(
