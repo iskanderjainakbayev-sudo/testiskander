@@ -59,7 +59,7 @@ export function createRenderer(canvas: HTMLCanvasElement): RenderRig {
   composer.addPass(bloom);
   const cinematic = createCinematicPass();
   composer.addPass(cinematic.pass);
-  const smaa = new SMAAPass(1, 1);
+  const smaa = new SMAAPass();
   composer.addPass(smaa);
   const outputPass = new OutputPass();
   composer.addPass(outputPass);
