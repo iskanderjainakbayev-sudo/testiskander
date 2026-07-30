@@ -36,6 +36,10 @@ export function createSurfaceGrounding(count: number) {
   return mesh;
 }
 
+const PLANE_NORMAL = new THREE.Vector3(0, 0, 1);
+const terrainNormal = new THREE.Vector3();
+const contactPosition = new THREE.Vector3();
+
 export function placeSurfaceGrounding(
   mesh: THREE.InstancedMesh,
   dummy: THREE.Object3D,
@@ -44,8 +48,19 @@ export function placeSurfaceGrounding(
   z: number,
   scale: number,
 ) {
-  dummy.position.set(x + scale * 0.17, surfaceHeight(x, z) + 0.035, z - scale * 0.08);
-  dummy.rotation.set(-Math.PI / 2, 0, 0);
+  const shadowX = x + scale * 0.17;
+  const shadowZ = z - scale * 0.08;
+  const step = Math.max(0.55, scale * 0.2);
+  terrainNormal.set(
+    surfaceHeight(shadowX - step, shadowZ) - surfaceHeight(shadowX + step, shadowZ),
+    step * 2,
+    surfaceHeight(shadowX, shadowZ - step) - surfaceHeight(shadowX, shadowZ + step),
+  ).normalize();
+  contactPosition
+    .set(shadowX, surfaceHeight(shadowX, shadowZ), shadowZ)
+    .addScaledVector(terrainNormal, 0.035);
+  dummy.position.copy(contactPosition);
+  dummy.quaternion.setFromUnitVectors(PLANE_NORMAL, terrainNormal);
   dummy.scale.set(scale * 1.5, scale * 0.8, 1);
   dummy.updateMatrix();
   mesh.setMatrixAt(index, dummy.matrix);

@@ -5,13 +5,15 @@ import { createRainSplashes } from './createRainSplashes';
 import { createSurfaceDetails } from './createSurfaceDetails';
 import { seededRandom, surfaceHeight } from './terrainNoise';
 import {
-  RAIN_FRAGMENT,
-  RAIN_VERTEX,
-  SKY_FRAGMENT,
   TERRAIN_FRAGMENT,
   TERRAIN_VERTEX,
   WATER_FRAGMENT,
 } from './surfaceShaders';
+import {
+  RAIN_FRAGMENT,
+  RAIN_VERTEX,
+  SKY_FRAGMENT,
+} from './surfaceAtmosphereShaders';
 
 export interface SolaceSurface {
   group: THREE.Group;
@@ -109,7 +111,6 @@ function createPrecipitation() {
     fragmentShader: RAIN_FRAGMENT,
     transparent: true,
     depthWrite: false,
-    blending: THREE.AdditiveBlending,
   });
   return new THREE.LineSegments(geometry, material);
 }
@@ -143,7 +144,11 @@ export function createSolaceSurface(): SolaceSurface {
       (precipitation.material as THREE.ShaderMaterial).uniforms.uTime.value = time;
       splashes.update(time);
       sky.position.copy(camera.position);
-      precipitation.position.set(camera.position.x, 0, camera.position.z);
+      precipitation.position.set(
+        camera.position.x,
+        camera.position.y - 3.5,
+        camera.position.z,
+      );
       details.update(time);
     },
     dispose: () => disposeSpaceScene(group),

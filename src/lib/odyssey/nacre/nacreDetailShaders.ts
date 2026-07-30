@@ -3,11 +3,19 @@ precision highp float;
 varying vec3 vWorld;
 varying vec3 vLocal;
 varying float vScale;
+varying vec3 vSmoothNormal;
 void main(){
   vec4 instanced=instanceMatrix*vec4(position,1.0);
   vWorld=(modelMatrix*instanced).xyz;
   vLocal=position;
   vScale=length(instanceMatrix[1].xyz);
+  mat3 instanceBasis=mat3(instanceMatrix);
+  vec3 scaleSq=vec3(
+    dot(instanceBasis[0],instanceBasis[0]),
+    dot(instanceBasis[1],instanceBasis[1]),
+    dot(instanceBasis[2],instanceBasis[2])
+  );
+  vSmoothNormal=normalize(mat3(modelMatrix)*instanceBasis*(normal/max(scaleSq,vec3(0.0001))));
   gl_Position=projectionMatrix*viewMatrix*vec4(vWorld,1.0);
 }`;
 
@@ -46,9 +54,10 @@ precision highp float;
 varying vec3 vWorld;
 varying vec3 vLocal;
 varying float vScale;
+varying vec3 vSmoothNormal;
 ${COMMON}
 void main(){
-  vec3 n=faceNormal(),l=normalize(vec3(-0.68,0.66,0.32));
+  vec3 n=normalize(vSmoothNormal),l=normalize(vec3(-0.68,0.66,0.32));
   float strata=0.5+0.5*sin(vWorld.y*0.17+hash31(floor(vWorld*0.08))*5.0);
   float cap=smoothstep(0.34,0.92,vLocal.y)*hash31(floor(vWorld*0.17));
   vec3 albedo=mix(vec3(0.105,0.026,0.012),vec3(0.49,0.18,0.042),strata*0.54);

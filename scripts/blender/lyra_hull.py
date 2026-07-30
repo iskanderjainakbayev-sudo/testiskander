@@ -648,7 +648,7 @@ def _add_service_shell(parent: bpy.types.Object, materials: dict[str, bpy.types.
             f"Cargo_Bay_Door_{label}",
             (4.2, 10.5, 0.24),
             (side * 3.25, -1.5, -4.2),
-            materials["hull"],
+            materials["armor"],
             parent,
             bevel=0.22,
         )

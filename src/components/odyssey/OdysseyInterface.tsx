@@ -15,6 +15,7 @@ export interface OdysseyInterfaceProps {
   snapshot: GameSnapshot;
   hasSave: boolean;
   pointerLocked: boolean;
+  suppressFocusPrompt?: boolean;
   onStart: () => void;
   onResume: () => void;
   onNewGame: () => void;
@@ -30,6 +31,7 @@ export function OdysseyInterface({
   snapshot,
   hasSave,
   pointerLocked,
+  suppressFocusPrompt = false,
   onStart,
   onResume,
   onNewGame,
@@ -91,7 +93,9 @@ export function OdysseyInterface({
       {snapshot.mode === 'ending' && (
         <EndingSequence onNewGame={onNewGame} onReturnToMenu={onReturnToMenu} />
       )}
-      {isActive && !pointerLocked && <FocusPrompt onResume={onResume} />}
+      {isActive && !pointerLocked && !suppressFocusPrompt && (
+        <FocusPrompt onResume={onResume} />
+      )}
     </div>
   );
 }

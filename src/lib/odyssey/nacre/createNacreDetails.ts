@@ -1,5 +1,7 @@
 import * as THREE from 'three';
+import { createErodedMountainGeometry } from './createNacreGeology';
 import { createNacreGrounding, placeNacreGrounding } from './createNacreGrounding';
+import { createNacreSample } from './createNacreSample';
 import { nacreHeight, nacreRandom } from './nacreNoise';
 import {
   NACRE_INSTANCE_VERTEX,
@@ -31,17 +33,18 @@ function finalize(mesh: THREE.InstancedMesh): THREE.InstancedMesh {
 }
 function createMountains(shader: THREE.ShaderMaterial): THREE.InstancedMesh {
   const random = nacreRandom(0x4e414352);
-  const mesh = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 2), shader, 38);
+  const mesh = new THREE.InstancedMesh(createErodedMountainGeometry(), shader, 50);
   const dummy = new THREE.Object3D();
   for (let index = 0; index < mesh.count; index += 1) {
-    const angle = index / mesh.count * Math.PI * 2 + (random() - 0.5) * 0.11;
-    const radius = 385 + random() * 92;
-    const height = 48 + random() * 66;
+    const angle = index * 2.399963 + (random() - 0.5) * 0.38;
+    const farLayer = index >= 34;
+    const radius = farLayer ? 445 + random() * 104 : 338 + random() * 118;
+    const height = (farLayer ? 48 : 62) + random() * (farLayer ? 62 : 78);
     const x = Math.cos(angle) * radius;
     const z = Math.sin(angle) * radius;
-    dummy.position.set(x, nacreHeight(x, z) + height * 0.22, z);
-    dummy.rotation.set(random() * 0.14, random() * Math.PI, random() * 0.12);
-    dummy.scale.set(42 + random() * 38, height, 31 + random() * 31);
+    dummy.position.set(x, nacreHeight(x, z) - 1.5, z);
+    dummy.rotation.set((random() - 0.5) * 0.045, random() * Math.PI * 2, (random() - 0.5) * 0.04);
+    dummy.scale.set(31 + random() * 46, height, 25 + random() * 37);
     dummy.updateMatrix();
     mesh.setMatrixAt(index, dummy.matrix);
   }
@@ -95,7 +98,11 @@ function createForest(
     const z = center[1] + Math.sin(angle) * radius;
     const height = 2.8 + random() * random() * 10.8;
     dummy.position.set(x, nacreHeight(x, z) + (crowns ? height * 0.72 : height * 0.46), z);
-    dummy.rotation.set(crowns ? random() * 1.2 : random() * 0.16, random() * Math.PI, crowns ? 1.15 : random() * 0.12);
+    dummy.rotation.set(
+      crowns ? (random() - 0.5) * 0.7 : random() * 0.16,
+      random() * Math.PI * 2,
+      crowns ? 0.38 + random() * 0.83 : random() * 0.12,
+    );
     dummy.scale.set(0.48 + random() * 0.72, height / (crowns ? 3.3 : 6), 0.48 + random() * 0.72);
     dummy.updateMatrix();
     mesh.setMatrixAt(index, dummy.matrix);
@@ -103,31 +110,6 @@ function createForest(
   mesh.name = crowns ? 'Translucent mineral crowns' : 'Translucent mineral forest';
   return finalize(mesh);
 }
-function createSample(
-  geometry: THREE.BufferGeometry,
-  shader: THREE.ShaderMaterial,
-  x: number,
-  z: number,
-  index: number,
-): THREE.Group {
-  const site = new THREE.Group();
-  site.name = `NACRE_PRISM_SAMPLE_${index + 1}`;
-  site.position.set(x, nacreHeight(x, z), z);
-  const shards = new THREE.InstancedMesh(geometry, shader, 11);
-  const dummy = new THREE.Object3D();
-  for (let shard = 0; shard < shards.count; shard += 1) {
-    const angle = shard / shards.count * Math.PI * 2;
-    const height = 1.8 + ((shard * 1.618) % 1) * 4.2;
-    dummy.position.set(Math.cos(angle) * 1.15, height * 0.47, Math.sin(angle) * 1.15);
-    dummy.rotation.set(Math.sin(shard) * 0.16, angle, Math.cos(shard) * 0.13);
-    dummy.scale.set(0.72, height / 6, 0.72);
-    dummy.updateMatrix();
-    shards.setMatrixAt(shard, dummy.matrix);
-  }
-  site.add(finalize(shards));
-  return site;
-}
-
 export function createNacreDetails(): NacreDetails {
   const root = new THREE.Group();
   const rockMaterial = material(NACRE_ROCK_FRAGMENT);
@@ -140,7 +122,9 @@ export function createNacreDetails(): NacreDetails {
   root.add(createForest(spire, mineralMaterial, 205, 0xf012e57, false));
   root.add(createForest(crown, mineralMaterial, 126, 0xc20a7, true));
   const coordinates: Array<[number, number]> = [[48, -34], [-79, -91], [91, -146]];
-  const sampleSites = coordinates.map(([x, z], index) => createSample(spire, mineralMaterial, x, z, index));
+  const sampleSites = coordinates.map(
+    ([x, z], index) => createNacreSample(spire, mineralMaterial, x, z, index),
+  );
   root.add(...sampleSites);
   return {
     root,

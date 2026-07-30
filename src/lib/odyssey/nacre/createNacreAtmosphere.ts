@@ -5,7 +5,7 @@ import {
   NACRE_DUST_VERTEX,
   NACRE_SKY_FRAGMENT,
   NACRE_SKY_VERTEX,
-} from './nacreSurfaceShaders';
+} from './nacreAtmosphereShaders';
 
 export interface NacreAtmosphere {
   sky: THREE.Mesh;
@@ -38,7 +38,7 @@ function createDust(): THREE.Points {
   const sizes = new Float32Array(count);
   for (let index = 0; index < count; index += 1) {
     positions[index * 3] = (random() - 0.5) * 190;
-    positions[index * 3 + 1] = 2.2 + Math.pow(random(), 1.18) * 112;
+    positions[index * 3 + 1] = 1.2 + Math.pow(random(), 2.25) * 82;
     positions[index * 3 + 2] = (random() - 0.5) * 180;
     phases[index] = random();
     sizes[index] = 0.55 + random() * 1.7;
@@ -53,7 +53,6 @@ function createDust(): THREE.Points {
     fragmentShader: NACRE_DUST_FRAGMENT,
     transparent: true,
     depthWrite: false,
-    blending: THREE.AdditiveBlending,
   });
   const dust = new THREE.Points(geometry, material);
   dust.name = 'High-altitude silica dust';
@@ -72,7 +71,7 @@ export function createNacreAtmosphere(): NacreAtmosphere {
       (sky.material as THREE.ShaderMaterial).uniforms.uTime.value = time;
       (dust.material as THREE.ShaderMaterial).uniforms.uTime.value = time;
       sky.position.copy(camera.position);
-      dust.position.set(camera.position.x, 0, camera.position.z);
+      dust.position.set(camera.position.x, camera.position.y - 3.2, camera.position.z);
     },
   };
 }

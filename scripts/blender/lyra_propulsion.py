@@ -6,7 +6,17 @@ import math
 
 import bpy
 
-from lyra_common import box, cone, curve_tube, cylinder, empty, finish_mesh, oriented_cylinder, torus
+from lyra_common import (
+    box,
+    cone,
+    curve_tube,
+    cylinder,
+    empty,
+    finish_mesh,
+    oriented_cylinder,
+    sphere,
+    torus,
+)
 
 
 def _open_nozzle(
@@ -124,6 +134,18 @@ def build_engines(root: bpy.types.Object, materials: dict[str, bpy.types.Materia
             materials["heat"],
             engine,
         )
+        _open_nozzle(
+            f"Engine_{index + 1:02d}_CeramicThroat",
+            x,
+            -29.69 + aft,
+            z,
+            0.49 * scale,
+            0.28 * scale,
+            0.52,
+            28,
+            materials["heat"],
+            engine,
+        )
         cylinder(
             f"Engine_{index + 1:02d}_Cowl",
             1.65 * scale,
@@ -155,16 +177,24 @@ def build_engines(root: bpy.types.Object, materials: dict[str, bpy.types.Materia
             major_segments=36,
             minor_segments=6,
         )
-        cylinder(
+        torus(
             f"Engine_{index + 1:02d}_PlasmaAperture",
-            0.44 * scale,
-            0.12,
+            0.31 * scale,
+            0.055,
             (x, -29.68 + aft, z),
             materials["amber"],
             engine,
-            40,
-            (math.pi / 2.0, 0.0, 0.0),
-            0.0,
+            major_segments=24,
+            minor_segments=5,
+        )
+        sphere(
+            f"Engine_{index + 1:02d}_PlasmaVolume",
+            0.29 * scale,
+            (x, -29.56 + aft, z),
+            materials["amber"],
+            engine,
+            18,
+            9,
         )
         _add_engine_internals(index, x, z, scale, aft, engine, materials)
         _add_bell_hardware(index, x, z, scale, aft, engine, materials)

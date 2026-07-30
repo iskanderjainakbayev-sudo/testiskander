@@ -9,12 +9,12 @@ import bpy
 from lyra_common import box, curve_tube, cylinder, empty, finish_mesh, oriented_cylinder, sphere
 
 RADIATOR_OUTLINE = (
-    (-6.3, 0.8),
-    (-5.4, 5.0),
-    (1.2, 5.2),
-    (2.8, 4.4),
-    (2.3, 1.3),
-    (1.4, 0.7),
+    (-5.2, 1.0),
+    (-4.5, 4.3),
+    (0.8, 4.5),
+    (2.1, 3.9),
+    (1.7, 1.4),
+    (1.0, 0.9),
 )
 
 
@@ -30,15 +30,27 @@ def build_landing_gear(root: bpy.types.Object, materials: dict[str, bpy.types.Ma
         pivot = empty(f"Gear_{name}_Pivot", gear)
         _add_gear_well(name, mount, pivot, materials)
         main_gear = "Main" in name
-        oriented_cylinder(
-            f"Gear_{name}_PrimaryStrut",
-            mount,
-            knee,
-            0.56 if main_gear else 0.50,
-            materials["metal"],
-            pivot,
-            28,
-        )
+        if main_gear:
+            oriented_cylinder(
+                f"Gear_{name}_PrimaryStrut",
+                mount,
+                knee,
+                0.56,
+                materials["metal"],
+                pivot,
+                28,
+            )
+        else:
+            for fork_side in (-1.0, 1.0):
+                oriented_cylinder(
+                    f"Gear_Nose_UpperAFrame_{'P' if fork_side < 0 else 'S'}",
+                    (mount[0] + fork_side * 0.72, mount[1], mount[2]),
+                    (knee[0] + fork_side * 0.54, knee[1], knee[2] + 0.28),
+                    0.31,
+                    materials["metal"],
+                    pivot,
+                    22,
+                )
         brace_end = (knee[0] * 0.82, knee[1] + 1.15, knee[2] + 0.35)
         oriented_cylinder(
             f"Gear_{name}_Brace",
@@ -96,7 +108,7 @@ def build_landing_gear(root: bpy.types.Object, materials: dict[str, bpy.types.Ma
             knee,
             materials["armor"],
             pivot,
-            32,
+            24,
             (math.pi / 2.0, 0.0, 0.0),
             0.06,
         )
@@ -185,6 +197,23 @@ def _add_gear_well(
             bevel=0.08,
             segments=2,
         )
+        oriented_cylinder(
+            f"Gear_{name}_WellDoorHinge_{'P' if side < 0 else 'S'}",
+            (
+                mount[0] + side * dimensions[0] * 0.43,
+                mount[1] - dimensions[1] * 0.34,
+                mount[2] + 0.10,
+            ),
+            (
+                mount[0] + side * dimensions[0] * 0.43,
+                mount[1] + dimensions[1] * 0.34,
+                mount[2] + 0.10,
+            ),
+            0.085,
+            materials["metal"],
+            parent,
+            14,
+        )
 
 
 def _add_footpad_claws(
@@ -227,7 +256,7 @@ def _radiator_blade(
     parent: bpy.types.Object,
     material: bpy.types.Material,
 ) -> None:
-    y_offset = -6.5 + offset_y
+    y_offset = -8.0 + offset_y
     thickness = 0.11
     front = [
         (x - thickness, y + y_offset + fan * (z - 3.0), z)
@@ -268,16 +297,16 @@ def build_thermal_system(root: bpy.types.Object, materials: dict[str, bpy.types.
     oriented_cylinder(
         "Radiator_Port_DeploymentBoom",
         (-8.6, -7.5, 2.55),
-        (-16.35, -7.8, 3.05),
+        (-16.25, -8.8, 3.0),
         0.34,
         materials["metal"],
         thermal,
         28,
     )
     truss_booms = (
-        ((-8.2, -6.25, 3.2), (-16.35, -3.55, 5.15)),
-        ((-8.4, -8.85, 1.9), (-16.35, -13.2, 1.05)),
-        ((-9.0, -6.15, 3.25), (-15.2, -11.7, 1.25)),
+        ((-8.2, -6.25, 3.2), (-16.35, -3.9, 4.15)),
+        ((-8.4, -8.85, 1.9), (-16.35, -14.8, 1.18)),
+        ((-9.0, -6.15, 3.25), (-15.2, -12.9, 1.38)),
     )
     for index, (start, end) in enumerate(truss_booms):
         oriented_cylinder(
@@ -290,9 +319,9 @@ def build_thermal_system(root: bpy.types.Object, materials: dict[str, bpy.types.
             20,
         )
     blade_specs = (
-        (-16.75, -0.32, -1.45),
+        (-16.55, -0.45, -2.60),
         (-17.45, 0.0, 0.0),
-        (-18.15, 0.32, 1.45),
+        (-18.35, 0.45, 2.60),
     )
     for index, (x, fan, offset_y) in enumerate(blade_specs):
         _radiator_blade(
@@ -303,7 +332,7 @@ def build_thermal_system(root: bpy.types.Object, materials: dict[str, bpy.types.
             thermal,
             materials["radiator"],
         )
-        y_offset = -6.5 + offset_y
+        y_offset = -8.0 + offset_y
         outline = [
             (x - 0.14, y + y_offset + fan * (z - 3.0), z)
             for y, z in (*RADIATOR_OUTLINE, RADIATOR_OUTLINE[0])
@@ -320,8 +349,8 @@ def build_thermal_system(root: bpy.types.Object, materials: dict[str, bpy.types.
             curve_tube(
                 f"Radiator_Port_Blade_{index + 1:02d}_Rib_{rib_index + 1:02d}",
                 (
-                    (x - 0.145, -5.1 + y_offset + fan * (z - 3.0), z),
-                    (x - 0.145, 1.65 + y_offset + fan * (z - 3.0), z),
+                    (x - 0.145, -4.2 + y_offset + fan * (z - 3.0), z),
+                    (x - 0.145, 1.2 + y_offset + fan * (z - 3.0), z),
                 ),
                 0.052,
                 materials["metal"],
@@ -330,7 +359,7 @@ def build_thermal_system(root: bpy.types.Object, materials: dict[str, bpy.types.
             )
     curve_tube(
         "Radiator_Port_CoolantSupply",
-        ((-8.2, -6.2, 2.9), (-12.0, -6.9, 3.6), (-16.9, -5.1, 5.35)),
+        ((-8.2, -6.2, 2.9), (-12.0, -6.9, 3.6), (-16.9, -5.2, 4.15)),
         0.13,
         materials["radiator"],
         thermal,

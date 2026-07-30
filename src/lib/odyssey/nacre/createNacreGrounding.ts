@@ -37,6 +37,11 @@ export function createNacreGrounding(count: number) {
   return mesh;
 }
 
+const PLANE_NORMAL = new THREE.Vector3(0, 0, 1);
+const terrainNormal = new THREE.Vector3();
+const contactPosition = new THREE.Vector3();
+const groundingDummy = new THREE.Object3D();
+
 export function placeNacreGrounding(
   mesh: THREE.InstancedMesh,
   index: number,
@@ -44,10 +49,20 @@ export function placeNacreGrounding(
   z: number,
   scale: number,
 ) {
-  const dummy = new THREE.Object3D();
-  dummy.position.set(x + scale * 0.2, nacreHeight(x, z) + 0.035, z - scale * 0.1);
-  dummy.rotation.x = -Math.PI / 2;
-  dummy.scale.set(scale * 1.45, scale * 0.78, 1);
-  dummy.updateMatrix();
-  mesh.setMatrixAt(index, dummy.matrix);
+  const shadowX = x + scale * 0.2;
+  const shadowZ = z - scale * 0.1;
+  const step = Math.max(0.55, scale * 0.2);
+  terrainNormal.set(
+    nacreHeight(shadowX - step, shadowZ) - nacreHeight(shadowX + step, shadowZ),
+    step * 2,
+    nacreHeight(shadowX, shadowZ - step) - nacreHeight(shadowX, shadowZ + step),
+  ).normalize();
+  contactPosition
+    .set(shadowX, nacreHeight(shadowX, shadowZ), shadowZ)
+    .addScaledVector(terrainNormal, 0.035);
+  groundingDummy.position.copy(contactPosition);
+  groundingDummy.quaternion.setFromUnitVectors(PLANE_NORMAL, terrainNormal);
+  groundingDummy.scale.set(scale * 1.45, scale * 0.78, 1);
+  groundingDummy.updateMatrix();
+  mesh.setMatrixAt(index, groundingDummy.matrix);
 }

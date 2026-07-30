@@ -238,7 +238,7 @@ def build_rcs_and_service_details(root: bpy.types.Object, materials: dict[str, b
                     ),
                     materials["heat"],
                     details,
-                    28,
+                    18,
                     (0.0, side * math.pi / 2.0, 0.0),
                     0.025,
                 )
@@ -250,7 +250,7 @@ def build_rcs_and_service_details(root: bpy.types.Object, materials: dict[str, b
                 (surface_x, y, surface_z + 0.92),
                 materials["heat"],
                 details,
-                28,
+                18,
                 bevel=0.025,
             )
     _add_service_louvers(details, materials)

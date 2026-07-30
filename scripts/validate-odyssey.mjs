@@ -35,6 +35,9 @@ try {
   const { nacreHeight } = await vite.ssrLoadModule(
     '/src/lib/odyssey/nacre/nacreNoise.ts',
   );
+  const { buildSceneList } = await vite.ssrLoadModule(
+    '/src/lib/odyssey/world/CaptureScenes.ts',
+  );
 
   const mission = new MissionController();
   assert(mission.update(2.3, true, 0, 1) === 'solace', 'Solace survey must resolve');
@@ -54,6 +57,16 @@ try {
   assert(mission.update(2.3, true, 0, 1) === 'pilgrim', 'Pilgrim scan must resolve');
   assert(mission.echoes === 3 && mission.target === 'atlas', 'Three echoes must unlock Atlas');
   assert(mission.update(2.3, true, 0, 1) === 'atlas', 'Atlas finale must resolve');
+
+  const captureScenes = buildSceneList();
+  assert(captureScenes.length === 22, 'QA capture catalog must contain 22 base scenes');
+  assert(new Set(captureScenes).size === captureScenes.length, 'QA capture scenes must be unique');
+  for (const required of [
+    'walk-cockpit', 'flight-atlas', 'discovery-veil',
+    'landing-solace', 'surface-nacre', 'takeoff-nacre', 'ending',
+  ]) {
+    assert(captureScenes.includes(required), `QA capture catalog is missing ${required}`);
+  }
 
   const cinematic = validateCinematicPresets();
   assert(cinematic.valid, `Cinematic rails invalid: ${cinematic.issues.join(', ')}`);
@@ -107,6 +120,7 @@ try {
     traffic: 'finite-and-disposed',
     terrain: 'solace-and-nacre-finite',
     expeditions: 'two-landings-two-takeoffs-finite',
+    captures: `${captureScenes.length}-scene-catalog-complete`,
   }, null, 2) + '\n');
 } finally {
   await vite.close();

@@ -46,28 +46,32 @@ function addRockField(root: THREE.Group) {
   root.add(rocks, grounding);
 }
 
-function createSampleSite(position: THREE.Vector3, index: number) {
+function createSampleSite(
+  position: THREE.Vector3,
+  index: number,
+  crystalMaterial: THREE.MeshPhysicalMaterial,
+) {
   const site = new THREE.Group();
   site.name = `ECHO_BLOOM_${index + 1}`;
   site.position.copy(position);
-  const crystalMaterial = new THREE.MeshPhysicalMaterial({
-    color: 0x7fc7c1,
-    emissive: 0x153f42,
-    emissiveIntensity: 1.8,
-    roughness: 0.18,
-    metalness: 0.05,
-    transmission: 0.08,
-    clearcoat: 0.24,
-  });
-  for (let shard = 0; shard < 7; shard += 1) {
-    const height = 1.1 + ((shard * 1.73) % 1) * 2.8;
-    const crystal = new THREE.Mesh(new THREE.ConeGeometry(0.24, height, 5), crystalMaterial);
-    const angle = shard / 7 * Math.PI * 2;
-    crystal.position.set(Math.cos(angle) * 0.62, height * 0.5, Math.sin(angle) * 0.62);
-    crystal.rotation.set(Math.sin(shard) * 0.2, angle, Math.cos(shard) * 0.18);
-    crystal.castShadow = true;
-    site.add(crystal);
+  const geometry = new THREE.ConeGeometry(0.24, 1, 5, 2);
+  const crystals = new THREE.InstancedMesh(geometry, crystalMaterial, 9);
+  const random = seededRandom(0xec40b100 + index * 7919);
+  const dummy = new THREE.Object3D();
+  for (let shard = 0; shard < crystals.count; shard += 1) {
+    const angle = shard * 2.399963 + (random() - 0.5) * 0.42;
+    const radius = 0.14 + Math.sqrt(shard / crystals.count) * (0.74 + random() * 0.25);
+    const height = 0.82 + random() * random() * 3.25;
+    dummy.position.set(Math.cos(angle) * radius, height * 0.48, Math.sin(angle) * radius);
+    dummy.rotation.set((random() - 0.5) * 0.28, angle, (random() - 0.5) * 0.32);
+    dummy.scale.set(0.72 + random() * 0.6, height, 0.72 + random() * 0.5);
+    dummy.updateMatrix();
+    crystals.setMatrixAt(shard, dummy.matrix);
   }
+  crystals.instanceMatrix.needsUpdate = true;
+  crystals.computeBoundingSphere();
+  crystals.castShadow = true;
+  site.add(crystals);
   const halo = new THREE.PointLight(0x66d9d1, 3.8, 14, 2);
   halo.position.y = 1.1;
   site.add(halo);
@@ -77,9 +81,22 @@ function createSampleSite(position: THREE.Vector3, index: number) {
 export function createSurfaceDetails(): SurfaceDetails {
   const root = new THREE.Group();
   addRockField(root);
+  const crystalMaterial = new THREE.MeshPhysicalMaterial({
+    color: 0x7fc7c1,
+    emissive: 0x153f42,
+    emissiveIntensity: 1.8,
+    roughness: 0.18,
+    metalness: 0.05,
+    transmission: 0.08,
+    clearcoat: 0.24,
+  });
   const coordinates: Array<[number, number]> = [[42, -38], [-64, -74], [18, -142]];
   const sampleSites = coordinates.map(([x, z], index) => {
-    const site = createSampleSite(new THREE.Vector3(x, surfaceHeight(x, z), z), index);
+    const site = createSampleSite(
+      new THREE.Vector3(x, surfaceHeight(x, z), z),
+      index,
+      crystalMaterial,
+    );
     root.add(site);
     return site;
   });

@@ -73,7 +73,7 @@ def _gradient_world() -> None:
     map_range.inputs["From Max"].default_value = 1.0
     ramp.color_ramp.elements[0].color = (0.012, 0.018, 0.028, 1.0)
     ramp.color_ramp.elements[1].color = (0.16, 0.19, 0.23, 1.0)
-    background.inputs["Strength"].default_value = 0.12
+    background.inputs["Strength"].default_value = 0.18
     world.node_tree.links.new(coordinates.outputs["Normal"], separate.inputs["Vector"])
     world.node_tree.links.new(separate.outputs["Z"], map_range.inputs["Value"])
     world.node_tree.links.new(map_range.outputs["Result"], ramp.inputs["Fac"])
@@ -100,7 +100,7 @@ def configure_scene() -> tuple[bpy.types.Object, bpy.types.Object]:
     bpy.context.scene.collection.objects.link(camera)
     scene.camera = camera
     area_light("Key_Neutral_Grazing", (40.0, 24.0, 32.0), (0.0, -2.0, 0.0), (0.98, 0.98, 0.97), 50000, 20.0)
-    area_light("Fill_Neutral", (-34.0, -2.0, 12.0), (-2.0, -3.0, 0.0), (0.82, 0.86, 0.90), 12500, 28.0)
+    area_light("Fill_Neutral", (-34.0, -2.0, 12.0), (-2.0, -3.0, 0.0), (0.86, 0.88, 0.90), 20000, 28.0)
     area_light("Top_Separation", (0.0, -4.0, 48.0), (0.0, -4.0, 0.0), (0.91, 0.93, 0.95), 6500, 24.0)
     return camera, _ground_plane()
 
@@ -115,7 +115,7 @@ def main() -> None:
     views = {
         "three-quarter-front": ((62.0, 76.0, 31.0), (0.0, 1.0, 0.0), 59.0),
         "port-profile": ((-125.0, -1.0, 4.0), (-1.0, -1.0, 0.0), 61.0),
-        "landed-gear": ((76.0, 88.0, 15.0), (0.0, 1.0, -2.2), 55.0),
+        "landed-gear": ((66.0, 75.0, 8.0), (0.0, 1.0, -2.5), 52.0),
         "engine-closeup": ((17.5, -49.0, 6.5), (0.0, -29.0, -0.2), 70.0),
         "surface-detail-closeup": ((34.0, -8.2, 5.2), (7.8, -8.2, 0.2), 72.0),
         "dorsal": ((20.0, 5.0, 132.0), (0.0, -1.0, 0.0), 58.0),

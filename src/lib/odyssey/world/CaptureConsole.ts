@@ -16,6 +16,7 @@ type CaptureWindow = Window & { __ODYSSEY_CAPTURE__?: OdysseyCaptureApi };
 
 export interface OdysseyCaptureApi {
   list: () => string[];
+  ready: () => Promise<boolean>;
   show: (scene: string) => boolean;
   state: () => { mode: string; target: string; landingTarget: string };
 }
@@ -26,6 +27,7 @@ export function installCaptureConsole(
   expedition: PlanetExpeditions,
   cinematics: OdysseyCinematics,
   showMenu: () => void,
+  modelReady: Promise<boolean>,
 ) {
   const captureScene = new URLSearchParams(window.location.search).get('capture');
   if (captureScene === null) return () => undefined;
@@ -33,6 +35,7 @@ export function installCaptureConsole(
   const scenes = buildSceneList();
   const api: OdysseyCaptureApi = {
     list: () => [...scenes],
+    ready: () => modelReady,
     state: () => ({
       mode: session.mode,
       target: session.mission.target,
