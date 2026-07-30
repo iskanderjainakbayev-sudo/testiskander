@@ -8,14 +8,18 @@ from pathlib import Path
 
 import bpy
 
-ATLAS_SIZE = 1024
+from lyra_atlas_markings import marking_kind
+
+ATLAS_SIZE = 2048
 ATLAS_CACHE = Path("/tmp/lyra-generated-atlases")
 
 
 def _signals(x: int, y: int) -> tuple[float, float, float]:
-    a = x * 0.071 + y * 0.013
-    b = x * 0.017 - y * 0.053
-    c = (x + y) * 0.031
+    scale = ATLAS_SIZE / 1024.0
+    sample_x, sample_y = x / scale, y / scale
+    a = sample_x * 0.071 + sample_y * 0.013
+    b = sample_x * 0.017 - sample_y * 0.053
+    c = (sample_x + sample_y) * 0.031
     grain = (math.sin(a) + math.sin(b) + math.sin(c)) / 3.0
     dx = (0.071 * math.cos(a) + 0.017 * math.cos(b) + 0.031 * math.cos(c)) / 3.0
     dy = (0.013 * math.cos(a) - 0.053 * math.cos(b) + 0.031 * math.cos(c)) / 3.0
@@ -25,12 +29,27 @@ def _signals(x: int, y: int) -> tuple[float, float, float]:
 def _sample(x: int, y: int) -> tuple[tuple[float, float, float], float, tuple[float, float, float]]:
     half = ATLAS_SIZE // 2
     u, v = x % half, y % half
+    scale = ATLAS_SIZE / 1024.0
     grain, dx, dy = _signals(x, y)
-    seam_x, seam_y = u % 128, v % 112
-    seam = seam_x < 3 or seam_y < 3
-    scratch = (x * 37 + y * 17) % 997 < 2
-    groove_x = (1.5 - seam_x) * 0.045 if seam_x < 3 else 0.0
-    groove_y = (1.5 - seam_y) * 0.045 if seam_y < 3 else 0.0
+    seam_period_x, seam_period_y = round(128 * scale), round(112 * scale)
+    seam_x, seam_y = u % seam_period_x, v % seam_period_y
+    seam_width = round(2 * scale)
+    seam = seam_x < seam_width or seam_y < seam_width
+    seam_distance = min(
+        seam_x,
+        seam_period_x - seam_x,
+        seam_y,
+        seam_period_y - seam_y,
+    )
+    cavity_grime = max(0.0, 1.0 - seam_distance / (8.0 * scale))
+    scratch_period = round(389 * scale)
+    scratch_phase = (v + u // 7) % scratch_period
+    scratch = (
+        scratch_phase < max(1, round(1.2 * scale))
+        and (u // max(1, round(54 * scale))) % 5 in (1, 2, 3)
+    )
+    groove_x = (seam_width * 0.5 - seam_x) * 0.035 if seam_x < seam_width else 0.0
+    groove_y = (seam_width * 0.5 - seam_y) * 0.035 if seam_y < seam_width else 0.0
     if x < half and y >= half:
         base = 0.61 + grain * 0.035
         color = (base + 0.12, base + 0.11, base + 0.08)
@@ -40,8 +59,9 @@ def _sample(x: int, y: int) -> tuple[tuple[float, float, float], float, tuple[fl
         if (136 < v % 256 < 141 and 178 < u % 256 < 244):
             color = (0.68, 0.23, 0.035)
     elif x >= half and y >= half:
-        brushed = 0.018 * math.sin((u + v) * 0.11) + 0.011 * math.sin((u - v) * 0.037)
-        oxidation = 0.018 * max(0.0, math.sin(u * 0.019 + v * 0.007))
+        brushed = 0.018 * math.sin((u + v) * 0.11 / scale)
+        brushed += 0.011 * math.sin((u - v) * 0.037 / scale)
+        oxidation = 0.018 * max(0.0, math.sin((u * 0.019 + v * 0.007) / scale))
         color = (
             0.125 + grain * 0.026 + brushed,
             0.142 + grain * 0.021 + brushed * 0.72 + oxidation * 0.35,
@@ -55,10 +75,22 @@ def _sample(x: int, y: int) -> tuple[tuple[float, float, float], float, tuple[fl
         color = (0.10 + heat + soot, 0.078 + heat * 0.45, 0.062 + heat * 0.18)
         roughness = 0.52 + soot * 0.75 + grain * 0.045
     else:
-        rib = 0.065 if u % 34 < 5 else 0.0
+        rib = 0.065 if u % round(34 * scale) < round(5 * scale) else 0.0
         oxidation = 0.025 * (grain + 1.0)
         color = (0.17 + rib + oxidation, 0.058 + rib * 0.31, 0.022 + oxidation)
         roughness = 0.40 + oxidation * 1.7 + (0.13 if rib else 0.0)
+    color = tuple(channel * (1.0 - cavity_grime * 0.12) for channel in color)
+    roughness += cavity_grime * 0.07
+    marking = marking_kind(u, v, half) if y >= half else None
+    if marking == "serial":
+        color = (0.48, 0.51, 0.49) if x >= half else (0.11, 0.13, 0.14)
+        roughness = 0.62
+    elif marking == "warning":
+        color = (0.68, 0.17, 0.025)
+        roughness = 0.58
+    elif marking == "hazard":
+        color = (0.57, 0.16, 0.024)
+        roughness = 0.61
     if seam:
         color = tuple(channel * 0.78 for channel in color)
         roughness += 0.15

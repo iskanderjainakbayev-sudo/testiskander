@@ -61,6 +61,7 @@ export class OdysseyFrameLoop {
       this.expedition.atmosphereBlend(this.session.mode, this.session.landing.progress),
       this.session.landingTarget,
     );
+    this.render.setVelocityEffect(this.velocityEffect());
     this.exterior.update(
       this.render.camera,
       this.session.mode,
@@ -95,4 +96,14 @@ export class OdysseyFrameLoop {
       this.cinematics.state,
     );
   };
+
+  private velocityEffect() {
+    const { mode, flight, landing } = this.session;
+    if (flight.boost) return flight.throttle;
+    if (mode === 'landing' || mode === 'takeoff') {
+      return Math.sin(landing.progress * Math.PI) * 0.38;
+    }
+    if (mode === 'cinematic') return 0.1;
+    return 0;
+  }
 }

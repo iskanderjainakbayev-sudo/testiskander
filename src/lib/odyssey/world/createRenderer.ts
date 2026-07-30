@@ -15,6 +15,7 @@ export interface RenderRig {
   render: () => RenderStats;
   resize: () => void;
   setAtmosphere: (surfaceAmount: number, planet: LandablePlanetId) => void;
+  setVelocityEffect: (strength: number) => void;
   dispose: () => void;
 }
 
@@ -93,6 +94,7 @@ export function createRenderer(canvas: HTMLCanvasElement): RenderRig {
       return renderStats;
     },
     resize,
+    setVelocityEffect: cinematic.setVelocity,
     setAtmosphere: (surfaceAmount, planet) => {
       const blend = THREE.MathUtils.clamp(surfaceAmount, 0, 1);
       const surfaceFog = planet === 'nacre' ? nacreFog : solaceFog;

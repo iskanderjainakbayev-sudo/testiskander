@@ -6,8 +6,9 @@ import math
 
 import bpy
 
-from lyra_common import box, curve_tube, empty, finish_mesh, torus
+from lyra_common import box, curve_tube, empty, finish_mesh, oriented_cylinder, sphere, torus
 from lyra_materials import atlas_uv
+from lyra_spine import build_engineering_spine
 from lyra_surface_hardware import add_hull_hardware
 
 HULL_SECTIONS = (
@@ -225,6 +226,63 @@ def _framed_recess(
             parent,
             1,
         )
+    for pipe_index, fraction in enumerate((0.22, 0.50, 0.78)):
+        angle = angle_start + (angle_end - angle_start) * fraction
+        material = materials["radiator"] if pipe_index == 1 else materials["metal"]
+        curve_tube(
+            f"{name}_LongitudinalPipe_{pipe_index + 1:02d}",
+            (
+                surface_point(y_start + 0.55, angle, 0.13),
+                surface_point((y_start + y_end) * 0.5, angle, 0.13),
+                surface_point(y_end - 0.55, angle, 0.13),
+            ),
+            0.040,
+            material,
+            parent,
+            1,
+        )
+        for terminal_index, y in enumerate((y_start + 0.62, y_end - 0.62)):
+            sphere(
+                f"{name}_PipeSocket_{pipe_index + 1:02d}_{terminal_index + 1:02d}",
+                0.095,
+                surface_point(y, angle, 0.18),
+                materials["metal"],
+                parent,
+                10,
+                5,
+            )
+    midpoint_y = (y_start + y_end) * 0.5
+    oriented_cylinder(
+        f"{name}_CentralConnector",
+        surface_point(midpoint_y, angle_mid, 0.10),
+        surface_point(midpoint_y, angle_mid, 0.28),
+        0.15,
+        materials["cyan"],
+        parent,
+        12,
+        bevel=0.01,
+    )
+    fastener_positions = (
+        (y_start, angle_start),
+        (y_start, angle_mid),
+        (y_start, angle_end),
+        (midpoint_y, angle_start),
+        (midpoint_y, angle_end),
+        (y_end, angle_start),
+        (y_end, angle_mid),
+        (y_end, angle_end),
+    )
+    for index, (y, angle) in enumerate(fastener_positions):
+        oriented_cylinder(
+            f"{name}_FrameFastener_{index + 1:02d}",
+            surface_point(y, angle, 0.25),
+            surface_point(y, angle, 0.31),
+            0.044,
+            materials["metal"],
+            parent,
+            8,
+            bevel=0.0,
+        )
 
 
 def _wing(
@@ -361,6 +419,7 @@ def build_hull(root: bpy.types.Object, materials: dict[str, bpy.types.Material])
             materials["metal"],
             hull,
         )
+    build_engineering_spine(hull, materials)
     _add_section_breaks(hull, materials)
     _add_integrated_recesses(hull, materials)
     _add_armor_layers(hull, materials)
@@ -528,7 +587,7 @@ def _add_service_shell(parent: bpy.types.Object, materials: dict[str, bpy.types.
             parent,
             bevel=0.22,
         )
-        for index, y in enumerate((-17.5, -10.5, 8.2)):
+        for index, y in enumerate((-17.5, 8.2)):
             shell_patch(
                 f"Service_Hatch_{label}_{index + 1:02d}",
                 y,
