@@ -228,6 +228,7 @@ def _framed_recess(
         )
     midpoint_y = (y_start + y_end) * 0.5
     side_bay = abs(math.cos(angle_mid)) > 0.68
+    detailed_bay = name == "ServiceTrench_Starboard"
     coolant_runs = (
         ("Supply", angle_start + 0.075, angle_mid + 0.055, 0.067),
         ("Return", angle_end - 0.075, angle_mid - 0.055, 0.058),
@@ -261,7 +262,7 @@ def _framed_recess(
     reservoir_specs = (
         ("Primary", midpoint_y - 0.75, angle_start + 0.12, 2.05, 0.23, 0.20),
         ("Accumulator", midpoint_y + 0.70, angle_end - 0.12, 1.55, 0.18, 0.28),
-    )
+    ) if detailed_bay else ()
     for reservoir_name, center_y, angle, length, radius, offset in reservoir_specs:
         start = surface_point(center_y - length * 0.5, angle, offset)
         end = surface_point(center_y + length * 0.5, angle, offset)
@@ -301,7 +302,7 @@ def _framed_recess(
     pump_specs = (
         ("Main", midpoint_y + 2.25, angle_mid, 0.34, 0.58),
         ("Auxiliary", midpoint_y - 3.05, angle_mid - 0.065, 0.25, 0.45),
-    )
+    ) if detailed_bay else (("Main", midpoint_y + 1.35, angle_mid, 0.30, 0.50),)
     for pump_name, pump_y, angle, radius, depth in pump_specs:
         oriented_cylinder(
             f"{name}_{pump_name}PumpHousing",
@@ -346,7 +347,7 @@ def _framed_recess(
         parent,
         1,
     )
-    if side_bay:
+    if detailed_bay:
         for index, fraction in enumerate((0.24, 0.48, 0.72)):
             y = y_start + (y_end - y_start) * fraction
             box(
@@ -481,7 +482,7 @@ def build_hull(root: bpy.types.Object, materials: dict[str, bpy.types.Material])
         "armor",
         0.105,
         8,
-        18,
+        16,
         0.08,
         0.025,
     )
@@ -495,8 +496,8 @@ def build_hull(root: bpy.types.Object, materials: dict[str, bpy.types.Material])
         materials["glass"],
         None,
         0.22,
-        12,
-        22,
+        10,
+        18,
         0.16,
         0.025,
     )
@@ -715,8 +716,8 @@ def _add_service_shell(parent: bpy.types.Object, materials: dict[str, bpy.types.
         materials["metal"],
         docking,
         rotation=(0.0, math.pi / 2.0, 0.0),
-        major_segments=32,
-        minor_segments=8,
+        major_segments=24,
+        minor_segments=6,
     )
     torus(
         "Docking_Collar_Seal",
@@ -726,6 +727,6 @@ def _add_service_shell(parent: bpy.types.Object, materials: dict[str, bpy.types.
         materials["cyan"],
         docking,
         rotation=(0.0, math.pi / 2.0, 0.0),
-        major_segments=32,
-        minor_segments=8,
+        major_segments=24,
+        minor_segments=6,
     )

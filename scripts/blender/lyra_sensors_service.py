@@ -43,7 +43,7 @@ def _dish(
     parent: bpy.types.Object,
     material: bpy.types.Material,
 ) -> bpy.types.Object:
-    rings, segments = 8, 40
+    rings, segments = 7, 32
     vertices = [(0.0, 0.0, 0.0)]
     for ring in range(1, rings + 1):
         ring_radius = radius * ring / rings
@@ -238,7 +238,7 @@ def build_rcs_and_service_details(root: bpy.types.Object, materials: dict[str, b
                     ),
                     materials["heat"],
                     details,
-                    18,
+                    12,
                     (0.0, side * math.pi / 2.0, 0.0),
                     0.025,
                 )
@@ -250,7 +250,7 @@ def build_rcs_and_service_details(root: bpy.types.Object, materials: dict[str, b
                 (surface_x, y, surface_z + 0.92),
                 materials["heat"],
                 details,
-                18,
+                12,
                 bevel=0.025,
             )
     _add_service_louvers(details, materials)
