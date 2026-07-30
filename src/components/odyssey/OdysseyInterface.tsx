@@ -76,7 +76,7 @@ export function OdysseyInterface({
         <SurfaceHud snapshot={snapshot} onInteract={onInteract} />
       )}
       {(snapshot.mode === 'landing' || snapshot.mode === 'takeoff') && (
-        <LandingSequence mode={snapshot.mode} progress={snapshot.transitionProgress} />
+        <LandingSequence snapshot={snapshot} />
       )}
       {snapshot.mode === 'paused' && (
         <PauseOverlay

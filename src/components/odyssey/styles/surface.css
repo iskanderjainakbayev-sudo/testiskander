@@ -20,12 +20,20 @@
 .odx-surface__hints { position:absolute; left:50%; bottom:2.7vh; display:flex; gap:24px; transform:translateX(-50%); color:rgba(208,225,222,.38); font-size:7px; letter-spacing:.12em; }
 .odx-surface__hints kbd { margin-right:6px; color:rgba(228,237,234,.72); }
 .odx-surface .odx-transmission { top:19vh; bottom:auto; }
+.odx-surface--nacre { background:radial-gradient(ellipse at 50% 115%,rgba(156,76,31,.1),transparent 55%); }
+.odx-surface--nacre .odx-surface__header i { background:#e8a466; box-shadow:0 0 12px rgba(232,164,102,.72); }
+.odx-surface--nacre .odx-surface__reticle i { border-color:rgba(239,171,103,.8); border-radius:2px; transform:rotate(45deg); }
+.odx-surface--nacre .odx-surface__reticle b { background:#f3d2ae; box-shadow:0 0 9px rgba(234,146,76,.78); }
+.odx-surface--nacre .odx-surface__vitals>span,.odx-surface--nacre .odx-surface__samples>span { color:#eea66a; }
+.odx-surface--nacre .odx-surface__vitals>i { background:linear-gradient(90deg,#d99a69 61%,rgba(222,178,137,.13) 61%); box-shadow:0 0 9px rgba(217,132,78,.32); }
 
 .odx-land { position:absolute; right:4vw; top:35%; display:flex; align-items:center; gap:24px; min-width:270px; padding:15px 16px 14px 19px; border:1px solid rgba(234,181,110,.34); color:rgba(226,235,233,.84)!important; background:linear-gradient(120deg,rgba(12,22,22,.78),rgba(4,10,11,.47)); box-shadow:0 16px 45px rgba(0,0,0,.23),inset 2px 0 #eab56e; backdrop-filter:blur(5px); cursor:pointer; pointer-events:auto; text-align:left; }
 .odx-land span,.odx-land small,.odx-land strong { display:block; }
 .odx-land small { margin-bottom:6px; color:#eab56e; font-size:6px; letter-spacing:.18em; }
 .odx-land strong { font-size:8px; letter-spacing:.14em; }
 .odx-land i { margin-left:auto; font:300 24px/1 Georgia,serif; animation:odx-descent 1.4s ease-in-out infinite; }
+.odx-land--nacre { border-color:rgba(226,146,80,.42); background:linear-gradient(120deg,rgba(28,17,12,.8),rgba(12,8,7,.5)); box-shadow:0 16px 45px rgba(0,0,0,.28),inset 2px 0 #e89d60; }
+.odx-land--nacre small { color:#efa66b; }
 
 .odx-landing { overflow:hidden; background:rgba(1,5,7,calc(var(--odx-cloud) * .18)); }
 .odx-landing__clouds { position:absolute; inset:-30%; opacity:var(--odx-cloud); background:radial-gradient(ellipse at 24% 54%,rgba(212,225,218,.78),transparent 22%),radial-gradient(ellipse at 72% 42%,rgba(168,193,189,.72),transparent 26%),radial-gradient(ellipse at 51% 70%,rgba(218,225,215,.66),transparent 30%),linear-gradient(125deg,rgba(116,153,155,.82),rgba(223,228,213,.88),rgba(77,118,125,.7)); filter:blur(18px) contrast(1.18); transform:scale(1.18); mix-blend-mode:screen; }
@@ -41,6 +49,12 @@
 .odx-landing>aside small { color:#eab56e; font-size:6px; letter-spacing:.14em; }
 .odx-landing__rule { position:absolute; left:5vw; right:5vw; bottom:5.8vh; height:1px; background:rgba(213,230,227,.15); }
 .odx-landing__rule i { display:block; width:var(--odx-transition); height:1px; background:linear-gradient(90deg,rgba(234,181,110,.3),#eab56e); box-shadow:0 0 9px rgba(234,181,110,.55); }
+.odx-landing--nacre { background:rgba(15,7,3,calc(var(--odx-cloud) * .22)); }
+.odx-landing--nacre .odx-landing__clouds { background:radial-gradient(ellipse at 22% 50%,rgba(236,188,139,.72),transparent 23%),radial-gradient(ellipse at 75% 39%,rgba(174,91,51,.72),transparent 28%),radial-gradient(ellipse at 52% 72%,rgba(235,161,102,.64),transparent 31%),linear-gradient(128deg,rgba(92,46,30,.82),rgba(218,154,99,.86),rgba(68,33,26,.75)); filter:blur(15px) contrast(1.24) saturate(1.12); }
+.odx-landing--nacre .odx-landing__clouds i { background:rgba(244,190,137,.25); }
+.odx-landing--nacre>header { border-left-color:#eca366; }
+.odx-landing--nacre>header span,.odx-landing--nacre>aside small { color:#f0a66a; }
+.odx-landing--nacre .odx-landing__rule i { background:linear-gradient(90deg,rgba(222,125,70,.24),#eda368); box-shadow:0 0 10px rgba(224,118,64,.58); }
 
 @keyframes odx-descent { 50% { transform:translateY(4px); opacity:.45; } }
 @keyframes odx-cloud-drift { from { transform:translateX(-8%) scale(.9); } to { transform:translateX(13%) scale(1.08); } }
