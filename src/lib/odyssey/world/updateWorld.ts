@@ -3,6 +3,7 @@ import { DISCOVERIES } from '../discoveries';
 import type { WorldCallbacks } from '../types';
 import type { InputController } from './InputController';
 import type { OdysseySession } from './OdysseySession';
+import type { SurfaceController } from './SurfaceController';
 
 const FORWARD = new THREE.Vector3(0, 0, -1);
 const currentForward = new THREE.Vector3();
@@ -23,6 +24,7 @@ export function updateFlight(
   input: InputController,
   camera: THREE.PerspectiveCamera,
   callbacks: WorldCallbacks,
+  onLand: () => void,
   delta: number,
   time: number,
 ) {
@@ -42,6 +44,7 @@ export function updateFlight(
   camera.position.set(shake, 1.58 + shake, -3.9);
   camera.rotation.set(shake * 0.2, 0, shake * 0.3);
   if (input.consume('KeyT')) session.cycleTarget();
+  if (input.consume('KeyL')) onLand();
   if (input.consume('KeyE') && flight.speed < 3) session.interact(camera);
   const scanning = input.isDown('KeyQ') || performance.now() < session.manualScanUntil;
   const alignment = flight.directionTo(mission.target).dot(
@@ -55,6 +58,19 @@ export function updateFlight(
   );
   if (scanning) audio.scan(mission.scanProgress);
   if (completed) session.finishDiscovery(completed, input, callbacks);
+}
+
+export function updateSurface(
+  session: OdysseySession,
+  surface: SurfaceController,
+  input: InputController,
+  camera: THREE.PerspectiveCamera,
+  delta: number,
+  onInteract: () => void,
+) {
+  session.mission.updateTime(delta);
+  surface.update(delta, input, camera, () => session.audio.footstep());
+  if (input.consume('KeyE')) onInteract();
 }
 
 export function updateMenu(camera: THREE.PerspectiveCamera, time: number) {

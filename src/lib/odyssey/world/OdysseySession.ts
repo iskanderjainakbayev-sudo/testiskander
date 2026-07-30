@@ -5,6 +5,7 @@ import { clearSave, loadSave, storeSave } from '../save';
 import type { DiscoveryId, GameMode, WorldCallbacks } from '../types';
 import { FlightController } from './FlightController';
 import type { InputController } from './InputController';
+import { LandingController } from './LandingController';
 import { MissionController } from './MissionController';
 import { WalkingController, type StationId } from './WalkingController';
 
@@ -13,6 +14,7 @@ export class OdysseySession {
   readonly flight = new FlightController();
   readonly walking = new WalkingController();
   readonly mission = new MissionController();
+  readonly landing = new LandingController();
   mode: GameMode = 'menu';
   pausedFrom: GameMode = 'walking';
   fuel = 100;
@@ -50,6 +52,27 @@ export class OdysseySession {
 
   scan() {
     this.manualScanUntil = performance.now() + 2500;
+  }
+
+  canLand() {
+    return this.mode === 'flight' && this.flight.distanceTo('solace') < 220;
+  }
+
+  beginLanding(input: InputController) {
+    if (!this.canLand()) return false;
+    this.landing.beginLanding(this.flight);
+    this.mode = 'landing';
+    input.clear();
+    this.audio.discovery();
+    this.mission.showTransmission('SOLACE CONTROL // DESCENT CORRIDOR ACQUIRED.');
+    return true;
+  }
+
+  beginTakeoff(input: InputController) {
+    this.landing.beginTakeoff();
+    this.mode = 'takeoff';
+    input.clear();
+    this.audio.gate();
   }
 
   cycleTarget() {
@@ -93,7 +116,7 @@ export class OdysseySession {
   }
 
   handlePointerLock(locked: boolean) {
-    if (!locked && (this.mode === 'walking' || this.mode === 'flight')) {
+    if (!locked && ['walking', 'flight', 'surface', 'landing', 'takeoff'].includes(this.mode)) {
       this.pausedFrom = this.mode;
       this.mode = 'paused';
       this.flight.boost = false;

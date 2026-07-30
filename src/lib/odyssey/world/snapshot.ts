@@ -27,6 +27,7 @@ export const INITIAL_SNAPSHOT: GameSnapshot = {
   locationName: 'LYRA / DECK 01',
   nearestShipName: null,
   nearestShipDistance: Number.POSITIVE_INFINITY,
+  canLand: false,
   frameRate: 60,
 };
 
@@ -43,6 +44,7 @@ interface SnapshotOptions {
   locationName?: string;
   nearestShipName?: string | null;
   nearestShipDistance?: number;
+  canLand?: boolean;
 }
 
 export function createSnapshot(options: SnapshotOptions): GameSnapshot {
@@ -85,6 +87,7 @@ export function createSnapshot(options: SnapshotOptions): GameSnapshot {
     locationName: options.locationName ?? (mode === 'walking' ? 'LYRA / DECK 01' : 'HELIOS NULL'),
     nearestShipName: options.nearestShipName ?? null,
     nearestShipDistance: options.nearestShipDistance ?? Number.POSITIVE_INFINITY,
+    canLand: options.canLand ?? false,
     frameRate: options.frameRate,
   };
 }

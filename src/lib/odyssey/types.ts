@@ -48,6 +48,7 @@ export interface GameSnapshot {
   locationName: string;
   nearestShipName: string | null;
   nearestShipDistance: number;
+  canLand: boolean;
   frameRate: number;
 }
 
