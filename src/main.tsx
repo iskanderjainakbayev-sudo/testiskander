@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 
-function registerProjectEclipseServiceWorker() {
+function registerOdysseyServiceWorker() {
   if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return;
 
   window.addEventListener('load', () => {
@@ -11,7 +11,7 @@ function registerProjectEclipseServiceWorker() {
   });
 }
 
-registerProjectEclipseServiceWorker();
+registerOdysseyServiceWorker();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

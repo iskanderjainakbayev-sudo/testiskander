@@ -49,6 +49,11 @@ export class FlightController {
     return new THREE.Vector3(...DISCOVERIES[id].position).sub(this.position).normalize();
   }
 
+  alignTo(id: DiscoveryId, delta: number) {
+    const desired = new THREE.Quaternion().setFromUnitVectors(FORWARD, this.directionTo(id));
+    this.quaternion.slerp(desired, Math.min(1, delta * 1.35)).normalize();
+  }
+
   getInverseQuaternion(target = new THREE.Quaternion()) {
     return target.copy(this.quaternion).invert();
   }

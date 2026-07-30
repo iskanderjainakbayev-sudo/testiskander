@@ -116,6 +116,7 @@ export class OdysseyWorld {
 
   private updateFlight(delta: number, time: number) {
     this.flight.update(delta, this.input);
+    if (this.input.isDown('KeyF')) this.flight.alignTo(this.mission.target, delta);
     this.audio.setFlight(this.flight.throttle, this.flight.boost);
     if (this.flight.boost) this.fuel = Math.max(12, this.fuel - delta * 0.22);
     const shake = this.flight.boost ? Math.sin(time * 0.04) * 0.006 : 0;
