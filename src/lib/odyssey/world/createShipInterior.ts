@@ -11,7 +11,7 @@ export interface ShipInterior {
 
 export function createShipInterior(scene: THREE.Scene): ShipInterior {
   const group = new THREE.Group();
-  group.name = 'Khepri interior';
+  group.name = 'Lyra interior';
   const holograms: THREE.Object3D[] = [];
   buildShipStructure(group);
   buildCockpit(group, holograms);

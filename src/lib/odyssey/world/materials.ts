@@ -98,7 +98,7 @@ export function makeScreenTexture(title: string, accent = '#f7bc74') {
     }
     context.stroke();
     context.fillStyle = 'rgba(255,255,255,.55)';
-    context.fillText('KHEPRI EXPLORATION SYSTEMS', 34, 466);
+    context.fillText('LYRA EXPLORATION SYSTEMS', 34, 466);
   });
 }
 

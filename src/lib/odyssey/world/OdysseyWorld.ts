@@ -34,7 +34,7 @@ export class OdysseyWorld {
   private manualScanUntil = 0;
   private endingTimer = 0;
 
-  constructor(private readonly canvas: HTMLCanvasElement, private readonly callbacks: WorldCallbacks) {
+  constructor(canvas: HTMLCanvasElement, private readonly callbacks: WorldCallbacks) {
     this.render = createRenderer(canvas);
     this.ship = createShipInterior(this.render.scene);
     this.space = createSpaceScene();
