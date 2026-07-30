@@ -5,6 +5,7 @@ import { createLyraExterior, type LyraExterior } from '../ship/createLyraExterio
 import { createSpaceScene, type SpaceSceneRig } from '../space/createSpaceScene';
 import type { TrafficUpdate } from '../space/traffic/createTrafficSystem';
 import type { WorldCallbacks } from '../types';
+import { installCaptureConsole } from './CaptureConsole';
 import { createRenderer, type RenderRig } from './createRenderer';
 import { createShipInterior, type ShipInterior } from './createShipInterior';
 import { InputController } from './InputController';
@@ -28,6 +29,7 @@ export class OdysseyWorld {
   private readonly cinematics: OdysseyCinematics;
   private readonly modeUpdater: OdysseyModeUpdater;
   private frameId = 0;
+  private captureCleanup = () => undefined;
   private lastTime = performance.now();
   private readonly performanceMonitor = new PerformanceMonitor();
   private traffic: TrafficUpdate = {
@@ -63,6 +65,14 @@ export class OdysseyWorld {
       this.cinematics,
       this.expedition,
     );
+    this.captureCleanup = installCaptureConsole(
+      this.session,
+      this.input,
+      this.render.camera,
+      this.expedition,
+      this.cinematics,
+      () => this.placeMenuCamera(),
+    );
     this.placeMenuCamera();
     this.frameId = requestAnimationFrame(this.animate);
   }
@@ -95,6 +105,7 @@ export class OdysseyWorld {
   dispose() {
     cancelAnimationFrame(this.frameId);
     this.session.mode = 'menu';
+    this.captureCleanup();
     this.input.releaseLock();
     this.input.dispose();
     this.session.audio.stop();

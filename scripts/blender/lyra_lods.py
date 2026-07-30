@@ -15,10 +15,10 @@ def build_lod1(root: bpy.types.Object, materials: dict[str, bpy.types.Material])
     lod["lod_level"] = 1
     lod["default_visible"] = False
     lod["activation_hint"] = "Use beyond 280 meters; hide LOD0_HERO"
-    loft_hull("LOD1_Hull_LiftingBody", HULL_SECTIONS, 32, lod, materials["hull"])
+    loft_hull("LOD1_Hull_LiftingBody", HULL_SECTIONS, 32, lod, materials["armor"], "armor")
     outline = ((4.8, -21.5), (11.4, -17.0), (18.7, -4.0), (17.0, 8.5), (9.2, 15.0), (3.6, 11.5))
-    _wing("LOD1_Port_LiftingSurface", -1.0, outline, lod, materials["hull"], 1.1)
-    _wing("LOD1_Starboard_LiftingSurface", 1.0, outline, lod, materials["hull"], 1.1)
+    _wing("LOD1_Port_LiftingSurface", -1.0, outline, lod, materials["armor"], 1.1, "armor")
+    _wing("LOD1_Starboard_LiftingSurface", 1.0, outline, lod, materials["armor"], 1.1, "armor")
     shell_patch(
         "LOD1_Canopy", 14.2, 28.2, 0.78, 2.36, lod, materials["glass"], None, 0.22, 8, 14, 0.12
     )
@@ -83,7 +83,7 @@ def build_collider(root: bpy.types.Object, materials: dict[str, bpy.types.Materi
         (21.0, 6.0, 3.5, 2.6, 0.35, 2.0),
         (30.5, 0.8, 0.8, 0.6, 0.4, 2.0),
     )
-    hull = loft_hull("COLLIDER_Hull", collider_sections, 12, collider, materials["armor"])
+    hull = loft_hull("COLLIDER_Hull", collider_sections, 12, collider, materials["armor"], "armor")
     hull["collider_type"] = "convex"
     for side, label in ((-1.0, "Port"), (1.0, "Starboard")):
         wing = box(

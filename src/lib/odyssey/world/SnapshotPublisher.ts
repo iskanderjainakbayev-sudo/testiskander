@@ -41,7 +41,7 @@ export class SnapshotPublisher {
       transitionProgress: session.landing.progress,
       surfaceSamples: expedition.walker.samples.size,
       locationName: mode === 'surface' ? expedition.locationName : undefined,
-      landingSiteName: session.landingTarget.toUpperCase(),
+      landingSiteName: expedition.locationName,
       nearestShipName: traffic.nearestShipName,
       nearestShipDistance: traffic.nearestShipDistance,
       canLand: session.canLand(),

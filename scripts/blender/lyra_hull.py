@@ -11,15 +11,15 @@ from lyra_materials import atlas_uv
 from lyra_surface_hardware import add_hull_hardware
 
 HULL_SECTIONS = (
-    (-30.0, 2.8, 2.4, 2.2, -0.20, 2.1),
-    (-27.0, 5.8, 3.2, 2.8, -0.15, 2.2),
-    (-21.0, 8.8, 4.5, 3.8, -0.05, 2.45),
-    (-12.0, 10.5, 5.0, 4.2, 0.00, 2.65),
-    (0.0, 10.9, 5.1, 4.3, 0.05, 2.75),
-    (11.0, 9.5, 4.8, 3.8, 0.18, 2.65),
-    (21.0, 6.8, 4.0, 3.0, 0.40, 2.45),
-    (28.0, 3.6, 2.6, 1.9, 0.55, 2.2),
-    (32.3, 0.45, 0.55, 0.38, 0.45, 2.0),
+    (-30.0, 2.5, 2.3, 2.0, -0.18, 2.8),
+    (-27.0, 4.6, 3.0, 2.5, -0.12, 3.0),
+    (-21.0, 6.6, 3.8, 3.2, -0.04, 3.25),
+    (-12.0, 8.2, 4.3, 3.7, 0.00, 3.55),
+    (0.0, 8.6, 4.45, 3.8, 0.05, 3.65),
+    (11.0, 7.8, 4.2, 3.4, 0.16, 3.55),
+    (21.0, 5.8, 3.55, 2.7, 0.36, 3.25),
+    (28.0, 2.8, 2.3, 1.7, 0.52, 3.0),
+    (32.3, 0.42, 0.52, 0.36, 0.44, 2.8),
 )
 
 
@@ -110,6 +110,7 @@ def loft_hull(
     radial_segments: int,
     parent: bpy.types.Object,
     material: bpy.types.Material,
+    atlas_region: str = "hull",
 ) -> bpy.types.Object:
     vertices = []
     for y, radius_x, top, bottom, center_z, exponent in sections:
@@ -141,7 +142,7 @@ def loft_hull(
     obj = bpy.data.objects.new(name, mesh)
     bpy.context.scene.collection.objects.link(obj)
     finish_mesh(obj, parent, material, smooth=True)
-    atlas_uv(obj, "hull")
+    atlas_uv(obj, atlas_region)
     return obj
 
 
@@ -177,6 +178,7 @@ def _wing(
     parent: bpy.types.Object,
     material: bpy.types.Material,
     thickness: float,
+    atlas_region: str = "hull",
 ) -> bpy.types.Object:
     del outline
     stations = (
@@ -218,7 +220,7 @@ def _wing(
     obj = bpy.data.objects.new(name, mesh)
     bpy.context.scene.collection.objects.link(obj)
     finish_mesh(obj, parent, material, smooth=True)
-    atlas_uv(obj, "hull")
+    atlas_uv(obj, atlas_region)
     return obj
 
 
@@ -247,10 +249,17 @@ def _wing_panel(
 
 def build_hull(root: bpy.types.Object, materials: dict[str, bpy.types.Material]) -> None:
     hull = empty("HULL_PRIMARY", root)
-    loft_hull("Hull_LiftingBody_LOD0", smooth_sections(HULL_SECTIONS, 5), 72, hull, materials["hull"])
+    loft_hull(
+        "Hull_LiftingBody_LOD0",
+        smooth_sections(HULL_SECTIONS, 5),
+        72,
+        hull,
+        materials["armor"],
+        "armor",
+    )
     outline = ((4.8, -21.5), (11.4, -17.0), (18.7, -4.0), (17.0, 8.5), (9.2, 15.0), (3.6, 11.5))
-    _wing("Hull_Port_LiftingSurface", -1.0, outline, hull, materials["hull"], 1.15)
-    _wing("Hull_Starboard_LiftingSurface", 1.0, outline, hull, materials["hull"], 1.15)
+    _wing("Hull_Port_LiftingSurface", -1.0, outline, hull, materials["armor"], 1.15, "armor")
+    _wing("Hull_Starboard_LiftingSurface", 1.0, outline, hull, materials["armor"], 1.15, "armor")
     shell_patch(
         "Canopy_Interior_ShadowShell",
         14.15,
@@ -290,19 +299,27 @@ def build_hull(root: bpy.types.Object, materials: dict[str, bpy.types.Material])
 
 def _add_armor_layers(parent: bpy.types.Object, materials: dict[str, bpy.types.Material]) -> None:
     panel_specs = (
-        ("Port_Forward", 7.0, 19.5, 2.55, 3.03),
-        ("Port_Mid", -8.0, 5.5, 2.58, 3.06),
-        ("Port_Aft", -21.5, -10.0, 2.52, 3.02),
-        ("Starboard_Forward", 5.5, 18.0, 0.10, 0.58),
-        ("Starboard_Mid", -9.5, 3.5, 0.08, 0.56),
-        ("Starboard_Aft", -22.0, -11.2, 0.12, 0.62),
-        ("Dorsal_Aft", -20.0, -7.5, 1.18, 1.86),
-        ("Dorsal_Port_Mid", -5.5, 7.5, 1.63, 2.08),
-        ("Dorsal_Starboard_Mid", -5.5, 7.5, 1.06, 1.51),
+        ("Port_Forward", 7.0, 19.5, 2.55, 3.03, "hull"),
+        ("Port_Mid", -8.0, 5.5, 2.58, 3.06, "armor"),
+        ("Port_Aft", -21.5, -10.0, 2.52, 3.02, "hull"),
+        ("Starboard_Forward", 5.5, 18.0, 0.10, 0.58, "hull"),
+        ("Starboard_Mid", -9.5, 3.5, 0.08, 0.56, "armor"),
+        ("Starboard_Aft", -22.0, -11.2, 0.12, 0.62, "hull"),
+        ("Dorsal_Aft", -20.0, -7.5, 1.18, 1.86, "armor"),
+        ("Dorsal_Port_Mid", -5.5, 7.5, 1.63, 2.08, "hull"),
+        ("Dorsal_Starboard_Mid", -5.5, 7.5, 1.06, 1.51, "hull"),
     )
-    for name, y_start, y_end, angle_start, angle_end in panel_specs:
+    for name, y_start, y_end, angle_start, angle_end, material_key in panel_specs:
         shell_patch(
-            f"Armor_{name}", y_start, y_end, angle_start, angle_end, parent, materials["armor"], "armor", 0.18
+            f"Armor_{name}",
+            y_start,
+            y_end,
+            angle_start,
+            angle_end,
+            parent,
+            materials[material_key],
+            material_key,
+            0.18,
         )
     panel_shapes = (
         ((5.8, -15.5), (10.7, -13.4), (12.6, -5.0), (9.7, -1.8), (5.4, -3.6)),
@@ -316,7 +333,7 @@ def _add_armor_layers(parent: bpy.types.Object, materials: dict[str, bpy.types.M
                 side,
                 points,
                 parent,
-                materials["armor"],
+                materials["hull"] if index == 1 else materials["armor"],
             )
 
 
@@ -327,7 +344,7 @@ def _add_service_shell(parent: bpy.types.Object, materials: dict[str, bpy.types.
             f"Cargo_Bay_Door_{label}",
             (4.2, 10.5, 0.24),
             (side * 3.25, -1.5, -4.2),
-            materials["armor"],
+            materials["hull"],
             parent,
             bevel=0.22,
         )
@@ -351,7 +368,7 @@ def _add_service_shell(parent: bpy.types.Object, materials: dict[str, bpy.types.
         "Docking_Collar_Outer",
         1.55,
         0.23,
-        (-10.75, -3.2, 0.1),
+        (-8.55, -3.2, 0.1),
         materials["metal"],
         docking,
         rotation=(0.0, math.pi / 2.0, 0.0),
@@ -360,7 +377,7 @@ def _add_service_shell(parent: bpy.types.Object, materials: dict[str, bpy.types.
         "Docking_Collar_Seal",
         1.22,
         0.12,
-        (-10.92, -3.2, 0.1),
+        (-8.72, -3.2, 0.1),
         materials["cyan"],
         docking,
         rotation=(0.0, math.pi / 2.0, 0.0),
