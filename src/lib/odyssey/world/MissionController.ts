@@ -20,25 +20,29 @@ export class MissionController {
     this.target = 'solace';
     this.scanProgress = 0;
     this.transmission = null;
+    this.transmissionTime = 0;
   }
 
   restore(scanned: DiscoveryId[], target: DiscoveryId) {
     this.scanned = [...scanned];
     this.target = target;
+    this.scanProgress = 0;
+    this.transmission = null;
+    this.transmissionTime = 0;
   }
 
   cycleTarget() {
-    const unlocked = TARGET_ORDER.filter((id) => id !== 'atlas' || this.echoes >= 3);
+    const unlocked = TARGET_ORDER.filter((id) => (
+      (id !== 'atlas' || this.echoes >= 3) && !this.scanned.includes(id)
+    ));
+    if (unlocked.length === 0) return;
     const index = unlocked.indexOf(this.target);
     this.target = unlocked[(index + 1) % unlocked.length] ?? 'solace';
     this.scanProgress = 0;
   }
 
   update(delta: number, scanning: boolean, distance: number, alignment: number) {
-    if (this.transmissionTime > 0) {
-      this.transmissionTime -= delta;
-      if (this.transmissionTime <= 0) this.transmission = null;
-    }
+    this.updateTime(delta);
     if (this.scanned.includes(this.target)) {
       this.scanProgress = 0;
       return null;
@@ -57,6 +61,13 @@ export class MissionController {
     this.target = next ?? 'atlas';
     this.scanProgress = 0;
     return completed;
+  }
+
+  updateTime(delta: number) {
+    if (this.transmissionTime > 0) {
+      this.transmissionTime -= delta;
+      if (this.transmissionTime <= 0) this.transmission = null;
+    }
   }
 
   showTransmission(text: string, seconds = 7) {

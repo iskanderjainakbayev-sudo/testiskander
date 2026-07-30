@@ -3,9 +3,13 @@ export class InputController {
   private readonly justPressed = new Set<string>();
   private mouseX = 0;
   private mouseY = 0;
-  private touchId: number | null = null;
-  private touchX = 0;
-  private touchY = 0;
+  private readonly touchKeys = new Set<string>();
+  private movementTouchId: number | null = null;
+  private lookTouchId: number | null = null;
+  private moveStartX = 0;
+  private moveStartY = 0;
+  private lookX = 0;
+  private lookY = 0;
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
@@ -14,6 +18,7 @@ export class InputController {
     window.addEventListener('keydown', this.onKeyDown);
     window.addEventListener('keyup', this.onKeyUp);
     window.addEventListener('mousemove', this.onMouseMove);
+    window.addEventListener('blur', this.clear);
     document.addEventListener('pointerlockchange', this.onLockChange);
     canvas.addEventListener('touchstart', this.onTouchStart, { passive: false });
     canvas.addEventListener('touchmove', this.onTouchMove, { passive: false });
@@ -21,7 +26,7 @@ export class InputController {
   }
 
   isDown(code: string) {
-    return this.keys.has(code);
+    return this.keys.has(code) || this.touchKeys.has(code);
   }
 
   consume(code: string) {
@@ -38,17 +43,30 @@ export class InputController {
   }
 
   requestLock() {
-    if (document.pointerLockElement !== this.canvas) void this.canvas.requestPointerLock();
+    if (document.pointerLockElement !== this.canvas) {
+      void this.canvas.requestPointerLock().catch(() => undefined);
+    }
   }
 
   releaseLock() {
     if (document.pointerLockElement === this.canvas) document.exitPointerLock();
   }
 
+  clear = () => {
+    this.keys.clear();
+    this.justPressed.clear();
+    this.touchKeys.clear();
+    this.movementTouchId = null;
+    this.lookTouchId = null;
+    this.mouseX = 0;
+    this.mouseY = 0;
+  };
+
   dispose() {
     window.removeEventListener('keydown', this.onKeyDown);
     window.removeEventListener('keyup', this.onKeyUp);
     window.removeEventListener('mousemove', this.onMouseMove);
+    window.removeEventListener('blur', this.clear);
     document.removeEventListener('pointerlockchange', this.onLockChange);
     this.canvas.removeEventListener('touchstart', this.onTouchStart);
     this.canvas.removeEventListener('touchmove', this.onTouchMove);
@@ -72,28 +90,55 @@ export class InputController {
   };
 
   private readonly onLockChange = () => {
-    this.onPointerLock(document.pointerLockElement === this.canvas);
+    const locked = document.pointerLockElement === this.canvas;
+    if (!locked) this.clear();
+    this.onPointerLock(locked);
   };
 
   private readonly onTouchStart = (event: TouchEvent) => {
-    const touch = event.changedTouches[0];
-    if (!touch) return;
-    this.touchId = touch.identifier;
-    this.touchX = touch.clientX;
-    this.touchY = touch.clientY;
+    for (const touch of Array.from(event.changedTouches)) {
+      if (touch.clientX < this.canvas.clientWidth * 0.46 && this.movementTouchId === null) {
+        this.movementTouchId = touch.identifier;
+        this.moveStartX = touch.clientX;
+        this.moveStartY = touch.clientY;
+      } else if (this.lookTouchId === null) {
+        this.lookTouchId = touch.identifier;
+        this.lookX = touch.clientX;
+        this.lookY = touch.clientY;
+      }
+    }
   };
 
   private readonly onTouchMove = (event: TouchEvent) => {
-    const touch = Array.from(event.changedTouches).find((item) => item.identifier === this.touchId);
-    if (!touch) return;
-    this.mouseX += (touch.clientX - this.touchX) * 0.7;
-    this.mouseY += (touch.clientY - this.touchY) * 0.7;
-    this.touchX = touch.clientX;
-    this.touchY = touch.clientY;
+    for (const touch of Array.from(event.changedTouches)) {
+      if (touch.identifier === this.movementTouchId) this.updateTouchMovement(touch);
+      if (touch.identifier === this.lookTouchId) {
+        this.mouseX += (touch.clientX - this.lookX) * 0.7;
+        this.mouseY += (touch.clientY - this.lookY) * 0.7;
+        this.lookX = touch.clientX;
+        this.lookY = touch.clientY;
+      }
+    }
     event.preventDefault();
   };
 
-  private readonly onTouchEnd = () => {
-    this.touchId = null;
+  private readonly onTouchEnd = (event: TouchEvent) => {
+    for (const touch of Array.from(event.changedTouches)) {
+      if (touch.identifier === this.movementTouchId) {
+        this.movementTouchId = null;
+        this.touchKeys.clear();
+      }
+      if (touch.identifier === this.lookTouchId) this.lookTouchId = null;
+    }
   };
+
+  private updateTouchMovement(touch: Touch) {
+    const x = touch.clientX - this.moveStartX;
+    const y = touch.clientY - this.moveStartY;
+    this.touchKeys.clear();
+    if (y < -14) this.touchKeys.add('KeyW');
+    if (y > 14) this.touchKeys.add('KeyS');
+    if (x < -14) this.touchKeys.add('KeyA');
+    if (x > 14) this.touchKeys.add('KeyD');
+  }
 }

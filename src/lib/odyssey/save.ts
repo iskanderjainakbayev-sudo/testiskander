@@ -1,20 +1,45 @@
-import type { SaveData } from './types';
+import type { DiscoveryId, SaveData } from './types';
 
 const SAVE_KEY = 'long-silence-save-v1';
 
 export function loadSave(): SaveData | null {
   try {
     const raw = localStorage.getItem(SAVE_KEY);
-    return raw ? JSON.parse(raw) as SaveData : null;
+    if (!raw) return null;
+    const value: unknown = JSON.parse(raw);
+    return isSaveData(value) ? value : null;
   } catch {
     return null;
   }
 }
 
+const IDS: DiscoveryId[] = ['solace', 'veil', 'pilgrim', 'atlas'];
+
+function isSaveData(value: unknown): value is SaveData {
+  if (!value || typeof value !== 'object') return false;
+  const save = value as Partial<SaveData>;
+  return Array.isArray(save.scanned)
+    && save.scanned.every((id) => IDS.includes(id))
+    && typeof save.echoes === 'number'
+    && typeof save.target === 'string'
+    && IDS.includes(save.target as DiscoveryId)
+    && Array.isArray(save.shipPosition)
+    && save.shipPosition.length === 3
+    && save.shipPosition.every((coordinate) => typeof coordinate === 'number' && Number.isFinite(coordinate));
+}
+
 export function storeSave(data: SaveData) {
-  localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+  } catch {
+    // The voyage remains playable when storage is unavailable.
+  }
 }
 
 export function clearSave() {
-  localStorage.removeItem(SAVE_KEY);
+  try {
+    localStorage.removeItem(SAVE_KEY);
+  } catch {
+    // Private browsing may disable storage.
+  }
 }

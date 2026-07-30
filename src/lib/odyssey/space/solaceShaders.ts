@@ -35,29 +35,31 @@ varying vec3 vLocal;
 varying vec3 vWorld;
 varying vec3 vNormalWorld;
 uniform float uTime;
+uniform vec3 uLightDirection;
 ${NOISE_GLSL}
 void main() {
-  vec3 n = normalize(vLocal);
-  float continental = fbm(n * 3.1 + vec3(0.0, uTime * 0.004, 0.0));
-  float fine = fbm(n * 18.0);
-  float latitude = abs(n.y);
+  vec3 localNormal = normalize(vLocal);
+  vec3 normalWorld = normalize(vNormalWorld);
+  float continental = fbm(localNormal * 3.1 + vec3(0.0, uTime * 0.004, 0.0));
+  float fine = fbm(localNormal * 18.0);
+  float latitude = abs(localNormal.y);
   float ice = smoothstep(0.62, 0.92, latitude + (continental - 0.5) * 0.24);
   float shelf = smoothstep(0.48, 0.63, continental) * (1.0 - ice);
   vec3 ocean = mix(vec3(0.002,0.018,0.040), vec3(0.008,0.105,0.145), fine * 0.52);
   ocean = mix(ocean, vec3(0.018,0.21,0.25), shelf * 0.48);
   vec3 iceColor = mix(vec3(0.27,0.38,0.43), vec3(0.72,0.84,0.85), fine);
   vec3 albedo = mix(ocean, iceColor, ice);
-  vec3 lightDir = normalize(vec3(-0.72, 0.32, 0.46));
-  float diffuse = max(dot(n, lightDir), 0.0);
-  float twilight = smoothstep(-0.24, 0.22, dot(n, lightDir));
+  vec3 lightDir = normalize(uLightDirection);
+  float diffuse = max(dot(normalWorld, lightDir), 0.0);
+  float twilight = smoothstep(-0.24, 0.22, dot(normalWorld, lightDir));
   vec3 viewDir = normalize(cameraPosition - vWorld);
-  vec3 halfDir = normalize(lightDir + normalize(viewDir));
-  float glint = pow(max(dot(n, halfDir), 0.0), 150.0) * (1.0 - ice);
-  float fresnel = pow(1.0-max(dot(normalize(vNormalWorld),viewDir),0.0),4.0);
+  vec3 halfDir = normalize(lightDir + viewDir);
+  float glint = pow(max(dot(normalWorld, halfDir), 0.0), 150.0) * (1.0 - ice);
+  float fresnel = pow(1.0-max(dot(normalWorld,viewDir),0.0),4.0);
   vec3 color = albedo * (0.035 + diffuse * 1.08) * twilight;
   color += vec3(0.18,0.65,0.82) * glint * 1.8;
   color += vec3(0.005,0.09,0.14) * fresnel * 0.68;
-  float life = smoothstep(0.79,0.96,fbm(n*27.0+vec3(4.0))) * (1.0-twilight);
+  float life = smoothstep(0.79,0.96,fbm(localNormal*27.0+vec3(4.0))) * (1.0-twilight);
   color += vec3(0.0,0.11,0.15) * life;
   gl_FragColor = vec4(color,1.0);
 }`;
@@ -68,6 +70,7 @@ varying vec3 vLocal;
 varying vec3 vWorld;
 varying vec3 vNormalWorld;
 uniform float uTime;
+uniform vec3 uLightDirection;
 ${NOISE_GLSL}
 void main() {
   vec3 p=normalize(vLocal);
@@ -75,9 +78,10 @@ void main() {
   float detail=fbm(p*19.0-vec3(uTime*0.011,0.0,0.0));
   float bands=sin(p.y*25.0+large*6.0)*0.07;
   float density=smoothstep(0.58,0.76,large*0.72+detail*0.30+bands);
-  vec3 lightDir=normalize(vec3(-0.72,0.32,0.46));
-  float light=0.2+max(dot(p,lightDir),0.0)*0.8;
-  float rim=pow(1.0-max(dot(normalize(vNormalWorld),normalize(cameraPosition-vWorld)),0.0),3.0);
+  vec3 normalWorld=normalize(vNormalWorld);
+  vec3 lightDir=normalize(uLightDirection);
+  float light=0.2+max(dot(normalWorld,lightDir),0.0)*0.8;
+  float rim=pow(1.0-max(dot(normalWorld,normalize(cameraPosition-vWorld)),0.0),3.0);
   gl_FragColor=vec4(vec3(0.60,0.73,0.76)*light+rim*vec3(0.08,0.28,0.34),density*0.63);
 }`;
 
@@ -85,10 +89,12 @@ export const ATMOSPHERE_FRAGMENT = `
 precision highp float;
 varying vec3 vWorld;
 varying vec3 vNormalWorld;
+uniform vec3 uLightDirection;
 void main() {
   vec3 viewDir=normalize(cameraPosition-vWorld);
-  float rim=pow(1.0-abs(dot(normalize(vNormalWorld),viewDir)),3.1);
-  float sun=smoothstep(-0.38,0.38,dot(normalize(vNormalWorld),normalize(vec3(-0.72,0.32,0.46))));
+  vec3 normalWorld=normalize(vNormalWorld);
+  float rim=pow(1.0-abs(dot(normalWorld,viewDir)),3.1);
+  float sun=smoothstep(-0.38,0.38,dot(normalWorld,normalize(uLightDirection)));
   vec3 color=mix(vec3(0.005,0.10,0.19),vec3(0.12,0.61,0.88),sun);
   gl_FragColor=vec4(color*rim*1.45,rim*0.74);
 }`;

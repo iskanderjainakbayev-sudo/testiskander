@@ -34,8 +34,11 @@ export function createShipInterior(scene: THREE.Scene): ShipInterior {
   return {
     group,
     update: (time) => {
-      holograms.forEach((object, index) => {
-        if (object.type === 'Mesh' && index < 2) object.rotation.y += 0.0015 + index * 0.0004;
+      holograms.forEach((object) => {
+        const spinY = object.userData.spinY as number | undefined;
+        const spinZ = object.userData.spinZ as number | undefined;
+        if (spinY) object.rotation.y = time * spinY;
+        if (spinZ) object.rotation.z = time * spinZ;
       });
       corridorLight.intensity = 4.5 + Math.sin(time * 1.7) * 0.35;
     },

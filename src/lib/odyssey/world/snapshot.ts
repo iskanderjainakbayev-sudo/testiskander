@@ -44,6 +44,10 @@ export function createSnapshot(options: SnapshotOptions): GameSnapshot {
     .applyQuaternion(inverse);
   const projected = localTarget.clone().project(camera);
   const inFront = localTarget.z < camera.position.z;
+  if (!inFront) {
+    projected.x *= -1;
+    projected.y *= -1;
+  }
   return {
     mode,
     objective: getObjective(mission.scanned, mode === 'walking' ? 'walking' : 'flight'),

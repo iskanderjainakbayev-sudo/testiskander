@@ -30,7 +30,7 @@ export function PauseOverlay({ snapshot, onResume, onNewGame, onReturnToMenu }: 
           <button className="odx-button odx-button--quiet" onClick={onNewGame}>RESTART EXPEDITION</button>
           <button className="odx-menu__exit" onClick={onReturnToMenu}>ABANDON TO ARCHIVE</button>
         </nav>
-        <footer>AUTOSAVE COMPLETE <i /> VESSEL MEMORY STABLE</footer>
+        <footer>FLIGHT RECORDER READY <i /> ECHOES SAVE ON RECOVERY</footer>
       </section>
     </main>
   );
@@ -45,4 +45,3 @@ function Stat({ label, value, detail }: { label: string; value: string; detail: 
     </div>
   );
 }
-

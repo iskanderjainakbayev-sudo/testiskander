@@ -48,6 +48,7 @@ export function OdysseyInterface({
       {snapshot.mode === 'flight' && (
         <FlightHud
           snapshot={snapshot}
+          onInteract={onInteract}
           onScan={onScan}
           onCycleTarget={onCycleTarget}
         />

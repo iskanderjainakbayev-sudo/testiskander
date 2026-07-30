@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { DISCOVERIES } from '../../lib/odyssey/discoveries';
 import type { GameSnapshot } from '../../lib/odyssey/types';
 
 interface TargetMarkerProps {
@@ -12,6 +13,7 @@ type MarkerStyle = CSSProperties & {
 };
 
 export function TargetMarker({ snapshot, onCycleTarget }: TargetMarkerProps) {
+  const inRange = snapshot.targetDistance < DISCOVERIES[snapshot.target].scanRange;
   const projectedX = edgeAwareX(snapshot);
   const x = 50 + clamp(projectedX, -0.92, 0.92) * 46;
   const y = 50 - clamp(snapshot.targetScreen.y, -0.84, 0.84) * 42;
@@ -22,7 +24,7 @@ export function TargetMarker({ snapshot, onCycleTarget }: TargetMarkerProps) {
 
   return (
     <button
-      className={`odx-target-marker${snapshot.targetScreen.visible ? ' is-visible' : ' is-edge'}`}
+      className={`odx-target-marker${snapshot.targetScreen.visible ? ' is-visible' : ' is-edge'}${inRange ? ' is-in-range' : ''}`}
       style={style}
       onClick={onCycleTarget}
       aria-label={`Selected target ${snapshot.targetName}, ${formatDistance(snapshot.targetDistance)} away. Cycle target.`}
@@ -30,7 +32,7 @@ export function TargetMarker({ snapshot, onCycleTarget }: TargetMarkerProps) {
       <span className="odx-target-marker__bracket" aria-hidden="true"><i /><i /><i /><i /></span>
       <span className="odx-target-marker__copy">
         <b>{snapshot.targetName}</b>
-        <small>{formatDistance(snapshot.targetDistance)}</small>
+        <small>{inRange ? 'SCAN WINDOW OPEN' : formatDistance(snapshot.targetDistance)}</small>
       </span>
     </button>
   );
@@ -44,8 +46,9 @@ function edgeAwareX(snapshot: GameSnapshot) {
 }
 
 export function formatDistance(distance: number) {
-  if (distance >= 1000) return `${(distance / 1000).toFixed(distance >= 10000 ? 0 : 1)} km`;
-  return `${Math.max(0, Math.round(distance))} m`;
+  const kilometers = Math.max(0, distance) * 12_500;
+  if (kilometers >= 1_000_000) return `${(kilometers / 1_000_000).toFixed(2)}M km`;
+  return `${Math.round(kilometers).toLocaleString('en-US')} km`;
 }
 
 function clamp(value: number, min: number, max: number) {

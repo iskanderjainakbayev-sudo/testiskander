@@ -26,6 +26,8 @@
 .odx-target-marker__copy small { margin-top:4px; color:var(--odx-amber); font-size:7px; letter-spacing:.12em; }
 .odx-target-marker.is-edge .odx-target-marker__bracket { inset:25px 58px; transform:rotate(45deg); }
 .odx-target-marker.is-edge .odx-target-marker__copy { top:62px; }
+.odx-target-marker.is-in-range .odx-target-marker__bracket i { border-color:var(--odx-amber); filter:drop-shadow(0 0 5px rgba(234,181,110,.55)); }
+.odx-target-marker.is-in-range .odx-target-marker__copy small { animation:odx-pulse .9s ease-in-out infinite; }
 
 .odx-reticle { position:absolute; left:50%; top:50%; width:78px; height:78px; transform:translate(-50%,-50%); opacity:.5; }
 .odx-reticle i { position:absolute; background:rgba(212,229,230,.63); }
@@ -45,4 +47,5 @@
 .odx-scan.is-scanning .odx-scan__ring { box-shadow:0 0 22px rgba(155,205,209,.16); animation:odx-pulse 1.4s ease-in-out infinite; }
 .odx-flight__hints,.odx-walk__hints { position:absolute; bottom:2.3vh; left:50%; display:flex; gap:21px; transform:translateX(-50%); color:rgba(191,210,212,.35); font-size:7px; letter-spacing:.1em; white-space:nowrap; }
 .odx-flight__hints kbd,.odx-walk__hints kbd { margin-right:5px; color:rgba(220,231,232,.65); }
-
+.odx-helm-exit { position:absolute; left:50%; bottom:14vh; padding:8px 12px; border:1px solid rgba(205,224,226,.22); color:rgba(220,232,233,.6)!important; background:rgba(4,10,12,.55); transform:translateX(-50%); pointer-events:auto; font-size:7px!important; letter-spacing:.13em; }
+.odx-helm-exit kbd { margin-right:7px; color:var(--odx-amber); }

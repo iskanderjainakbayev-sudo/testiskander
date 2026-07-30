@@ -24,6 +24,7 @@ export function TouchActions({
         )}
         {mode === 'flight' && (
           <>
+            {canInteract && <button onClick={onInteract}><i>◇</i><span>EXIT</span></button>}
             <button onClick={onCycleTarget}><i>⌁</i><span>TARGET</span></button>
             <button className="is-primary" onClick={onScan}><i>◉</i><span>SCAN</span></button>
           </>
@@ -32,4 +33,3 @@ export function TouchActions({
     </div>
   );
 }
-

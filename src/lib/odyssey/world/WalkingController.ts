@@ -16,11 +16,17 @@ export class WalkingController {
   pitch = 0;
   private bob = 0;
   private stepDistance = 0;
+  private readonly forward = new THREE.Vector3();
+  private readonly right = new THREE.Vector3();
+  private readonly movement = new THREE.Vector3();
+  private readonly toStation = new THREE.Vector3();
 
   reset() {
     this.position.set(0, 1.62, 7.2);
     this.yaw = 0;
     this.pitch = 0;
+    this.bob = 0;
+    this.stepDistance = 0;
   }
 
   leaveHelm() {
@@ -38,17 +44,20 @@ export class WalkingController {
     const look = input.takeLook();
     this.yaw -= look.x * 0.0018;
     this.pitch = THREE.MathUtils.clamp(this.pitch - look.y * 0.0016, -1.28, 1.28);
-    const forward = new THREE.Vector3(Math.sin(this.yaw), 0, -Math.cos(this.yaw));
-    const right = new THREE.Vector3(Math.cos(this.yaw), 0, Math.sin(this.yaw));
-    const movement = new THREE.Vector3();
-    if (input.isDown('KeyW')) movement.add(forward);
-    if (input.isDown('KeyS')) movement.sub(forward);
-    if (input.isDown('KeyD')) movement.add(right);
-    if (input.isDown('KeyA')) movement.sub(right);
-    const moving = movement.lengthSq() > 0;
+    this.forward.set(Math.sin(this.yaw), 0, -Math.cos(this.yaw));
+    this.right.set(Math.cos(this.yaw), 0, Math.sin(this.yaw));
+    this.movement.set(0, 0, 0);
+    if (input.isDown('KeyW')) this.movement.add(this.forward);
+    if (input.isDown('KeyS')) this.movement.sub(this.forward);
+    if (input.isDown('KeyD')) this.movement.add(this.right);
+    if (input.isDown('KeyA')) this.movement.sub(this.right);
+    const moving = this.movement.lengthSq() > 0;
     if (moving) {
       const distance = delta * (input.isDown('ShiftLeft') ? 3.35 : 2.35);
-      this.position.add(movement.normalize().multiplyScalar(distance));
+      const previousX = this.position.x;
+      const previousZ = this.position.z;
+      this.position.add(this.movement.normalize().multiplyScalar(distance));
+      if (this.hitsFurniture()) this.position.set(previousX, this.position.y, previousZ);
       this.stepDistance += distance;
       if (this.stepDistance > 0.82) {
         this.stepDistance = 0;
@@ -68,11 +77,20 @@ export class WalkingController {
     let distance = Number.POSITIVE_INFINITY;
     for (const station of STATIONS) {
       const current = this.position.distanceTo(station.position);
-      if (current < station.range && current < distance) {
+      this.toStation.copy(station.position).sub(this.position).setY(0).normalize();
+      this.forward.set(Math.sin(this.yaw), 0, -Math.cos(this.yaw));
+      const isFacing = this.toStation.dot(this.forward) > 0.18;
+      if (isFacing && current < station.range && current < distance) {
         nearest = station;
         distance = current;
       }
     }
     return nearest;
+  }
+
+  private hitsFurniture() {
+    const navDistance = Math.hypot(this.position.x + 1.15, this.position.z - 1.25);
+    const seatDistance = Math.hypot(this.position.x, this.position.z + 3.45);
+    return navDistance < 1.02 || seatDistance < 0.68;
   }
 }

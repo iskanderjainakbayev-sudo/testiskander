@@ -75,6 +75,8 @@ export function createSpaceScene(): SpaceSceneRig {
   const cameraScenePosition = new THREE.Vector3();
   const cameraInertial = new THREE.Vector3();
   const shipQuaternion = new THREE.Quaternion();
+  const inertialLightDirection = new THREE.Vector3(-0.72, 0.32, 0.46).normalize();
+  const renderedLightDirection = new THREE.Vector3();
   let warpTarget = 0;
   let warpStrength = 0;
   let previousTime = 0;
@@ -102,11 +104,16 @@ export function createSpaceScene(): SpaceSceneRig {
     const delta = previousTime === 0 ? 1 / 60 : Math.min(time - previousTime, 0.05);
     previousTime = time;
     warpStrength = THREE.MathUtils.damp(warpStrength, warpTarget, 8, Math.max(delta, 0));
+    renderedLightDirection.copy(inertialLightDirection).applyQuaternion(inverseShipQuaternion);
     animatedMaterials.forEach((material) => {
       const timeUniform = material.uniforms.uTime;
       const warpUniform = material.uniforms.uWarp;
+      const lightUniform = material.uniforms.uLightDirection;
       if (timeUniform) timeUniform.value = time;
       if (warpUniform) warpUniform.value = warpStrength;
+      if (lightUniform?.value instanceof THREE.Vector3) {
+        lightUniform.value.copy(renderedLightDirection);
+      }
     });
 
     solace.update(time);

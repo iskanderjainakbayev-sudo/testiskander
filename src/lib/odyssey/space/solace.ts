@@ -12,13 +12,15 @@ precision highp float;
 varying vec3 vLocal;
 varying vec3 vWorld;
 varying vec3 vNormalWorld;
+uniform vec3 uLightDirection;
 float hash(vec3 p){return fract(sin(dot(p,vec3(17.1,91.7,43.3)))*43758.5453);}
 void main(){
-  vec3 n=normalize(vLocal);
-  float pits=hash(floor(n*28.0));
+  vec3 localNormal=normalize(vLocal);
+  vec3 normalWorld=normalize(vNormalWorld);
+  float pits=hash(floor(localNormal*28.0));
   float rock=0.48+0.28*pits;
-  float light=max(dot(n,normalize(vec3(-0.72,0.32,0.46))),0.0);
-  float rim=pow(1.0-max(dot(normalize(vNormalWorld),normalize(cameraPosition-vWorld)),0.0),3.0);
+  float light=max(dot(normalWorld,normalize(uLightDirection)),0.0);
+  float rim=pow(1.0-max(dot(normalWorld,normalize(cameraPosition-vWorld)),0.0),3.0);
   gl_FragColor=vec4(vec3(0.19,0.23,0.25)*rock*(0.045+light)+vec3(0.025,0.07,0.09)*rim,1.0);
 }`;
 
@@ -33,7 +35,10 @@ function shaderMaterial(
   options: Partial<THREE.ShaderMaterialParameters> = {},
 ): THREE.ShaderMaterial {
   return new THREE.ShaderMaterial({
-    uniforms: { uTime: { value: 0 } },
+    uniforms: {
+      uTime: { value: 0 },
+      uLightDirection: { value: new THREE.Vector3(-0.72, 0.32, 0.46).normalize() },
+    },
     vertexShader: SURFACE_VERTEX,
     fragmentShader,
     ...options,

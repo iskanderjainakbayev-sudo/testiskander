@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { DISCOVERIES } from '../../lib/odyssey/discoveries';
 import type { GameSnapshot } from '../../lib/odyssey/types';
 import { normalizePercent, FlightTelemetry } from './FlightTelemetry';
 import { ObjectiveReadout } from './ObjectiveReadout';
@@ -9,14 +10,16 @@ import { Transmission } from './Transmission';
 
 interface FlightHudProps {
   snapshot: GameSnapshot;
+  onInteract: () => void;
   onScan: () => void;
   onCycleTarget: () => void;
 }
 
 type ScanStyle = CSSProperties & { '--odx-scan': string };
 
-export function FlightHud({ snapshot, onScan, onCycleTarget }: FlightHudProps) {
+export function FlightHud({ snapshot, onInteract, onScan, onCycleTarget }: FlightHudProps) {
   const scan = normalizePercent(snapshot.scanProgress);
+  const inRange = snapshot.targetDistance < DISCOVERIES[snapshot.target].scanRange;
   const scanStyle: ScanStyle = { '--odx-scan': `${scan * 3.6}deg` };
 
   return (
@@ -36,13 +39,22 @@ export function FlightHud({ snapshot, onScan, onCycleTarget }: FlightHudProps) {
       />
       <button className={`odx-scan${scan > 0 ? ' is-scanning' : ''}`} style={scanStyle} onClick={onScan}>
         <span className="odx-scan__ring" aria-hidden="true"><i /><b /></span>
-        <span><small>{scan > 0 ? 'SPECTRAL RESOLUTION' : 'DEEP FIELD ARRAY'}</small><strong>{scan > 0 ? `${Math.round(scan)}%` : 'HOLD Q TO SCAN'}</strong></span>
+        <span><small>{scan > 0 ? 'SPECTRAL RESOLUTION' : 'DEEP FIELD ARRAY'}</small><strong>{scan > 0 ? `${Math.round(scan)}%` : inRange ? 'HOLD Q · ACQUIRE ECHO' : 'APPROACH TARGET'}</strong></span>
       </button>
       <div className="odx-flight__hints">
-        <span><kbd>MOUSE</kbd> STEER</span><span><kbd>W S</kbd> THRUST</span><span><kbd>A D</kbd> ROLL</span><span><kbd>SHIFT</kbd> PULSE</span><span><kbd>F</kbd> ALIGN</span><span><kbd>T</kbd> TARGET</span>
+        <span><kbd>MOUSE</kbd> STEER</span><span><kbd>W S</kbd> THRUST</span><span><kbd>A D</kbd> ROLL</span><span><kbd>SPACE</kbd> BRAKE</span><span><kbd>SHIFT</kbd> PULSE</span><span><kbd>F</kbd> ALIGN</span><span><kbd>T</kbd> TARGET</span>
       </div>
+      {snapshot.nearbyInteraction && (
+        <button className="odx-helm-exit" onClick={onInteract}><kbd>E</kbd> LEAVE HELM</button>
+      )}
       <Transmission message={snapshot.transmission} />
-      <TouchActions mode="flight" onScan={onScan} onCycleTarget={onCycleTarget} />
+      <TouchActions
+        mode="flight"
+        canInteract={Boolean(snapshot.nearbyInteraction)}
+        onInteract={onInteract}
+        onScan={onScan}
+        onCycleTarget={onCycleTarget}
+      />
     </section>
   );
 }

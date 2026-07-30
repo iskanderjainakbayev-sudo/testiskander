@@ -71,6 +71,7 @@ export function buildNavTable(group: THREE.Group, holograms: THREE.Object3D[]) {
   group.add(table);
   const map = new THREE.Mesh(new THREE.IcosahedronGeometry(0.68, 2), glow);
   map.position.set(-1.15, 1.55, 1.25);
+  map.userData.spinY = 0.34;
   group.add(map);
   const orbit = new THREE.Mesh(
     new THREE.TorusGeometry(0.95, 0.012, 5, 90),
@@ -78,6 +79,7 @@ export function buildNavTable(group: THREE.Group, holograms: THREE.Object3D[]) {
   );
   orbit.position.copy(map.position);
   orbit.rotation.x = 1.15;
+  orbit.userData.spinZ = -0.16;
   group.add(orbit);
   holograms.push(map, orbit);
 }
@@ -109,6 +111,7 @@ export function buildArchiveAndReactor(group: THREE.Group, holograms: THREE.Obje
     ring.position.set(0, 1.58, 9.5);
     ring.rotation.y = Math.PI / 2;
     ring.rotation.x = i * 0.27;
+    ring.userData.spinZ = 0.08 + i * 0.025;
     group.add(ring);
     holograms.push(ring);
   }

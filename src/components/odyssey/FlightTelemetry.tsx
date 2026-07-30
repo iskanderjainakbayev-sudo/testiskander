@@ -10,14 +10,15 @@ type ThrottleStyle = CSSProperties & { '--odx-throttle': string };
 export function FlightTelemetry({ snapshot }: FlightTelemetryProps) {
   const throttle = normalizePercent(snapshot.throttle);
   const heading = Math.round(((snapshot.targetBearing % 360) + 360) % 360);
+  const lightSpeed = snapshot.speed * 12_500 / 299_792;
   const style: ThrottleStyle = { '--odx-throttle': `${throttle}%` };
 
   return (
     <aside className="odx-telemetry" aria-label="Flight telemetry">
       <div className="odx-telemetry__speed">
-        <span>RELATIVE VELOCITY</span>
-        <strong>{Math.round(snapshot.speed).toLocaleString('en-US')}</strong>
-        <small>M · S<sup>−1</sup></small>
+        <span>PHASE VELOCITY</span>
+        <strong>{lightSpeed.toFixed(lightSpeed < 10 ? 2 : 1)}</strong>
+        <small>C · LOCAL</small>
       </div>
       <div className="odx-telemetry__throttle" style={style}>
         <span>THRUST</span>

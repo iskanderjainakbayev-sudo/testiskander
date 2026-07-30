@@ -36,12 +36,13 @@ export function createRenderer(canvas: HTMLCanvasElement): RenderRig {
   composer.addPass(new RenderPass(scene, camera));
   const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.42, 0.58, 0.88);
   composer.addPass(bloom);
-  composer.addPass(new OutputPass());
+  const outputPass = new OutputPass();
+  composer.addPass(outputPass);
 
   const resize = () => {
     const width = canvas.clientWidth || window.innerWidth;
     const height = canvas.clientHeight || window.innerHeight;
-    const dpr = Math.min(window.devicePixelRatio, width < 700 ? 1.2 : 1.5);
+    const dpr = Math.min(window.devicePixelRatio, width < 700 ? 1.15 : 1.35);
     renderer.setPixelRatio(dpr);
     renderer.setSize(width, height, false);
     composer.setPixelRatio(dpr);
@@ -60,6 +61,8 @@ export function createRenderer(canvas: HTMLCanvasElement): RenderRig {
     resize,
     dispose: () => {
       window.removeEventListener('resize', resize);
+      bloom.dispose();
+      outputPass.dispose();
       composer.dispose();
       renderer.dispose();
     },
