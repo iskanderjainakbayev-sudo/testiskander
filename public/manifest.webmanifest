@@ -1,0 +1,19 @@
+{
+  "name": "Project Eclipse",
+  "short_name": "Eclipse",
+  "description": "Explore a fractured world beneath an eternal eclipse.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "landscape-primary",
+  "background_color": "#070b15",
+  "theme_color": "#0b1222",
+  "icons": [
+    {
+      "src": "/icons/eclipse-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -10,6 +10,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
+    "assets:weapons": "node scripts/create-tactical-assets.mjs",
     "db:login": "supabase login",
     "db:link": "supabase link",
     "db:new": "supabase migration new",
