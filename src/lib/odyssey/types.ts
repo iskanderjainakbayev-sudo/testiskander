@@ -1,4 +1,12 @@
-export type GameMode = 'menu' | 'walking' | 'flight' | 'paused' | 'ending';
+export type GameMode =
+  | 'menu'
+  | 'walking'
+  | 'flight'
+  | 'landing'
+  | 'surface'
+  | 'takeoff'
+  | 'paused'
+  | 'ending';
 
 export type DiscoveryId = 'solace' | 'veil' | 'pilgrim' | 'atlas';
 
@@ -35,6 +43,11 @@ export interface GameSnapshot {
   nearbyInteraction: string | null;
   transmission: string | null;
   scanProgress: number;
+  transitionProgress: number;
+  surfaceSamples: number;
+  locationName: string;
+  nearestShipName: string | null;
+  nearestShipDistance: number;
   frameRate: number;
 }
 

@@ -22,6 +22,11 @@ export const INITIAL_SNAPSHOT: GameSnapshot = {
   nearbyInteraction: null,
   transmission: null,
   scanProgress: 0,
+  transitionProgress: 0,
+  surfaceSamples: 0,
+  locationName: 'LYRA / DECK 01',
+  nearestShipName: null,
+  nearestShipDistance: Number.POSITIVE_INFINITY,
   frameRate: 60,
 };
 
@@ -33,6 +38,11 @@ interface SnapshotOptions {
   nearbyInteraction: string | null;
   fuel: number;
   frameRate: number;
+  transitionProgress?: number;
+  surfaceSamples?: number;
+  locationName?: string;
+  nearestShipName?: string | null;
+  nearestShipDistance?: number;
 }
 
 export function createSnapshot(options: SnapshotOptions): GameSnapshot {
@@ -50,7 +60,7 @@ export function createSnapshot(options: SnapshotOptions): GameSnapshot {
   }
   return {
     mode,
-    objective: getObjective(mission.scanned, mode === 'walking' ? 'walking' : 'flight'),
+    objective: getObjective(mission.scanned, mode, options.surfaceSamples),
     target: mission.target,
     targetName: discovery.name,
     targetDistance: localTarget.length(),
@@ -70,6 +80,11 @@ export function createSnapshot(options: SnapshotOptions): GameSnapshot {
     nearbyInteraction: options.nearbyInteraction,
     transmission: mission.transmission,
     scanProgress: mission.scanProgress,
+    transitionProgress: options.transitionProgress ?? 0,
+    surfaceSamples: options.surfaceSamples ?? 0,
+    locationName: options.locationName ?? (mode === 'walking' ? 'LYRA / DECK 01' : 'HELIOS NULL'),
+    nearestShipName: options.nearestShipName ?? null,
+    nearestShipDistance: options.nearestShipDistance ?? Number.POSITIVE_INFINITY,
     frameRate: options.frameRate,
   };
 }

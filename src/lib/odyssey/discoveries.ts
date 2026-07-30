@@ -37,12 +37,37 @@ export const DISCOVERIES: Record<DiscoveryId, Discovery> = {
 
 export const TARGET_ORDER: DiscoveryId[] = ['solace', 'veil', 'pilgrim', 'atlas'];
 
-export function getObjective(scanned: DiscoveryId[], mode: string): Objective {
+export function getObjective(scanned: DiscoveryId[], mode: string, surfaceSamples = 0): Objective {
   if (mode === 'walking') {
     return {
       eyebrow: 'AWAKENING / DECK 01',
       title: 'Take the helm',
       detail: 'Follow the amber guide lights to the forward cockpit.',
+    };
+  }
+  if (mode === 'landing') {
+    return {
+      eyebrow: 'SOLACE / ATMOSPHERIC ENTRY',
+      title: 'Hold the descent corridor',
+      detail: 'Lyra is riding the ion wake toward a singing archipelago.',
+    };
+  }
+  if (mode === 'takeoff') {
+    return {
+      eyebrow: 'SOLACE / ASCENT',
+      title: 'Return to the stars',
+      detail: 'The pulse field is rebuilding above the cloud deck.',
+    };
+  }
+  if (mode === 'surface') {
+    return surfaceSamples < 3 ? {
+      eyebrow: `SOLACE EXPEDITION / SAMPLE ${surfaceSamples + 1} OF 3`,
+      title: 'Follow the echo blooms',
+      detail: 'Their harmonic light cuts through the storm. Approach and interface.',
+    } : {
+      eyebrow: 'SOLACE EXPEDITION / FIELDWORK COMPLETE',
+      title: 'Return to Lyra',
+      detail: 'The recovered living ice belongs in the archive. Find the amber landing beacon.',
     };
   }
 

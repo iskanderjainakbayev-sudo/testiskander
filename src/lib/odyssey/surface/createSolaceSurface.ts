@@ -1,0 +1,131 @@
+import * as THREE from 'three';
+import { disposeSpaceScene } from '../space/disposeSpaceScene';
+import { createSurfaceDetails } from './createSurfaceDetails';
+import { surfaceHeight } from './terrainNoise';
+import { SKY_FRAGMENT, TERRAIN_FRAGMENT, TERRAIN_VERTEX, WATER_FRAGMENT } from './surfaceShaders';
+
+export interface SolaceSurface {
+  group: THREE.Group;
+  sampleSites: THREE.Object3D[];
+  getHeight: (x: number, z: number) => number;
+  update: (time: number, camera: THREE.Camera) => void;
+  dispose: () => void;
+}
+
+const SKY_VERTEX = `
+varying vec3 vDirection;
+void main() {
+  vDirection=normalize(position);
+  vec4 clip=projectionMatrix*modelViewMatrix*vec4(position,1.0);
+  gl_Position=clip.xyww;
+}`;
+
+function createTerrain() {
+  const geometry = new THREE.PlaneGeometry(900, 900, 176, 176);
+  geometry.rotateX(-Math.PI / 2);
+  const positions = geometry.getAttribute('position');
+  for (let index = 0; index < positions.count; index += 1) {
+    positions.setY(index, surfaceHeight(positions.getX(index), positions.getZ(index)));
+  }
+  positions.needsUpdate = true;
+  geometry.computeVertexNormals();
+  const material = new THREE.ShaderMaterial({
+    vertexShader: TERRAIN_VERTEX,
+    fragmentShader: TERRAIN_FRAGMENT,
+  });
+  const terrain = new THREE.Mesh(geometry, material);
+  terrain.receiveShadow = true;
+  terrain.castShadow = true;
+  return terrain;
+}
+
+function createWater() {
+  const material = new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 } },
+    vertexShader: TERRAIN_VERTEX,
+    fragmentShader: WATER_FRAGMENT,
+    transparent: true,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+  });
+  const water = new THREE.Mesh(new THREE.PlaneGeometry(900, 900), material);
+  water.rotation.x = -Math.PI / 2;
+  water.position.y = 1.75;
+  water.renderOrder = 2;
+  return water;
+}
+
+function createSky() {
+  const material = new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 } },
+    vertexShader: SKY_VERTEX,
+    fragmentShader: SKY_FRAGMENT,
+    side: THREE.BackSide,
+    depthWrite: false,
+    depthTest: false,
+    toneMapped: false,
+  });
+  const sky = new THREE.Mesh(new THREE.IcosahedronGeometry(720, 4), material);
+  sky.frustumCulled = false;
+  sky.renderOrder = -20;
+  return sky;
+}
+
+function createPrecipitation() {
+  const random = () => Math.random();
+  const positions = new Float32Array(900 * 3);
+  for (let index = 0; index < 900; index += 1) {
+    positions[index * 3] = (random() - 0.5) * 100;
+    positions[index * 3 + 1] = random() * 42;
+    positions[index * 3 + 2] = (random() - 0.5) * 100;
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  const material = new THREE.PointsMaterial({
+    color: 0xb9d4d2,
+    size: 0.11,
+    transparent: true,
+    opacity: 0.34,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  });
+  return new THREE.Points(geometry, material);
+}
+
+export function createSolaceSurface(): SolaceSurface {
+  const group = new THREE.Group();
+  group.name = 'Solace surface biome';
+  group.visible = false;
+  const terrain = createTerrain();
+  const water = createWater();
+  const sky = createSky();
+  const precipitation = createPrecipitation();
+  const details = createSurfaceDetails();
+  group.add(sky, terrain, water, precipitation, details.root);
+  const sun = new THREE.DirectionalLight(0xb9d6d2, 2.7);
+  sun.position.set(-140, 210, 90);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(1024, 1024);
+  sun.shadow.camera.left = sun.shadow.camera.bottom = -90;
+  sun.shadow.camera.right = sun.shadow.camera.top = 90;
+  group.add(sun, new THREE.HemisphereLight(0x547a82, 0x071011, 0.75));
+  return {
+    group,
+    sampleSites: details.sampleSites,
+    getHeight: surfaceHeight,
+    update: (time, camera) => {
+      (water.material as THREE.ShaderMaterial).uniforms.uTime.value = time;
+      (sky.material as THREE.ShaderMaterial).uniforms.uTime.value = time;
+      sky.position.copy(camera.position);
+      precipitation.position.set(camera.position.x, 0, camera.position.z);
+      const attribute = precipitation.geometry.getAttribute('position');
+      for (let index = 0; index < attribute.count; index += 1) {
+        const y = attribute.getY(index) - 0.055;
+        attribute.setY(index, y < 0 ? 42 : y);
+      }
+      attribute.needsUpdate = true;
+      details.update(time);
+    },
+    dispose: () => disposeSpaceScene(group),
+  };
+}
