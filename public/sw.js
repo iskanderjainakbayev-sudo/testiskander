@@ -1,5 +1,5 @@
-const CACHE_NAME = 'project-eclipse-shell-v1';
-const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icons/eclipse-icon.svg'];
+const CACHE_NAME = 'long-silence-shell-v1';
+const APP_SHELL = ['/', '/index.html', '/odyssey.webmanifest', '/icons/odyssey-icon.svg'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -10,7 +10,9 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => Promise.all(
-      keys.filter((key) => key.startsWith('project-eclipse-') && key !== CACHE_NAME)
+      keys.filter((key) => (
+        key.startsWith('project-eclipse-') || key.startsWith('long-silence-')
+      ) && key !== CACHE_NAME)
         .map((key) => caches.delete(key)),
     )).then(() => self.clients.claim()),
   );

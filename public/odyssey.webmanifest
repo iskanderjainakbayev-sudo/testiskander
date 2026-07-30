@@ -1,0 +1,19 @@
+{
+  "name": "The Long Silence",
+  "short_name": "Long Silence",
+  "description": "A cinematic voyage beyond the last human signal.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "landscape-primary",
+  "background_color": "#03070b",
+  "theme_color": "#03070b",
+  "icons": [
+    {
+      "src": "/icons/odyssey-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
