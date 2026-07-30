@@ -1,10 +1,10 @@
 import { Link } from 'wouter';
-import '../styles/eclipse.css';
+import '../styles/afterfall.css';
 
 export function HomePage() {
-  return <main className="eclipse-home">
-    <div className="eclipse-home__orbit eclipse-home__orbit--one" /><div className="eclipse-home__orbit eclipse-home__orbit--two" />
-    <section className="eclipse-home__content"><p>RIFTFALL EXPEDITION // SINGLE-PLAYER ACTION RPG</p><h1>PROJECT<br /><i>ECLIPSE</i></h1><b>Cross the fractured frontier, awaken an ancient beacon, and face the force holding the sky open.</b><Link href="/game">ENTER THE RIFTLANDS <span>→</span></Link><small>THREE.JS WEBGL · OFFLINE AUTOSAVE · PWA READY</small></section>
-    <section className="eclipse-home__features" aria-label="Game features"><article><b>✦</b><span>Explore</span><small>Six connected frontier zones</small></article><article><b>⚔</b><span>Adapt</span><small>Blade, bolt, pulse and parkour</small></article><article><b>◈</b><span>Restore</span><small>Craft, upgrade, and seal the breach</small></article></section>
+  return <main className="afterfall-home">
+    <div className="afterfall-home__rain" /><div className="afterfall-home__outline" />
+    <section className="afterfall-home__content"><p>FIELD SURVIVAL // HOLLOW CREEK, DAY 14</p><h1>AFTER<br /><i>FALL</i></h1><b>When the evacuation signal dies, every road through the abandoned valley becomes a decision: search, craft, stay quiet—or run.</b><Link href="/game">START FIELD EXPEDITION <span>→</span></Link><small>THREE.JS WEBGL · OFFLINE FIELD SAVES · PWA READY</small></section>
+    <section className="afterfall-home__features" aria-label="Game features"><article><b>⌖</b><span>Explore</span><small>Hospital, checkpoint, forest and rail yard</small></article><article><b>▣</b><span>Survive</span><small>Hunger, thirst, energy and weather</small></article><article><b>✦</b><span>Adapt</span><small>Loot, craft and fight for a way out</small></article></section>
   </main>;
 }

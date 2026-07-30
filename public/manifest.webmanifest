@@ -1,16 +1,16 @@
 {
-  "name": "Project Eclipse",
-  "short_name": "Eclipse",
-  "description": "Explore a fractured world beneath an eternal eclipse.",
+  "name": "AFTERFALL",
+  "short_name": "AFTERFALL",
+  "description": "A first-person survival expedition through Hollow Creek.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "landscape-primary",
-  "background_color": "#070b15",
-  "theme_color": "#0b1222",
+  "background_color": "#18211d",
+  "theme_color": "#24352d",
   "icons": [
     {
-      "src": "/icons/eclipse-icon.svg",
+      "src": "/icons/afterfall-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
