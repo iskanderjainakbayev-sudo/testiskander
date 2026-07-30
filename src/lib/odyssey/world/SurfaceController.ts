@@ -19,6 +19,7 @@ export class SurfaceController {
     private readonly sampleSites: THREE.Object3D[],
     readonly rampZ = 45,
     readonly spawnZ = rampZ - 17,
+    private readonly sampleLabel = 'RESONATE WITH ECHO BLOOM',
   ) {}
 
   reset() {
@@ -87,7 +88,7 @@ export class SurfaceController {
       if (this.samples.has(index)) continue;
       const site = this.sampleSites[index];
       if (this.isFacing(site.position, 4.2)) {
-        return { action: { type: 'sample', index }, label: 'RESONATE WITH ECHO BLOOM' };
+        return { action: { type: 'sample', index }, label: this.sampleLabel };
       }
     }
     const ramp = this.toTarget.set(0, this.getHeight(0, this.rampZ) + 1.2, this.rampZ);

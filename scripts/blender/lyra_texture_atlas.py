@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import math
 from array import array
+from pathlib import Path
 
 import bpy
 
 ATLAS_SIZE = 1024
+ATLAS_CACHE = Path("/tmp/lyra-generated-atlases")
 
 
 def _signals(x: int, y: int) -> tuple[float, float, float]:
@@ -65,12 +67,26 @@ def _sample(x: int, y: int) -> tuple[tuple[float, float, float], float, tuple[fl
 
 
 def _image(name: str, pixels: array, color_space: str) -> bpy.types.Image:
-    image = bpy.data.images.new(name, ATLAS_SIZE, ATLAS_SIZE, alpha=True)
-    image.pixels.foreach_set(pixels)
-    image.colorspace_settings.name = color_space
-    image.update()
-    image.pack()
-    return image
+    expected = ATLAS_SIZE * ATLAS_SIZE * 4
+    if len(pixels) != expected:
+        raise RuntimeError(f"{name} has {len(pixels)} values; expected {expected}")
+    ATLAS_CACHE.mkdir(parents=True, exist_ok=True)
+    working = bpy.data.images.new(f"{name}_Working", ATLAS_SIZE, ATLAS_SIZE, alpha=True)
+    working.colorspace_settings.name = color_space
+    working.pixels.foreach_set(pixels)
+    working.update()
+    if max(working.pixels[0:4096]) <= 0.0:
+        raise RuntimeError(f"{name} pixel upload remained black")
+    path = ATLAS_CACHE / f"{name}.png"
+    working.filepath_raw = str(path)
+    working.file_format = "PNG"
+    working.save()
+    loaded = bpy.data.images.load(str(path), check_existing=False)
+    loaded.name = name
+    loaded.colorspace_settings.name = color_space
+    loaded.pack()
+    bpy.data.images.remove(working)
+    return loaded
 
 
 def create_texture_atlases() -> dict[str, bpy.types.Image]:
