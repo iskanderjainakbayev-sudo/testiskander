@@ -32,8 +32,8 @@ void main(){
   color*=rayleigh;
   color+=pow(sunDot,1500.0)*vec3(3.4,2.55,1.62);
   color+=pow(sunDot,22.0)*horizon*vec3(0.22,0.16,0.095);
-  vec2 skyUv=vec2(atan(d.z,d.x)*1.55+uTime*0.0017,d.y*5.7);
-  float warp=fbm2(skyUv*0.48+vec2(1.7,-2.4));
+  vec2 skyUv=d.xz/(0.30+max(d.y,0.0))*1.72+vec2(uTime*0.0017,0.0);
+  float warp=noise2(skyUv*0.48+vec2(1.7,-2.4));
   float cloudMacro=fbm2(skyUv+vec2(warp*1.7,uTime*0.002));
   float cloudDetail=noise2(skyUv*4.1-vec2(uTime*0.006,0.0));
   float cloud=smoothstep(0.43,0.73,cloudMacro*0.76+cloudDetail*0.24);

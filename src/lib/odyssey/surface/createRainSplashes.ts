@@ -82,6 +82,7 @@ export function createRainSplashes(): RainSplashes {
     polygonOffsetFactor: -2,
     polygonOffsetUnits: -2,
   });
+  material.forceSinglePass = true;
   const points = new THREE.InstancedMesh(geometry, material, count);
   const dummy = new THREE.Object3D();
   for (let index = 0; index < count; index += 1) {

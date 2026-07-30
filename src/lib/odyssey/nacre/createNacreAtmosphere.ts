@@ -55,7 +55,7 @@ function createDust(): THREE.Points {
     depthWrite: false,
   });
   const dust = new THREE.Points(geometry, material);
-  dust.name = 'High-altitude silica dust';
+  dust.name = 'Ground-skimming silica dust';
   dust.frustumCulled = false;
   dust.renderOrder = 8;
   return dust;

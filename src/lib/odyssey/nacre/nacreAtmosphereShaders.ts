@@ -37,8 +37,8 @@ void main(){
   float sunDot=max(dot(d,sunDir),0.0);
   color+=pow(sunDot,1700.0)*vec3(5.0,3.05,1.30);
   color+=pow(sunDot,16.0)*opticalDepth*vec3(0.72,0.25,0.045);
-  vec2 skyUv=vec2(atan(d.z,d.x)*2.15+uTime*0.0013,d.y*8.4);
-  float warp=fbm2(skyUv*0.43+vec2(2.7,-1.1));
+  vec2 skyUv=d.xz/(0.28+max(d.y,0.0))*2.05+vec2(uTime*0.0013,0.0);
+  float warp=noise2(skyUv*0.43+vec2(2.7,-1.1));
   float stream=fbm2(skyUv+vec2(warp*1.8,-uTime*0.002));
   float highDust=smoothstep(0.51,0.77,stream)*smoothstep(-0.08,0.08,d.y);
   vec3 dustLight=mix(vec3(0.12,0.035,0.012),vec3(0.53,0.20,0.055),pow(sunDot,3.0));

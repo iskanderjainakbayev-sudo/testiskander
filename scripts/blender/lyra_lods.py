@@ -57,8 +57,8 @@ def build_lod1(root: bpy.types.Object, materials: dict[str, bpy.types.Material])
         )
     box(
         "LOD1_Port_Radiator",
-        (0.4, 9.5, 4.1),
-        (-17.25, -8.8, 2.8),
+        (0.4, 14.0, 3.2),
+        (-17.25, -9.0, 2.6),
         materials["radiator"],
         lod,
         bevel=0.1,

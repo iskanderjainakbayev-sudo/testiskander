@@ -226,74 +226,113 @@ def _framed_recess(
             parent,
             1,
         )
-    for pipe_index, fraction in enumerate((0.22, 0.50, 0.78)):
-        angle = angle_start + (angle_end - angle_start) * fraction
-        material = materials["radiator"] if pipe_index == 1 else materials["metal"]
+    midpoint_y = (y_start + y_end) * 0.5
+    side_bay = abs(math.cos(angle_mid)) > 0.68
+    coolant_runs = (
+        ("Supply", angle_start + 0.075, angle_mid + 0.055, 0.067),
+        ("Return", angle_end - 0.075, angle_mid - 0.055, 0.058),
+    )
+    for pipe_index, (label, outer_angle, inner_angle, radius) in enumerate(coolant_runs):
+        bend_points = (
+            surface_point(y_start + 0.62, outer_angle, 0.17),
+            surface_point(midpoint_y - 2.25, outer_angle, 0.18),
+            surface_point(midpoint_y - 1.35, inner_angle, 0.23),
+            surface_point(midpoint_y + 2.10, inner_angle, 0.20),
+            surface_point(y_end - 0.62, outer_angle, 0.17),
+        )
         curve_tube(
-            f"{name}_LongitudinalPipe_{pipe_index + 1:02d}",
-            (
-                surface_point(y_start + 0.55, angle, 0.13),
-                surface_point((y_start + y_end) * 0.5, angle, 0.13),
-                surface_point(y_end - 0.55, angle, 0.13),
-            ),
-            0.055 if pipe_index == 1 else 0.043,
-            material,
+            f"{name}_BentCoolant{label}",
+            bend_points,
+            radius,
+            materials["radiator"],
             parent,
             1,
         )
-        for terminal_index, y in enumerate((y_start + 0.62, y_end - 0.62)):
+        for elbow_index in (1, 2):
             sphere(
-                f"{name}_PipeSocket_{pipe_index + 1:02d}_{terminal_index + 1:02d}",
-                0.095,
-                surface_point(y, angle, 0.18),
+                f"{name}_{label}Elbow_{elbow_index:02d}",
+                0.11,
+                bend_points[elbow_index],
                 materials["metal"],
                 parent,
                 10,
                 5,
             )
-    midpoint_y = (y_start + y_end) * 0.5
-    side_bay = abs(math.cos(angle_mid)) > 0.68
+    reservoir_specs = (
+        ("Primary", midpoint_y - 0.75, angle_start + 0.12, 2.05, 0.23, 0.20),
+        ("Accumulator", midpoint_y + 0.70, angle_end - 0.12, 1.55, 0.18, 0.28),
+    )
+    for reservoir_name, center_y, angle, length, radius, offset in reservoir_specs:
+        start = surface_point(center_y - length * 0.5, angle, offset)
+        end = surface_point(center_y + length * 0.5, angle, offset)
+        oriented_cylinder(
+            f"{name}_{reservoir_name}Reservoir",
+            start,
+            end,
+            radius,
+            materials["heat"],
+            parent,
+            18,
+            bevel=0.025,
+        )
+        for collar_index, y in enumerate(
+            (center_y - length * 0.38, center_y + length * 0.38)
+        ):
+            oriented_cylinder(
+                f"{name}_{reservoir_name}Clamp_{collar_index + 1:02d}",
+                surface_point(y - 0.09, angle, offset + 0.01),
+                surface_point(y + 0.09, angle, offset + 0.01),
+                radius + 0.045,
+                materials["metal"],
+                parent,
+                14,
+                bevel=0.012,
+            )
     manifold_location = surface_point(midpoint_y - 1.55, angle_mid, 0.16)
     box(
         f"{name}_ManifoldBlock",
-        (0.30, 1.75, 0.78) if side_bay else (1.75, 1.55, 0.30),
+        (0.32, 0.70, 1.24) if side_bay else (1.24, 0.70, 0.32),
         manifold_location,
-        materials["armor"],
+        materials["metal"],
         parent,
         bevel=0.10,
         segments=3,
     )
-    pump_y = midpoint_y + 1.35
-    oriented_cylinder(
-        f"{name}_CoolantPumpHousing",
-        surface_point(pump_y, angle_mid, 0.10),
-        surface_point(pump_y, angle_mid, 0.48),
-        0.34,
-        materials["armor"],
-        parent,
-        18,
-        bevel=0.025,
+    pump_specs = (
+        ("Main", midpoint_y + 2.25, angle_mid, 0.34, 0.58),
+        ("Auxiliary", midpoint_y - 3.05, angle_mid - 0.065, 0.25, 0.45),
     )
-    oriented_cylinder(
-        f"{name}_CoolantPumpCollar",
-        surface_point(pump_y, angle_mid, 0.46),
-        surface_point(pump_y, angle_mid, 0.64),
-        0.23,
-        materials["metal"],
-        parent,
-        16,
-        bevel=0.018,
-    )
-    oriented_cylinder(
-        f"{name}_PumpStatusLens",
-        surface_point(pump_y, angle_mid, 0.63),
-        surface_point(pump_y, angle_mid, 0.69),
-        0.095,
-        materials["cyan"],
-        parent,
-        12,
-        bevel=0.0,
-    )
+    for pump_name, pump_y, angle, radius, depth in pump_specs:
+        oriented_cylinder(
+            f"{name}_{pump_name}PumpHousing",
+            surface_point(pump_y, angle, 0.10),
+            surface_point(pump_y, angle, depth),
+            radius,
+            materials["armor"],
+            parent,
+            18,
+            bevel=0.025,
+        )
+        oriented_cylinder(
+            f"{name}_{pump_name}PumpCollar",
+            surface_point(pump_y, angle, depth - 0.03),
+            surface_point(pump_y, angle, depth + 0.16),
+            radius * 0.68,
+            materials["metal"],
+            parent,
+            16,
+            bevel=0.018,
+        )
+        oriented_cylinder(
+            f"{name}_{pump_name}StatusLens",
+            surface_point(pump_y, angle, depth + 0.15),
+            surface_point(pump_y, angle, depth + 0.21),
+            radius * 0.27,
+            materials["cyan"] if pump_name == "Main" else materials["amber"],
+            parent,
+            12,
+            bevel=0.0,
+        )
     curve_tube(
         f"{name}_BraidedWiringHarness",
         (

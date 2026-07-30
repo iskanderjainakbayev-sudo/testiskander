@@ -9,12 +9,12 @@ import bpy
 from lyra_common import box, curve_tube, cylinder, empty, finish_mesh, oriented_cylinder, sphere
 
 RADIATOR_OUTLINE = (
-    (-5.2, 1.0),
-    (-4.5, 4.3),
-    (0.8, 4.5),
-    (2.1, 3.9),
-    (1.7, 1.4),
-    (1.0, 0.9),
+    (-3.6, 1.2),
+    (-3.1, 3.8),
+    (0.2, 4.0),
+    (0.9, 3.5),
+    (0.7, 1.5),
+    (0.2, 1.1),
 )
 
 
@@ -256,7 +256,7 @@ def _radiator_blade(
     parent: bpy.types.Object,
     material: bpy.types.Material,
 ) -> None:
-    y_offset = -8.0 + offset_y
+    y_offset = -9.0 + offset_y
     thickness = 0.11
     front = [
         (x - thickness, y + y_offset + fan * (z - 3.0), z)
@@ -319,9 +319,9 @@ def build_thermal_system(root: bpy.types.Object, materials: dict[str, bpy.types.
             20,
         )
     blade_specs = (
-        (-16.55, -0.45, -2.60),
+        (-16.55, -0.50, -5.00),
         (-17.45, 0.0, 0.0),
-        (-18.35, 0.45, 2.60),
+        (-18.35, 0.50, 5.00),
     )
     for index, (x, fan, offset_y) in enumerate(blade_specs):
         _radiator_blade(
@@ -332,7 +332,7 @@ def build_thermal_system(root: bpy.types.Object, materials: dict[str, bpy.types.
             thermal,
             materials["radiator"],
         )
-        y_offset = -8.0 + offset_y
+        y_offset = -9.0 + offset_y
         outline = [
             (x - 0.14, y + y_offset + fan * (z - 3.0), z)
             for y, z in (*RADIATOR_OUTLINE, RADIATOR_OUTLINE[0])
@@ -349,8 +349,8 @@ def build_thermal_system(root: bpy.types.Object, materials: dict[str, bpy.types.
             curve_tube(
                 f"Radiator_Port_Blade_{index + 1:02d}_Rib_{rib_index + 1:02d}",
                 (
-                    (x - 0.145, -4.2 + y_offset + fan * (z - 3.0), z),
-                    (x - 0.145, 1.2 + y_offset + fan * (z - 3.0), z),
+                    (x - 0.145, -2.8 + y_offset + fan * (z - 3.0), z),
+                    (x - 0.145, 0.35 + y_offset + fan * (z - 3.0), z),
                 ),
                 0.052,
                 materials["metal"],

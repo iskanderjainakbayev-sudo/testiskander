@@ -60,7 +60,8 @@ export function addRing(
   );
   ring.position.set(...position);
   ring.rotation.set(...rotation);
-  ring.castShadow = true;
+  ring.castShadow = !material.transparent;
+  ring.receiveShadow = !material.transparent;
   group.add(ring);
   return ring;
 }

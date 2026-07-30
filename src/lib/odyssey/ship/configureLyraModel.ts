@@ -20,17 +20,18 @@ export function configureLyraModel(
   lod1.visible = false;
   root.traverse((object) => {
     if (!(object instanceof THREE.Mesh)) return;
-    object.castShadow = landed;
-    object.receiveShadow = landed;
     const materials = Array.isArray(object.material) ? object.material : [object.material];
     materials.forEach((material) => configureMaterial(material, anisotropy));
+    const isOpaque = materials.every((material) => !material.transparent);
+    object.castShadow = landed && isOpaque;
+    object.receiveShadow = landed && isOpaque;
   });
   root.updateMatrixWorld(true);
   return { root, lod0, lod1 };
 }
 
-export function selectLyraLod(variant: LyraVariant, distance: number) {
-  const showHero = distance < 280;
+export function selectLyraLod(variant: LyraVariant, distance: number): void {
+  const showHero = variant.lod0.visible ? distance < 300 : distance < 260;
   variant.lod0.visible = showHero;
   variant.lod1.visible = !showHero;
 }

@@ -88,6 +88,7 @@ export function createSolace(): SolaceVisual {
     depthWrite: false,
     side: THREE.DoubleSide,
   });
+  ringMaterial.forceSinglePass = true;
   const rings = new THREE.Mesh(new THREE.RingGeometry(82, 133, 192, 2), ringMaterial);
   rings.rotation.set(1.27, 0.18, -0.14);
   rings.renderOrder = 2;

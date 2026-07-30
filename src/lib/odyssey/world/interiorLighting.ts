@@ -17,6 +17,7 @@ export function buildInteriorLighting(
   cockpit.castShadow = true;
   cockpit.shadow.mapSize.set(512, 512);
   cockpit.shadow.bias = -0.0004;
+  cockpit.shadow.normalBias = 0.018;
   group.add(cockpit, cockpit.target);
 
   const forwardFill = new THREE.PointLight(0x7eb8b5, 3.8, 7.5, 2);

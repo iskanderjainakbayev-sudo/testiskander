@@ -68,6 +68,7 @@ export function createAtlas(): AtlasVisual {
     color: 0x62ddef,
     transparent: true,
     opacity: 0.72,
+    depthWrite: false,
     toneMapped: false,
   });
   glyphMaterial.fog = false;
@@ -86,8 +87,10 @@ export function createAtlas(): AtlasVisual {
     transparent: true,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
+    side: THREE.DoubleSide,
     toneMapped: false,
   });
+  portalMaterial.forceSinglePass = true;
   const portal = new THREE.Mesh(new THREE.PlaneGeometry(178, 178), portalMaterial);
   portal.position.z = -2;
   portal.renderOrder = -1;

@@ -27,6 +27,13 @@ float fbm(vec3 p) {
   float f=0.0, a=0.52;
   for(int i=0;i<5;i++){ f+=a*noise(p); p=p*2.03+3.7; a*=0.49; }
   return f;
+}
+vec3 detailNormal(vec3 p,vec3 n,float height,float strength){
+  vec3 dp1=dFdx(p),dp2=dFdy(p);
+  vec3 r1=cross(dp2,n),r2=cross(n,dp1);
+  float determinant=dot(dp1,r1);
+  vec2 gradient=vec2(dFdx(height),dFdy(height))*strength;
+  return normalize(abs(determinant)*n-sign(determinant)*(gradient.x*r1+gradient.y*r2));
 }`;
 
 export const OCEAN_FRAGMENT = `
@@ -39,9 +46,10 @@ uniform vec3 uLightDirection;
 ${NOISE_GLSL}
 void main() {
   vec3 localNormal = normalize(vLocal);
-  vec3 normalWorld = normalize(vNormalWorld);
   float continental = fbm(localNormal * 3.1 + vec3(0.0, uTime * 0.004, 0.0));
   float fine = fbm(localNormal * 18.0);
+  float detailFade=1.0-smoothstep(120.0,620.0,distance(cameraPosition,vWorld));
+  vec3 normalWorld=detailNormal(vWorld,normalize(vNormalWorld),(fine-0.5)*0.085,detailFade);
   float latitude = abs(localNormal.y);
   float ice = smoothstep(0.62, 0.92, latitude + (continental - 0.5) * 0.24);
   float shelf = smoothstep(0.48, 0.63, continental) * (1.0 - ice);
@@ -80,9 +88,12 @@ void main() {
   float density=smoothstep(0.58,0.76,large*0.72+detail*0.30+bands);
   vec3 normalWorld=normalize(vNormalWorld);
   vec3 lightDir=normalize(uLightDirection);
-  float light=0.2+max(dot(normalWorld,lightDir),0.0)*0.8;
+  float ndl=max(dot(normalWorld,lightDir),0.0);
+  float light=0.16+ndl*0.84;
   float rim=pow(1.0-max(dot(normalWorld,normalize(cameraPosition-vWorld)),0.0),3.0);
-  gl_FragColor=vec4(vec3(0.60,0.73,0.76)*light+rim*vec3(0.08,0.28,0.34),density*0.63);
+  float silver=pow(rim,2.0)*smoothstep(-0.08,0.55,dot(normalWorld,lightDir));
+  vec3 cloudColor=vec3(0.47,0.57,0.59)*light+silver*vec3(0.18,0.34,0.38);
+  gl_FragColor=vec4(cloudColor,density*(0.50+ndl*0.13));
 }`;
 
 export const ATMOSPHERE_FRAGMENT = `
@@ -93,10 +104,14 @@ uniform vec3 uLightDirection;
 void main() {
   vec3 viewDir=normalize(cameraPosition-vWorld);
   vec3 normalWorld=normalize(vNormalWorld);
-  float rim=pow(1.0-abs(dot(normalWorld,viewDir)),3.1);
-  float sun=smoothstep(-0.38,0.38,dot(normalWorld,normalize(uLightDirection)));
-  vec3 color=mix(vec3(0.005,0.10,0.19),vec3(0.12,0.61,0.88),sun);
-  gl_FragColor=vec4(color*rim*1.45,rim*0.74);
+  vec3 lightDir=normalize(uLightDirection);
+  float rim=pow(1.0-abs(dot(normalWorld,viewDir)),3.0);
+  float day=smoothstep(-0.34,0.32,dot(normalWorld,lightDir));
+  float terminator=pow(1.0-abs(dot(normalWorld,lightDir)),8.0);
+  float forward=pow(max(dot(viewDir,lightDir),0.0),9.0);
+  vec3 color=mix(vec3(0.003,0.033,0.075),vec3(0.075,0.39,0.58),day);
+  color+=terminator*vec3(0.19,0.20,0.15)+forward*vec3(0.11,0.25,0.27);
+  gl_FragColor=vec4(color*rim*1.32,rim*(0.43+day*0.25));
 }`;
 
 export const RING_FRAGMENT = `

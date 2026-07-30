@@ -32,6 +32,12 @@ export function createErodedMountainGeometry(): THREE.BufferGeometry {
       indices.push(lower, upper, lowerNext, lowerNext, upper, upperNext);
     }
   }
+  const top = positions.length / 3;
+  const topRing = (HEIGHTS.length - 1) * segments;
+  positions.push(0, 1.012, 0);
+  for (let segment = 0; segment < segments; segment += 1) {
+    indices.push(topRing + segment, top, topRing + (segment + 1) % segments);
+  }
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
   geometry.setIndex(indices);

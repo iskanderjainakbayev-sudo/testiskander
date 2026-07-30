@@ -37,6 +37,7 @@ export function createRenderer(canvas: HTMLCanvasElement): RenderRig {
     antialias: true,
     alpha: false,
     powerPreference: 'high-performance',
+    reversedDepthBuffer: true,
     stencil: false,
   });
 

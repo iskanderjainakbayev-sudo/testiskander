@@ -49,8 +49,8 @@ export function addInstances(
   });
   instances.instanceMatrix.setUsage(THREE.StaticDrawUsage);
   instances.computeBoundingSphere();
-  instances.castShadow = true;
-  instances.receiveShadow = true;
+  instances.castShadow = !material.transparent;
+  instances.receiveShadow = !material.transparent;
   group.add(instances);
   return instances;
 }
@@ -85,8 +85,10 @@ export function addCylinder(
 }
 
 export function finishMesh<T extends THREE.Mesh>(mesh: T): T {
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
+  const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+  const isOpaque = materials.every((material) => !material.transparent);
+  mesh.castShadow = isOpaque;
+  mesh.receiveShadow = isOpaque;
   return mesh;
 }
 

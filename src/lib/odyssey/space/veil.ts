@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 
+const VOID_RADIUS = 24;
+
 const PLANE_VERTEX = `
 varying vec2 vUvLocal;
 varying vec2 vPosition;
@@ -85,7 +87,10 @@ export function createVeil(): VeilVisual {
   root.name = 'The Veil gravitational wound';
 
   const voidMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
-  const voidSphere = new THREE.Mesh(new THREE.SphereGeometry(24, 48, 32), voidMaterial);
+  const voidSphere = new THREE.Mesh(
+    new THREE.SphereGeometry(VOID_RADIUS, 48, 32),
+    voidMaterial,
+  );
   voidSphere.renderOrder = 2;
   root.add(voidSphere);
 
@@ -99,6 +104,7 @@ export function createVeil(): VeilVisual {
     side: THREE.DoubleSide,
     toneMapped: false,
   });
+  discMaterial.forceSinglePass = true;
   const disc = new THREE.Mesh(new THREE.PlaneGeometry(250, 250), discMaterial);
   disc.rotation.set(1.23, 0.17, 0.28);
   disc.renderOrder = 1;
@@ -131,6 +137,7 @@ export function createVeil(): VeilVisual {
     update: (time, cameraInertial) => {
       disc.rotation.z = 0.28 + time * 0.007;
       direction.copy(cameraInertial).sub(root.position).normalize();
+      lens.position.copy(direction).multiplyScalar(VOID_RADIUS + 0.5);
       lens.quaternion.setFromUnitVectors(zAxis, direction);
     },
   };

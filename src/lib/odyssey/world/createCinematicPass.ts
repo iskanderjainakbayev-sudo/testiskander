@@ -66,14 +66,23 @@ export interface CinematicPass {
 
 export function createCinematicPass(): CinematicPass {
   const pass = new ShaderPass(CINEMATIC_SHADER);
+  let targetVelocity = 0;
+  let velocity = 0;
+  let previousTime = 0;
   return {
     pass,
     update: (time, width, height) => {
+      const delta = previousTime === 0
+        ? 1 / 60
+        : THREE.MathUtils.clamp(time - previousTime, 0, 0.05);
+      previousTime = time;
+      velocity = THREE.MathUtils.damp(velocity, targetVelocity, 12, delta);
       pass.uniforms.uTime.value = time;
       (pass.uniforms.uResolution.value as THREE.Vector2).set(width, height);
+      pass.uniforms.uVelocity.value = velocity;
     },
     setVelocity: (strength) => {
-      pass.uniforms.uVelocity.value = THREE.MathUtils.clamp(strength, 0, 1);
+      targetVelocity = THREE.MathUtils.clamp(strength, 0, 1);
     },
   };
 }

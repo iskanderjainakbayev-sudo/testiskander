@@ -93,7 +93,7 @@ function createForest(
   for (let index = 0; index < count; index += 1) {
     const center = FOREST_CENTERS[index % FOREST_CENTERS.length];
     const angle = random() * Math.PI * 2;
-    const radius = Math.pow(random(), 0.7) * 66;
+    const radius = Math.pow(random(), 1.32) * 66;
     const x = center[0] + Math.cos(angle) * radius;
     const z = center[1] + Math.sin(angle) * radius;
     const height = 2.8 + random() * random() * 10.8;

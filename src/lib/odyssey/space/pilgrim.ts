@@ -64,6 +64,7 @@ export function createPilgrim(): PilgrimVisual {
     transmission: 0.23,
     transparent: true,
     opacity: 0.84,
+    depthWrite: false,
   });
   glass.fog = false;
   const garden = new THREE.Mesh(new THREE.SphereGeometry(13, 28, 18), glass);

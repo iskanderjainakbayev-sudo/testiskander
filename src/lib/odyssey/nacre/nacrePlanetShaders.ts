@@ -26,6 +26,13 @@ float fbm(vec3 p){
   float sum=0.0,amp=0.52;
   for(int i=0;i<5;i++){sum+=noise3(p)*amp;p=p*2.07+4.17;amp*=0.48;}
   return sum;
+}
+vec3 detailNormal(vec3 p,vec3 n,float height,float strength){
+  vec3 dp1=dFdx(p),dp2=dFdy(p);
+  vec3 r1=cross(dp2,n),r2=cross(n,dp1);
+  float determinant=dot(dp1,r1);
+  vec2 gradient=vec2(dFdx(height),dFdy(height))*strength;
+  return normalize(abs(determinant)*n-sign(determinant)*(gradient.x*r1+gradient.y*r2));
 }`;
 
 export const NACRE_SURFACE_FRAGMENT = `
@@ -37,12 +44,14 @@ uniform vec3 uLightDirection;
 ${NOISE}
 void main(){
   vec3 sphere=normalize(vLocal);
-  vec3 n=normalize(vNormalWorld);
   float continents=fbm(sphere*3.2);
   float ridges=1.0-abs(fbm(sphere*8.7+vec3(7.1))*2.0-1.0);
   float canyons=smoothstep(0.77,0.91,ridges)*smoothstep(0.39,0.58,continents);
   float silica=smoothstep(0.64,0.82,fbm(sphere*19.0+vec3(-3.0,8.0,2.0)));
   float grains=fbm(sphere*54.0);
+  float detailFade=1.0-smoothstep(120.0,620.0,distance(cameraPosition,vWorld));
+  vec3 n=detailNormal(vWorld,normalize(vNormalWorld),
+    (grains-0.5)*0.07+(ridges-0.5)*0.045,detailFade);
   vec3 umber=mix(vec3(0.105,0.030,0.012),vec3(0.43,0.145,0.035),continents);
   vec3 ochre=mix(umber,vec3(0.82,0.43,0.12),grains*0.48);
   vec3 albedo=mix(ochre,vec3(0.055,0.018,0.012),canyons*0.88);
@@ -86,10 +95,12 @@ varying vec3 vNormalWorld;
 uniform vec3 uLightDirection;
 void main(){
   vec3 n=normalize(vNormalWorld),v=normalize(cameraPosition-vWorld);
+  vec3 lightDir=normalize(uLightDirection);
   float rim=pow(1.0-abs(dot(n,v)),3.0);
-  float day=smoothstep(-0.34,0.32,dot(n,normalize(uLightDirection)));
-  float forward=pow(max(dot(v,-normalize(uLightDirection)),0.0),7.0);
-  vec3 color=mix(vec3(0.16,0.018,0.003),vec3(1.0,0.40,0.095),day);
-  color+=forward*vec3(0.75,0.20,0.03);
-  gl_FragColor=vec4(color*rim*1.3,rim*(0.44+day*0.25));
+  float day=smoothstep(-0.34,0.32,dot(n,lightDir));
+  float terminator=pow(1.0-abs(dot(n,lightDir)),7.0);
+  float forward=pow(max(dot(v,lightDir),0.0),7.0);
+  vec3 color=mix(vec3(0.075,0.009,0.003),vec3(0.62,0.235,0.055),day);
+  color+=terminator*vec3(0.34,0.075,0.012)+forward*vec3(0.42,0.12,0.018);
+  gl_FragColor=vec4(color*rim*1.18,rim*(0.39+day*0.24));
 }`;

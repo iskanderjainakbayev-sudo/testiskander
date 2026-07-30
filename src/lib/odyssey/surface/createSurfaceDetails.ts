@@ -104,13 +104,14 @@ export function createSurfaceDetails(): SurfaceDetails {
     root,
     sampleSites,
     update: (time) => {
-      sampleSites.forEach((site, index) => {
-        site.rotation.y = time * (0.08 + index * 0.015);
+      for (let index = 0; index < sampleSites.length; index += 1) {
+        const site = sampleSites[index];
+        site.rotation.y = Math.sin(time * 0.17 + index * 1.7) * 0.026;
         const light = site.children[site.children.length - 1];
         if (light instanceof THREE.PointLight) {
           light.intensity = 3.5 + Math.sin(time * 1.4 + index) * 0.65;
         }
-      });
+      }
     },
   };
 }

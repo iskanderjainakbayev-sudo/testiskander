@@ -84,6 +84,7 @@ export function createTrafficMaterials(): TrafficMaterialBundle {
     toneMapped: false,
     fog: true,
   });
+  plume.forceSinglePass = true;
   const port = new THREE.MeshBasicMaterial({ color: 0xff3d36, toneMapped: false });
   const starboard = new THREE.MeshBasicMaterial({ color: 0x49ffc5, toneMapped: false });
   const contrail = new THREE.LineBasicMaterial({

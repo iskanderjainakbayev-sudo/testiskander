@@ -29,16 +29,21 @@ float noise3(vec3 p) {
 }
 float fbm(vec3 p) {
   float value = 0.0, amplitude = 0.52;
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < 4; i++) {
     value += amplitude * noise3(p);
     p = p * 2.03 + vec3(5.2, 1.3, 7.1);
     amplitude *= 0.48;
   }
   return value;
 }
+float cloudNoise(vec3 p) {
+  return noise3(p) * 0.57
+    + noise3(p * 2.07 + vec3(3.1, 7.4, 1.8)) * 0.29
+    + noise3(p * 4.19 - vec3(2.7, 4.2, 6.3)) * 0.14;
+}
 float cloud(vec3 d, vec3 center, float radius) {
   float falloff = exp(-pow(length(d - center) / radius, 2.0) * 2.2);
-  return falloff * smoothstep(0.39, 0.9, fbm(d * 4.2 + center * 7.0));
+  return falloff * smoothstep(0.39, 0.9, cloudNoise(d * 4.2 + center * 7.0));
 }
 void main() {
   vec3 d = normalize(vDirection);
@@ -47,7 +52,8 @@ void main() {
   float grain = fbm(d * 8.0);
   float broadBand = exp(-latitude * 7.5);
   float brightLane = exp(-latitude * 23.0) * smoothstep(0.28, 0.82, grain);
-  float dustLane = exp(-latitude * 35.0) * smoothstep(0.48, 0.78, fbm(d * 18.0 + 6.0));
+  float dustGrain = mix(grain, noise3(d * 31.0 + 6.0), 0.62);
+  float dustLane = exp(-latitude * 35.0) * smoothstep(0.48, 0.78, dustGrain);
   vec3 color = vec3(0.0018, 0.0027, 0.0075);
   color += broadBand * vec3(0.020, 0.024, 0.045) * (0.3 + grain);
   color += brightLane * vec3(0.12, 0.13, 0.17) * 0.43;
