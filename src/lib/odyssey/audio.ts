@@ -2,16 +2,12 @@ type UiSound = 'hover' | 'select' | 'error';
 
 export class OdysseyAudio {
   private context: AudioContext | null = null;
-  private master: GainNode | null = null;
-  private engine: GainNode | null = null;
+  private master: GainNode | null = null; private engine: GainNode | null = null;
   private engineFilter: BiquadFilterNode | null = null;
   private engineTones: OscillatorNode[] = [];
-  private noiseBuffer: AudioBuffer | null = null;
-  private musicTimer: number | null = null;
-  private musicStep = 0;
-  private scanStep = -1;
-  private throttle = 0;
-  private boosting = false;
+  private noiseBuffer: AudioBuffer | null = null; private musicTimer: number | null = null;
+  private musicStep = 0; private scanStep = -1;
+  private throttle = 0; private boosting = false;
 
   async start(): Promise<void> {
     if (typeof window === 'undefined' || !window.AudioContext) return;
@@ -19,6 +15,7 @@ export class OdysseyAudio {
     if (this.context?.state === 'suspended') {
       try { await this.context.resume(); } catch { /* Autoplay may still be locked. */ }
     }
+    if (this.context?.state === 'running' && this.musicStep === 0) this.musicPhrase();
   }
 
   stop(): void {
@@ -30,10 +27,8 @@ export class OdysseyAudio {
       window.setTimeout(() => { void context.close().catch(() => undefined); }, 180);
     }
     this.context = this.master = this.engine = this.engineFilter = null;
-    this.engineTones = [];
-    this.noiseBuffer = null;
-    this.musicTimer = null;
-    this.scanStep = -1;
+    this.engineTones = []; this.noiseBuffer = null; this.musicTimer = null;
+    this.musicStep = 0; this.scanStep = -1;
   }
 
   setFlight(throttle: number, boost: boolean): void {
@@ -59,8 +54,7 @@ export class OdysseyAudio {
   }
 
   footstep(): void {
-    this.noise(0.09, 330, 0.035, 'lowpass');
-    this.tone(76, 0.075, 0.025, 'sine', 48);
+    this.noise(0.09, 330, 0.035, 'lowpass'); this.tone(76, 0.075, 0.025, 'sine', 48);
   }
 
   scan(progress: number): void {
@@ -75,24 +69,20 @@ export class OdysseyAudio {
   }
 
   discovery(): void {
-    [220, 329.63, 440, 659.25].forEach((note, index) => {
-      this.tone(note, 1.7, 0.035, index % 2 ? 'triangle' : 'sine', note * 1.008, index * 0.13);
-    });
+    [220, 329.63, 440, 659.25].forEach((note, index) =>
+      this.tone(note, 1.7, 0.035, index % 2 ? 'triangle' : 'sine', note * 1.008, index * 0.13));
   }
 
   gate(): void {
-    this.noise(1.8, 760, 0.045, 'bandpass');
-    this.tone(54, 2.35, 0.085, 'sine', 27);
+    this.noise(1.8, 760, 0.045, 'bandpass'); this.tone(54, 2.35, 0.085, 'sine', 27);
     this.tone(108, 2.1, 0.035, 'triangle', 432, 0.12);
     this.tone(864, 1.6, 0.018, 'sine', 1296, 0.35);
   }
 
   private createSoundscape(): void {
     const context = new AudioContext({ latencyHint: 'interactive' });
-    const master = context.createGain();
-    const compressor = context.createDynamicsCompressor();
-    master.gain.value = 0.42;
-    compressor.threshold.value = -18; compressor.knee.value = 18;
+    const master = context.createGain(); const compressor = context.createDynamicsCompressor();
+    master.gain.value = 0.42; compressor.threshold.value = -18; compressor.knee.value = 18;
     compressor.ratio.value = 4; compressor.attack.value = 0.008; compressor.release.value = 0.32;
     master.connect(compressor).connect(context.destination);
     this.context = context; this.master = master;
@@ -104,8 +94,7 @@ export class OdysseyAudio {
   }
 
   private createEngine(context: AudioContext, master: GainNode): void {
-    const engine = context.createGain();
-    const filter = context.createBiquadFilter();
+    const engine = context.createGain(); const filter = context.createBiquadFilter();
     engine.gain.value = 0.025; filter.type = 'lowpass'; filter.frequency.value = 190;
     filter.Q.value = 0.7; filter.connect(engine).connect(master);
     this.engineTones = [34, 69].map((frequency, index) => {
@@ -113,8 +102,7 @@ export class OdysseyAudio {
       tone.type = index ? 'triangle' : 'sine'; tone.frequency.value = frequency;
       tone.connect(filter); tone.start(); return tone;
     });
-    const air = context.createBufferSource();
-    const airGain = context.createGain();
+    const air = context.createBufferSource(); const airGain = context.createGain();
     air.buffer = this.noiseBuffer; air.loop = true; airGain.gain.value = 0.14;
     air.connect(airGain).connect(filter); air.start();
     this.engine = engine; this.engineFilter = filter;
@@ -126,8 +114,7 @@ export class OdysseyAudio {
     const roots = [73.42, 65.41, 87.31, 55];
     const root = roots[this.musicStep++ % roots.length];
     const now = context.currentTime;
-    const gain = context.createGain();
-    const filter = context.createBiquadFilter();
+    const gain = context.createGain(); const filter = context.createBiquadFilter();
     gain.gain.setValueAtTime(0.0001, now);
     gain.gain.exponentialRampToValueAtTime(0.014, now + 1.8);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + 7.8);
@@ -147,8 +134,7 @@ export class OdysseyAudio {
     const context = this.ready();
     if (!context || !this.master) return;
     const start = context.currentTime + delay;
-    const voice = context.createOscillator();
-    const gain = context.createGain();
+    const voice = context.createOscillator(); const gain = context.createGain();
     voice.type = type; voice.frequency.setValueAtTime(frequency, start);
     voice.frequency.exponentialRampToValueAtTime(Math.max(20, end), start + life);
     gain.gain.setValueAtTime(0.0001, start);
@@ -160,11 +146,11 @@ export class OdysseyAudio {
   private noise(life: number, frequency: number, level: number, type: BiquadFilterType): void {
     const context = this.ready();
     if (!context || !this.master || !this.noiseBuffer) return;
-    const source = context.createBufferSource();
-    const filter = context.createBiquadFilter();
+    const source = context.createBufferSource(); const filter = context.createBiquadFilter();
     const gain = context.createGain();
     const now = context.currentTime;
-    source.buffer = this.noiseBuffer; filter.type = type; filter.frequency.value = frequency;
+    source.buffer = this.noiseBuffer; source.loop = true;
+    filter.type = type; filter.frequency.value = frequency;
     filter.Q.value = 0.8; gain.gain.setValueAtTime(level, now);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + life);
     source.connect(filter).connect(gain).connect(this.master);
@@ -182,7 +168,5 @@ export class OdysseyAudio {
     return buffer;
   }
 
-  private ready(): AudioContext | null {
-    return this.context?.state === 'running' ? this.context : null;
-  }
+  private ready(): AudioContext | null { return this.context?.state === 'running' ? this.context : null; }
 }
