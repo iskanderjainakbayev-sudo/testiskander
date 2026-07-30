@@ -105,7 +105,7 @@ export class OdysseyWorld {
     this.space.update(time / 1000, this.render.camera, this.flight.position, inverse);
     this.space.setWarp?.(this.flight.boost ? this.flight.throttle : 0);
     this.ship.update(time / 1000);
-    this.render.renderer.render(this.render.scene, this.render.camera);
+    this.render.render();
     this.publishSnapshot(delta);
   };
 
