@@ -3,6 +3,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { disposeSpaceScene } from '../space/disposeSpaceScene';
 import type { LandablePlanetId } from '../types';
@@ -58,6 +59,8 @@ export function createRenderer(canvas: HTMLCanvasElement): RenderRig {
   composer.addPass(bloom);
   const cinematic = createCinematicPass();
   composer.addPass(cinematic.pass);
+  const smaa = new SMAAPass(1, 1);
+  composer.addPass(smaa);
   const outputPass = new OutputPass();
   composer.addPass(outputPass);
   const drawingSize = new THREE.Vector2();
@@ -119,6 +122,7 @@ export function createRenderer(canvas: HTMLCanvasElement): RenderRig {
       window.removeEventListener('resize', resize);
       bloom.dispose();
       cinematic.pass.dispose();
+      smaa.dispose();
       outputPass.dispose();
       composer.dispose();
       environment.dispose();
