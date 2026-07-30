@@ -64,7 +64,7 @@ def create_materials() -> dict[str, bpy.types.Material]:
     atlases = create_texture_atlases()
     materials = {
         "hull": _material("MAT_LYRA_Hull_Ivory", (0.57, 0.56, 0.52, 1), 0.10, 0.62, atlases),
-        "armor": _material("MAT_LYRA_Armor_Graphite", (0.17, 0.18, 0.19, 1), 0.52, 0.47, atlases),
+        "armor": _material("MAT_LYRA_Armor_Graphite", (0.20, 0.22, 0.23, 1), 0.45, 0.50, atlases),
         "metal": _material("MAT_LYRA_Metal_Satin", (0.11, 0.13, 0.14, 1), 0.84, 0.42),
         "glass": _material("MAT_LYRA_Canopy_Glass", (0.008, 0.027, 0.035, 1), 0.15, 0.07),
         "heat": _material("MAT_LYRA_Heat_Ceramic", (0.10, 0.075, 0.055, 1), 0.68, 0.41, atlases),

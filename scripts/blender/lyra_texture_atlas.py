@@ -63,17 +63,17 @@ def _sample(x: int, y: int) -> tuple[tuple[float, float, float], float, tuple[fl
         brushed += 0.011 * math.sin((u - v) * 0.037 / scale)
         oxidation = 0.018 * max(0.0, math.sin((u * 0.019 + v * 0.007) / scale))
         color = (
-            0.165 + grain * 0.030 + brushed,
-            0.180 + grain * 0.025 + brushed * 0.72 + oxidation * 0.35,
-            0.190 + grain * 0.022 + brushed * 0.56 + oxidation,
+            0.205 + grain * 0.030 + brushed,
+            0.220 + grain * 0.025 + brushed * 0.72 + oxidation * 0.35,
+            0.230 + grain * 0.022 + brushed * 0.56 + oxidation,
         )
         roughness = 0.46 + abs(brushed) * 1.45 + grain * 0.045 + oxidation * 1.2
     elif x < half:
         radial = math.hypot(u - half * 0.5, v - half * 0.5) / (half * 0.72)
         heat = max(0.0, 1.0 - radial) * 0.11
         soot = 0.035 * (grain + 1.0) + 0.11 * (v / half) ** 2
-        color = (0.10 + heat + soot, 0.078 + heat * 0.45, 0.062 + heat * 0.18)
-        roughness = 0.52 + soot * 0.75 + grain * 0.045
+        color = (0.14 + heat + soot, 0.105 + heat * 0.45, 0.075 + heat * 0.18)
+        roughness = 0.56 + soot * 0.75 + grain * 0.045
     else:
         rib = 0.065 if u % round(34 * scale) < round(5 * scale) else 0.0
         oxidation = 0.025 * (grain + 1.0)

@@ -137,13 +137,25 @@ def build_engines(root: bpy.types.Object, materials: dict[str, bpy.types.Materia
         _open_nozzle(
             f"Engine_{index + 1:02d}_CeramicThroat",
             x,
-            -29.69 + aft,
+            -29.74 + aft,
             z,
-            0.49 * scale,
-            0.28 * scale,
-            0.52,
-            28,
+            0.58 * scale,
+            0.42 * scale,
+            0.70,
+            32,
             materials["heat"],
+            engine,
+        )
+        _open_nozzle(
+            f"Engine_{index + 1:02d}_PlasmaContainmentCone",
+            x,
+            -29.62 + aft,
+            z,
+            0.34 * scale,
+            0.48 * scale,
+            0.34,
+            24,
+            materials["amber"],
             engine,
         )
         cylinder(
@@ -179,8 +191,8 @@ def build_engines(root: bpy.types.Object, materials: dict[str, bpy.types.Materia
         )
         torus(
             f"Engine_{index + 1:02d}_PlasmaAperture",
-            0.31 * scale,
-            0.055,
+            0.42 * scale,
+            0.065,
             (x, -29.68 + aft, z),
             materials["amber"],
             engine,
@@ -189,7 +201,7 @@ def build_engines(root: bpy.types.Object, materials: dict[str, bpy.types.Materia
         )
         sphere(
             f"Engine_{index + 1:02d}_PlasmaVolume",
-            0.29 * scale,
+            0.42 * scale,
             (x, -29.56 + aft, z),
             materials["amber"],
             engine,
@@ -231,7 +243,7 @@ def _add_engine_internals(
     )
     torus(
         f"Engine_{index + 1:02d}_CombustorInnerRing",
-        0.44 * scale,
+        0.52 * scale,
         0.045,
         (x, -29.82 + aft, z),
         materials["heat"],
@@ -241,10 +253,10 @@ def _add_engine_internals(
     )
     cone(
         f"Engine_{index + 1:02d}_Centerbody",
-        0.20 * scale,
-        0.055,
-        1.14,
-        (x, -30.45 + aft, z),
+        0.15 * scale,
+        0.045,
+        0.84,
+        (x, -30.36 + aft, z),
         materials["heat"],
         engine,
         24,
