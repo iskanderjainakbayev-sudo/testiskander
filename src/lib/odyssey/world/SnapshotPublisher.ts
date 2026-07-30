@@ -2,6 +2,7 @@ import type * as THREE from 'three';
 import type { CinematicState } from '../cinematics';
 import type { TrafficUpdate } from '../space/traffic/createTrafficSystem';
 import type { WorldCallbacks } from '../types';
+import type { RenderStats } from './createRenderer';
 import type { OdysseySession } from './OdysseySession';
 import type { FrameMetrics } from './PerformanceMonitor';
 import type { PlanetExpeditions } from './PlanetExpeditions';
@@ -19,6 +20,7 @@ export class SnapshotPublisher {
     expedition: PlanetExpeditions,
     traffic: TrafficUpdate,
     metrics: FrameMetrics,
+    renderStats: RenderStats,
     cinematic: CinematicState,
   ) {
     this.elapsed += delta;
@@ -38,6 +40,8 @@ export class SnapshotPublisher {
       frameTimeP95: metrics.p95Milliseconds,
       frameTimeP99: metrics.p99Milliseconds,
       longFramePercent: metrics.longFramePercent,
+      drawCalls: renderStats.calls,
+      triangles: renderStats.triangles,
       transitionProgress: session.landing.progress,
       surfaceSamples: expedition.walker.samples.size,
       locationName: mode === 'surface' ? expedition.locationName : undefined,

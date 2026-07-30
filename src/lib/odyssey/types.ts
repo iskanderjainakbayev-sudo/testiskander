@@ -58,6 +58,8 @@ export interface GameSnapshot {
   frameTimeP95: number;
   frameTimeP99: number;
   longFramePercent: number;
+  drawCalls: number;
+  triangles: number;
   cinematicCaption: string;
   cinematicProgress: number;
   cinematicShot: string;

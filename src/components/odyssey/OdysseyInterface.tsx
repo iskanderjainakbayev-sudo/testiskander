@@ -49,6 +49,8 @@ export function OdysseyInterface({
         frameTimeP95={snapshot.frameTimeP95}
         frameTimeP99={snapshot.frameTimeP99}
         longFramePercent={snapshot.longFramePercent}
+        drawCalls={snapshot.drawCalls}
+        triangles={snapshot.triangles}
       />
       {snapshot.mode === 'menu' && (
         <MainMenu

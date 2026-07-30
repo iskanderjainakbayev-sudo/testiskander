@@ -39,6 +39,8 @@ export const INITIAL_SNAPSHOT: GameSnapshot = {
   frameTimeP95: 16.67,
   frameTimeP99: 16.67,
   longFramePercent: 0,
+  drawCalls: 0,
+  triangles: 0,
   cinematicCaption: '',
   cinematicProgress: 0,
   cinematicShot: 'idle',
@@ -62,6 +64,8 @@ interface SnapshotOptions {
   frameTimeP95?: number;
   frameTimeP99?: number;
   longFramePercent?: number;
+  drawCalls?: number;
+  triangles?: number;
   cinematicCaption?: string;
   cinematicProgress?: number;
   cinematicShot?: string;
@@ -122,6 +126,8 @@ export function createSnapshot(options: SnapshotOptions): GameSnapshot {
     frameTimeP95: options.frameTimeP95 ?? 16.67,
     frameTimeP99: options.frameTimeP99 ?? 16.67,
     longFramePercent: options.longFramePercent ?? 0,
+    drawCalls: options.drawCalls ?? 0,
+    triangles: options.triangles ?? 0,
     cinematicCaption: options.cinematicCaption ?? '',
     cinematicProgress: options.cinematicProgress ?? 0,
     cinematicShot: options.cinematicShot ?? 'idle',

@@ -83,7 +83,7 @@ export class OdysseyFrameLoop {
     this.expedition.update(time / 1000, this.render.camera);
     this.space.setWarp?.(flight.boost ? flight.throttle : 0);
     if (this.ship.group.visible) this.ship.update(time / 1000);
-    this.render.render();
+    const renderStats = this.render.render();
     this.snapshots.update(
       delta,
       this.session,
@@ -91,6 +91,7 @@ export class OdysseyFrameLoop {
       this.expedition,
       this.traffic,
       this.performanceMonitor.read(),
+      renderStats,
       this.cinematics.state,
     );
   };

@@ -3,6 +3,8 @@ interface CinematicFrameProps {
   frameTimeP95: number;
   frameTimeP99: number;
   longFramePercent: number;
+  drawCalls: number;
+  triangles: number;
 }
 
 export function CinematicFrame({
@@ -10,6 +12,8 @@ export function CinematicFrame({
   frameTimeP95,
   frameTimeP99,
   longFramePercent,
+  drawCalls,
+  triangles,
 }: CinematicFrameProps) {
   const performanceClass = frameRate > 0 && frameRate < 44 ? ' is-warm' : '';
 
@@ -28,6 +32,8 @@ export function CinematicFrame({
         data-p95-ms={frameTimeP95.toFixed(2)}
         data-p99-ms={frameTimeP99.toFixed(2)}
         data-long-frame-percent={longFramePercent.toFixed(3)}
+        data-draw-calls={drawCalls}
+        data-triangles={triangles}
       >
         LYRA // {Math.round(frameRate || 60)} FPS
       </span>

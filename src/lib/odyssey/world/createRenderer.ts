@@ -12,10 +12,15 @@ export interface RenderRig {
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
   renderer: THREE.WebGLRenderer;
-  render: () => void;
+  render: () => RenderStats;
   resize: () => void;
   setAtmosphere: (surfaceAmount: number, planet: LandablePlanetId) => void;
   dispose: () => void;
+}
+
+export interface RenderStats {
+  calls: number;
+  triangles: number;
 }
 
 export function createRenderer(canvas: HTMLCanvasElement): RenderRig {
@@ -38,6 +43,7 @@ export function createRenderer(canvas: HTMLCanvasElement): RenderRig {
   renderer.toneMappingExposure = 1.06;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.info.autoReset = false;
   const pmrem = new THREE.PMREMGenerator(renderer);
   const room = new RoomEnvironment();
   const environment = pmrem.fromScene(room, 0.045).texture;
@@ -57,6 +63,7 @@ export function createRenderer(canvas: HTMLCanvasElement): RenderRig {
   const spaceFog = new THREE.Color(0x010309);
   const solaceFog = new THREE.Color(0x10262a);
   const nacreFog = new THREE.Color(0x5a2814);
+  const renderStats: RenderStats = { calls: 0, triangles: 0 };
 
   const resize = () => {
     const width = canvas.clientWidth || window.innerWidth;
@@ -77,9 +84,13 @@ export function createRenderer(canvas: HTMLCanvasElement): RenderRig {
     camera,
     renderer,
     render: () => {
+      renderer.info.reset();
       renderer.getDrawingBufferSize(drawingSize);
       cinematic.update(performance.now() / 1000, drawingSize.x, drawingSize.y);
       composer.render();
+      renderStats.calls = renderer.info.render.calls;
+      renderStats.triangles = renderer.info.render.triangles;
+      return renderStats;
     },
     resize,
     setAtmosphere: (surfaceAmount, planet) => {
