@@ -48,14 +48,14 @@ def _text_mask(
 
 
 def marking_kind(u: int, v: int, half: int) -> str | None:
-    if _text_mask(u, v, half, "LYRA07", (0.07, 0.73), 0.0085):
+    if _text_mask(u, v, half, "LYRA07", (0.07, 0.76), 0.0048):
         return "serial"
-    if _text_mask(u, v, half, "NO STEP", (0.48, 0.19), 0.0065):
+    if _text_mask(u, v, half, "NO STEP", (0.54, 0.20), 0.0040):
         return "warning"
-    if _text_mask(u, v, half, "CAUTION", (0.08, 0.31), 0.0058):
+    if _text_mask(u, v, half, "CAUTION", (0.08, 0.31), 0.0037):
         return "warning"
     normalized_u, normalized_v = u / half, v / half
-    if 0.07 < normalized_u < 0.42 and 0.12 < normalized_v < 0.155:
-        stripe = int((normalized_u + normalized_v * 1.7) * 46.0)
+    if 0.07 < normalized_u < 0.24 and 0.12 < normalized_v < 0.137:
+        stripe = int((normalized_u + normalized_v * 1.7) * 72.0)
         return "hazard" if stripe % 2 == 0 else None
     return None

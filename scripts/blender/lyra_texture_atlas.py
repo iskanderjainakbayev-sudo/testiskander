@@ -51,9 +51,9 @@ def _sample(x: int, y: int) -> tuple[tuple[float, float, float], float, tuple[fl
     groove_x = (seam_width * 0.5 - seam_x) * 0.035 if seam_x < seam_width else 0.0
     groove_y = (seam_width * 0.5 - seam_y) * 0.035 if seam_y < seam_width else 0.0
     if x < half and y >= half:
-        base = 0.61 + grain * 0.035
-        color = (base + 0.12, base + 0.11, base + 0.08)
-        roughness = 0.56 + grain * 0.085
+        base = 0.50 + grain * 0.038
+        color = (base + 0.11, base + 0.10, base + 0.075)
+        roughness = 0.62 + grain * 0.085
         if (68 < v % 192 < 74 and 30 < u % 256 < 150):
             color = tuple(channel * 0.28 for channel in color)
         if (136 < v % 256 < 141 and 178 < u % 256 < 244):
@@ -63,9 +63,9 @@ def _sample(x: int, y: int) -> tuple[tuple[float, float, float], float, tuple[fl
         brushed += 0.011 * math.sin((u - v) * 0.037 / scale)
         oxidation = 0.018 * max(0.0, math.sin((u * 0.019 + v * 0.007) / scale))
         color = (
-            0.125 + grain * 0.026 + brushed,
-            0.142 + grain * 0.021 + brushed * 0.72 + oxidation * 0.35,
-            0.151 + grain * 0.018 + brushed * 0.56 + oxidation,
+            0.165 + grain * 0.030 + brushed,
+            0.180 + grain * 0.025 + brushed * 0.72 + oxidation * 0.35,
+            0.190 + grain * 0.022 + brushed * 0.56 + oxidation,
         )
         roughness = 0.46 + abs(brushed) * 1.45 + grain * 0.045 + oxidation * 1.2
     elif x < half:
@@ -82,15 +82,17 @@ def _sample(x: int, y: int) -> tuple[tuple[float, float, float], float, tuple[fl
     color = tuple(channel * (1.0 - cavity_grime * 0.12) for channel in color)
     roughness += cavity_grime * 0.07
     marking = marking_kind(u, v, half) if y >= half else None
+    if x >= half and marking in ("warning", "hazard"):
+        marking = None
     if marking == "serial":
-        color = (0.48, 0.51, 0.49) if x >= half else (0.11, 0.13, 0.14)
+        color = (0.28, 0.30, 0.29) if x >= half else (0.10, 0.115, 0.12)
         roughness = 0.62
     elif marking == "warning":
-        color = (0.68, 0.17, 0.025)
-        roughness = 0.58
+        color = (0.43, 0.095, 0.018)
+        roughness = 0.64
     elif marking == "hazard":
-        color = (0.57, 0.16, 0.024)
-        roughness = 0.61
+        color = (0.38, 0.085, 0.016)
+        roughness = 0.66
     if seam:
         color = tuple(channel * 0.78 for channel in color)
         roughness += 0.15
@@ -136,7 +138,7 @@ def create_texture_atlases() -> dict[str, bpy.types.Image]:
             rough_pixels.extend((roughness, roughness, roughness, 1.0))
             normal_pixels.extend((*normal, 1.0))
     return {
-        "color": _image("TEX_LYRA_SurfaceColor_1K", color_pixels, "sRGB"),
-        "roughness": _image("TEX_LYRA_SurfaceRoughness_1K", rough_pixels, "Non-Color"),
-        "normal": _image("TEX_LYRA_SurfaceNormal_1K", normal_pixels, "Non-Color"),
+        "color": _image("TEX_LYRA_SurfaceColor_2K", color_pixels, "sRGB"),
+        "roughness": _image("TEX_LYRA_SurfaceRoughness_2K", rough_pixels, "Non-Color"),
+        "normal": _image("TEX_LYRA_SurfaceNormal_2K", normal_pixels, "Non-Color"),
     }

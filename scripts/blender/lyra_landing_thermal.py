@@ -179,7 +179,7 @@ def _add_gear_well(
                 mount[1],
                 mount[2] + 0.03,
             ),
-            materials["hull"],
+            materials["armor"],
             parent,
             rotation=(0.0, side * 0.13, 0.0),
             bevel=0.08,

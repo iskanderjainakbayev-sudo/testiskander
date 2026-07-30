@@ -63,9 +63,9 @@ def _material(
 def create_materials() -> dict[str, bpy.types.Material]:
     atlases = create_texture_atlases()
     materials = {
-        "hull": _material("MAT_LYRA_Hull_Ivory", (0.69, 0.68, 0.62, 1), 0.10, 0.52, atlases),
-        "armor": _material("MAT_LYRA_Armor_Graphite", (0.13, 0.15, 0.16, 1), 0.55, 0.43, atlases),
-        "metal": _material("MAT_LYRA_Metal_Satin", (0.08, 0.10, 0.11, 1), 0.86, 0.40),
+        "hull": _material("MAT_LYRA_Hull_Ivory", (0.57, 0.56, 0.52, 1), 0.10, 0.62, atlases),
+        "armor": _material("MAT_LYRA_Armor_Graphite", (0.17, 0.18, 0.19, 1), 0.52, 0.47, atlases),
+        "metal": _material("MAT_LYRA_Metal_Satin", (0.11, 0.13, 0.14, 1), 0.84, 0.42),
         "glass": _material("MAT_LYRA_Canopy_Glass", (0.008, 0.027, 0.035, 1), 0.15, 0.07),
         "heat": _material("MAT_LYRA_Heat_Ceramic", (0.10, 0.075, 0.055, 1), 0.68, 0.41, atlases),
         "cyan": _material(
@@ -74,7 +74,7 @@ def create_materials() -> dict[str, bpy.types.Material]:
         "amber": _material(
             "MAT_LYRA_Emission_Amber", (0.26, 0.055, 0.006, 1), 0.28, 0.26, emission=(1.0, 0.075, 0.004), emission_strength=3.0
         ),
-        "radiator": _material("MAT_LYRA_Radiator_Copper", (0.18, 0.055, 0.021, 1), 0.86, 0.40, atlases),
+        "radiator": _material("MAT_LYRA_Radiator_Copper", (0.13, 0.040, 0.016, 1), 0.84, 0.46, atlases),
     }
     glass = materials["glass"]
     glass.surface_render_method = "DITHERED"
