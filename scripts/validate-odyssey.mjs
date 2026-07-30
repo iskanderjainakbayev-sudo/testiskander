@@ -23,6 +23,9 @@ try {
   const { surfaceHeight } = await vite.ssrLoadModule(
     '/src/lib/odyssey/surface/terrainNoise.ts',
   );
+  const { nacreHeight } = await vite.ssrLoadModule(
+    '/src/lib/odyssey/nacre/nacreNoise.ts',
+  );
 
   const mission = new MissionController();
   assert(mission.update(2.3, true, 0, 1) === 'solace', 'Solace survey must resolve');
@@ -31,7 +34,13 @@ try {
   mission.cycleTarget();
   assert(mission.target === 'solace', 'Solace ground expedition must gate the route');
   mission.completeSolaceExpedition();
-  assert(mission.echoes === 1 && mission.target === 'veil', 'Surface samples must unlock Veil');
+  assert(mission.echoes === 1 && mission.target === 'nacre', 'Surface samples must unlock Nacre');
+  assert(mission.update(2.3, true, 0, 1) === 'nacre', 'Nacre survey must resolve');
+  assert(mission.nacreSurveyed, 'Nacre orbital survey flag must persist');
+  mission.cycleTarget();
+  assert(mission.target === 'nacre', 'Nacre ground expedition must gate the route');
+  mission.completeNacreExpedition();
+  assert(mission.echoes === 1 && mission.target === 'veil', 'Nacre must unlock Veil without adding an echo');
   assert(mission.update(2.3, true, 0, 1) === 'veil', 'Veil scan must resolve');
   assert(mission.update(2.3, true, 0, 1) === 'pilgrim', 'Pilgrim scan must resolve');
   assert(mission.echoes === 3 && mission.target === 'atlas', 'Three echoes must unlock Atlas');
@@ -48,6 +57,7 @@ try {
   for (let x = -420; x <= 420; x += 35) {
     for (let z = -420; z <= 420; z += 35) {
       assert(Number.isFinite(surfaceHeight(x, z)), 'Solace terrain contains a non-finite height');
+      assert(Number.isFinite(nacreHeight(x, z)), 'Nacre terrain contains a non-finite height');
     }
   }
 
@@ -65,7 +75,7 @@ try {
     cinematicVelocityJump: cinematic.maximumNormalizedVelocityJump,
     syntheticPerformance: metrics,
     traffic: 'finite-and-disposed',
-    terrain: 'finite',
+    terrain: 'solace-and-nacre-finite',
   }, null, 2) + '\n');
 } finally {
   await vite.close();
