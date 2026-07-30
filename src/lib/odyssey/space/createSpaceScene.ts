@@ -7,6 +7,7 @@ import { disposeSpaceScene } from './disposeSpaceScene';
 import { createPilgrim } from './pilgrim';
 import { createSolace } from './solace';
 import { createDistantStars, createNearStars } from './starfield';
+import { createTrafficSystem, type TrafficUpdate } from './traffic/createTrafficSystem';
 import { createVeil } from './veil';
 
 export interface SpaceSceneRig {
@@ -18,7 +19,7 @@ export interface SpaceSceneRig {
     camera: THREE.Camera,
     shipPosition: THREE.Vector3,
     inverseShipQuaternion: THREE.Quaternion,
-  ) => void;
+  ) => TrafficUpdate;
   setWarp?: (strength: number) => void;
   dispose: () => void;
 }
@@ -41,6 +42,7 @@ export function createSpaceScene(): SpaceSceneRig {
   starRotation.add(deepSky.mesh, distantStars.points);
   group.add(nearStars.points);
 
+  const traffic = createTrafficSystem();
   const solace = createSolace();
   const veil = createVeil();
   const pilgrim = createPilgrim();
@@ -55,6 +57,7 @@ export function createSpaceScene(): SpaceSceneRig {
     setBodyPosition(bodies[id], id);
     group.add(bodies[id]);
   });
+  group.add(traffic.group);
 
   const ambient = new THREE.AmbientLight(0x122134, 0.42);
   const keyLight = new THREE.DirectionalLight(0xb8d5ff, 2.25);
@@ -86,7 +89,7 @@ export function createSpaceScene(): SpaceSceneRig {
     camera: THREE.Camera,
     shipPosition: THREE.Vector3,
     inverseShipQuaternion: THREE.Quaternion,
-  ): void => {
+  ): TrafficUpdate => {
     group.quaternion.copy(inverseShipQuaternion);
     group.position.copy(shipPosition).multiplyScalar(-1).applyQuaternion(inverseShipQuaternion);
 
@@ -120,6 +123,7 @@ export function createSpaceScene(): SpaceSceneRig {
     veil.update(time, cameraInertial);
     pilgrim.update(time);
     atlas.update(time);
+    return traffic.update(time, shipPosition);
   };
 
   return {
@@ -130,6 +134,9 @@ export function createSpaceScene(): SpaceSceneRig {
     setWarp: (strength) => {
       warpTarget = THREE.MathUtils.clamp(strength, 0, 1);
     },
-    dispose: () => disposeSpaceScene(group),
+    dispose: () => {
+      traffic.dispose();
+      disposeSpaceScene(group);
+    },
   };
 }

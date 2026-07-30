@@ -1,0 +1,19 @@
+{
+  "asset": "LYRA_EXPLORER_65M",
+  "lod0_triangles": 72228,
+  "lod1_triangles": 5248,
+  "collider_triangles": 140,
+  "materials": [
+    "MAT_LYRA_Armor_Graphite",
+    "MAT_LYRA_Canopy_Glass",
+    "MAT_LYRA_Emission_Amber",
+    "MAT_LYRA_Emission_Cyan",
+    "MAT_LYRA_Heat_Ceramic",
+    "MAT_LYRA_Hull_Ivory",
+    "MAT_LYRA_Metal_Satin",
+    "MAT_LYRA_Radiator_Copper"
+  ],
+  "mesh_nodes": 201,
+  "coordinate_convention": "Blender +Z up/+Y forward; glTF and Three.js +Y up/-Z forward",
+  "transform_violations": []
+}

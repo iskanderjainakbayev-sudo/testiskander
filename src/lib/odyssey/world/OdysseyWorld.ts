@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { loadSave } from '../save';
 import { createSpaceScene, type SpaceSceneRig } from '../space/createSpaceScene';
+import type { TrafficUpdate } from '../space/traffic/createTrafficSystem';
 import { createSolaceSurface, type SolaceSurface } from '../surface/createSolaceSurface';
 import type { WorldCallbacks } from '../types';
 import { createRenderer, type RenderRig } from './createRenderer';
@@ -25,6 +26,11 @@ export class OdysseyWorld {
   private lastTime = performance.now();
   private snapshotTime = 0;
   private fps = 60;
+  private traffic: TrafficUpdate = {
+    nearestShipName: null,
+    nearestShipDistance: Number.POSITIVE_INFINITY,
+    encounterMessage: null,
+  };
   private readonly inverseQuaternion = new THREE.Quaternion();
 
   constructor(canvas: HTMLCanvasElement, private readonly callbacks: WorldCallbacks) {
@@ -118,7 +124,15 @@ export class OdysseyWorld {
     this.syncEnvironment();
     flight.getInverseQuaternion(this.inverseQuaternion);
     if (this.space.group.visible) {
-      this.space.update(time / 1000, this.render.camera, flight.position, this.inverseQuaternion);
+      this.traffic = this.space.update(
+        time / 1000,
+        this.render.camera,
+        flight.position,
+        this.inverseQuaternion,
+      );
+      if (mode === 'flight' && this.traffic.encounterMessage) {
+        this.session.mission.showTransmission(this.traffic.encounterMessage, 6);
+      }
     }
     if (this.surface.group.visible) this.surface.update(time / 1000, this.render.camera);
     this.space.setWarp?.(flight.boost ? flight.throttle : 0);
@@ -144,6 +158,8 @@ export class OdysseyWorld {
       transitionProgress: this.session.landing.progress,
       surfaceSamples: this.surfaceController.samples.size,
       locationName: mode === 'surface' ? 'SOLACE / RAINSHELF 04' : undefined,
+      nearestShipName: this.traffic.nearestShipName,
+      nearestShipDistance: this.traffic.nearestShipDistance,
       canLand: this.session.canLand(),
     }));
   }

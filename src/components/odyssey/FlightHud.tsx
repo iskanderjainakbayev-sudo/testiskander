@@ -6,6 +6,7 @@ import { ObjectiveReadout } from './ObjectiveReadout';
 import { ShipSystems } from './ShipSystems';
 import { TargetMarker } from './TargetMarker';
 import { TouchActions } from './TouchActions';
+import { TrafficContact } from './TrafficContact';
 import { Transmission } from './Transmission';
 
 interface FlightHudProps {
@@ -38,6 +39,7 @@ export function FlightHud({ snapshot, onInteract, onScan, onCycleTarget, onLand 
         echoes={snapshot.echoes}
         scannedCount={snapshot.scanned.length}
       />
+      <TrafficContact snapshot={snapshot} />
       <button className={`odx-scan${scan > 0 ? ' is-scanning' : ''}`} style={scanStyle} onClick={onScan}>
         <span className="odx-scan__ring" aria-hidden="true"><i /><b /></span>
         <span><small>{scan > 0 ? 'SPECTRAL RESOLUTION' : 'DEEP FIELD ARRAY'}</small><strong>{scan > 0 ? `${Math.round(scan)}%` : inRange ? 'HOLD Q · ACQUIRE ECHO' : 'APPROACH TARGET'}</strong></span>
