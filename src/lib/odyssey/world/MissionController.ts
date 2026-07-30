@@ -13,6 +13,7 @@ export class MissionController {
   target: DiscoveryId = 'solace';
   scanProgress = 0;
   transmission: string | null = null;
+  solaceSurveyed = false;
   private transmissionTime = 0;
 
   reset() {
@@ -20,18 +21,21 @@ export class MissionController {
     this.target = 'solace';
     this.scanProgress = 0;
     this.transmission = null;
+    this.solaceSurveyed = false;
     this.transmissionTime = 0;
   }
 
-  restore(scanned: DiscoveryId[], target: DiscoveryId) {
+  restore(scanned: DiscoveryId[], target: DiscoveryId, solaceSurveyed = false) {
     this.scanned = [...scanned];
     this.target = target;
     this.scanProgress = 0;
     this.transmission = null;
+    this.solaceSurveyed = solaceSurveyed || scanned.includes('solace');
     this.transmissionTime = 0;
   }
 
   cycleTarget() {
+    if (this.solaceSurveyed && !this.scanned.includes('solace')) return;
     const unlocked = TARGET_ORDER.filter((id) => (
       (id !== 'atlas' || this.echoes >= 3) && !this.scanned.includes(id)
     ));
@@ -43,6 +47,10 @@ export class MissionController {
 
   update(delta: number, scanning: boolean, distance: number, alignment: number) {
     this.updateTime(delta);
+    if (this.target === 'solace' && this.solaceSurveyed) {
+      this.scanProgress = 0;
+      return null;
+    }
     if (this.scanned.includes(this.target)) {
       this.scanProgress = 0;
       return null;
@@ -53,14 +61,22 @@ export class MissionController {
       ? Math.min(1, this.scanProgress + delta / 2.25)
       : Math.max(0, this.scanProgress - delta * 0.72);
     if (this.scanProgress < 1) return null;
-    this.scanned.push(this.target);
+    if (this.target === 'solace') this.solaceSurveyed = true;
+    else this.scanned.push(this.target);
     this.transmission = TRANSMISSIONS[this.target];
     this.transmissionTime = this.target === 'atlas' ? 12 : 8;
     const completed = this.target;
-    const next = TARGET_ORDER.find((id) => id !== 'atlas' && !this.scanned.includes(id));
-    this.target = next ?? 'atlas';
+    if (completed !== 'solace') {
+      const next = TARGET_ORDER.find((id) => id !== 'atlas' && !this.scanned.includes(id));
+      this.target = next ?? 'atlas';
+    }
     this.scanProgress = 0;
     return completed;
+  }
+
+  completeSolaceExpedition() {
+    if (!this.scanned.includes('solace')) this.scanned.push('solace');
+    this.target = TARGET_ORDER.find((id) => id !== 'atlas' && !this.scanned.includes(id)) ?? 'atlas';
   }
 
   updateTime(delta: number) {

@@ -45,8 +45,9 @@ export class OdysseyWorld {
   }
 
   start = (newGame = false) => {
+    const save = this.session.start(newGame, this.input);
     if (newGame) this.expedition.reset();
-    this.session.start(newGame, this.input);
+    else this.expedition.restore(save?.surfaceSamples ?? this.session.surfaceSamples);
   };
   resume = () => this.session.resume(this.input);
   interact = () => {

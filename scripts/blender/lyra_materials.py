@@ -102,16 +102,16 @@ def _material(
 def create_materials() -> dict[str, bpy.types.Material]:
     atlas = create_atlas()
     materials = {
-        "hull": _material("MAT_LYRA_Hull_Ivory", (0.66, 0.65, 0.60, 1), 0.58, 0.34, atlas),
-        "armor": _material("MAT_LYRA_Armor_Graphite", (0.04, 0.05, 0.06, 1), 0.72, 0.30, atlas),
+        "hull": _material("MAT_LYRA_Hull_Ivory", (0.66, 0.65, 0.60, 1), 0.24, 0.39, atlas),
+        "armor": _material("MAT_LYRA_Armor_Graphite", (0.04, 0.05, 0.06, 1), 0.62, 0.36, atlas),
         "metal": _material("MAT_LYRA_Metal_Satin", (0.12, 0.15, 0.17, 1), 0.88, 0.22),
         "glass": _material("MAT_LYRA_Canopy_Glass", (0.008, 0.027, 0.035, 1), 0.15, 0.07),
         "heat": _material("MAT_LYRA_Heat_Ceramic", (0.10, 0.075, 0.055, 1), 0.76, 0.41, atlas),
         "cyan": _material(
-            "MAT_LYRA_Emission_Cyan", (0.01, 0.22, 0.31, 1), 0.35, 0.18, emission=(0.0, 0.78, 1.0), emission_strength=6.0
+            "MAT_LYRA_Emission_Cyan", (0.01, 0.22, 0.31, 1), 0.35, 0.18, emission=(0.0, 0.78, 1.0), emission_strength=5.0
         ),
         "amber": _material(
-            "MAT_LYRA_Emission_Amber", (0.31, 0.10, 0.01, 1), 0.28, 0.24, emission=(1.0, 0.20, 0.01), emission_strength=8.0
+            "MAT_LYRA_Emission_Amber", (0.31, 0.10, 0.01, 1), 0.28, 0.24, emission=(1.0, 0.20, 0.01), emission_strength=4.2
         ),
         "radiator": _material("MAT_LYRA_Radiator_Copper", (0.30, 0.10, 0.035, 1), 0.91, 0.25, atlas),
     }

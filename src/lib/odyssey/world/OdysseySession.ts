@@ -2,7 +2,7 @@ import type * as THREE from 'three';
 import { OdysseyAudio } from '../audio';
 import { DISCOVERIES } from '../discoveries';
 import { clearSave, loadSave, storeSave } from '../save';
-import type { DiscoveryId, GameMode, WorldCallbacks } from '../types';
+import type { DiscoveryId, GameMode, SaveData, WorldCallbacks } from '../types';
 import { FlightController } from './FlightController';
 import type { InputController } from './InputController';
 import { LandingController } from './LandingController';
@@ -20,8 +20,9 @@ export class OdysseySession {
   fuel = 100;
   manualScanUntil = 0;
   endingTimer = 0;
+  surfaceSamples: number[] = [];
 
-  start(newGame: boolean, input: InputController) {
+  start(newGame: boolean, input: InputController): SaveData | null {
     void this.audio.start();
     input.clear();
     this.manualScanUntil = 0;
@@ -30,11 +31,14 @@ export class OdysseySession {
     const save = newGame ? null : loadSave();
     if (newGame) clearSave();
     if (save) {
-      this.mission.restore(save.scanned, save.target);
+      this.mission.restore(save.scanned, save.target, save.solaceSurveyed);
+      this.surfaceSamples = save.surfaceSamples
+        ?? (save.scanned.includes('solace') ? [0, 1, 2] : []);
       this.flight.position.set(...save.shipPosition);
       this.mode = 'flight';
     } else {
       this.mission.reset();
+      this.surfaceSamples = [];
       this.walking.reset();
       this.mode = 'walking';
     }
@@ -42,6 +46,7 @@ export class OdysseySession {
     this.fuel = 100;
     input.requestLock();
     this.audio.ui('select');
+    return save;
   }
 
   resume(input: InputController) {
@@ -55,7 +60,9 @@ export class OdysseySession {
   }
 
   canLand() {
-    return this.mode === 'flight' && this.flight.distanceTo('solace') < 220;
+    return this.mode === 'flight'
+      && this.mission.solaceSurveyed
+      && this.flight.distanceTo('solace') < 220;
   }
 
   beginLanding(input: InputController) {
@@ -73,6 +80,13 @@ export class OdysseySession {
     this.mode = 'takeoff';
     input.clear();
     this.audio.gate();
+    this.persist();
+  }
+
+  recordSurfaceSample(index: number) {
+    if (!this.surfaceSamples.includes(index)) this.surfaceSamples.push(index);
+    if (this.surfaceSamples.length >= 3) this.mission.completeSolaceExpedition();
+    this.persist();
   }
 
   cycleTarget() {
@@ -107,11 +121,17 @@ export class OdysseySession {
       return;
     }
     this.audio.discovery();
+    this.persist();
+  }
+
+  persist() {
     storeSave({
       scanned: this.mission.scanned,
       echoes: this.mission.echoes,
       target: this.mission.target,
       shipPosition: this.flight.position.toArray(),
+      solaceSurveyed: this.mission.solaceSurveyed,
+      surfaceSamples: [...this.surfaceSamples],
     });
   }
 

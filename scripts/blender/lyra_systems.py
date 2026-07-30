@@ -30,6 +30,7 @@ def build_systems(root: bpy.types.Object, materials: dict[str, bpy.types.Materia
 
 def build_engines(root: bpy.types.Object, materials: dict[str, bpy.types.Material]) -> None:
     engines = empty("PROPULSION_THREE_VECTOR", root)
+    aft = -1.5
     for index, (x, z, scale) in enumerate(((-4.8, -0.4, 0.92), (0.0, -0.7, 1.12), (4.8, -0.4, 0.92))):
         engine = empty(f"Engine_{index + 1:02d}_{'Center' if index == 1 else 'Port' if x < 0 else 'Starboard'}", engines)
         cone(
@@ -37,7 +38,7 @@ def build_engines(root: bpy.types.Object, materials: dict[str, bpy.types.Materia
             1.22 * scale,
             2.15 * scale,
             3.8,
-            (x, -28.8, z),
+            (x, -28.8 + aft, z),
             materials["heat"],
             engine,
             64,
@@ -49,7 +50,7 @@ def build_engines(root: bpy.types.Object, materials: dict[str, bpy.types.Materia
             0.74 * scale,
             1.58 * scale,
             3.0,
-            (x, -29.25, z),
+            (x, -29.25 + aft, z),
             materials["metal"],
             engine,
             56,
@@ -60,7 +61,7 @@ def build_engines(root: bpy.types.Object, materials: dict[str, bpy.types.Materia
             f"Engine_{index + 1:02d}_Cowl",
             1.65 * scale,
             2.7,
-            (x, -26.25, z),
+            (x, -26.25 + aft, z),
             materials["armor"],
             engine,
             56,
@@ -71,7 +72,7 @@ def build_engines(root: bpy.types.Object, materials: dict[str, bpy.types.Materia
             f"Engine_{index + 1:02d}_ExitRing",
             1.72 * scale,
             0.16,
-            (x, -30.72, z),
+            (x, -30.72 + aft, z),
             materials["heat"],
             engine,
             major_segments=64,
@@ -81,7 +82,7 @@ def build_engines(root: bpy.types.Object, materials: dict[str, bpy.types.Materia
             f"Engine_{index + 1:02d}_VectorRing",
             1.36 * scale,
             0.12,
-            (x, -27.42, z),
+            (x, -27.42 + aft, z),
             materials["metal"],
             engine,
             major_segments=56,
@@ -91,7 +92,7 @@ def build_engines(root: bpy.types.Object, materials: dict[str, bpy.types.Materia
             f"Engine_{index + 1:02d}_PlasmaAperture",
             1.30 * scale,
             0.18,
-            (x, -30.83, z),
+            (x, -30.83 + aft, z),
             materials["amber"],
             engine,
             56,
@@ -105,7 +106,7 @@ def build_engines(root: bpy.types.Object, materials: dict[str, bpy.types.Materia
             box(
                 f"Engine_{index + 1:02d}_BellPetal_{vane + 1:02d}",
                 (0.16, 1.65, 0.62),
-                (px, -29.62, pz),
+                (px, -29.62 + aft, pz),
                 materials["heat"],
                 engine,
                 rotation=(0.0, -angle, 0.0),
@@ -114,8 +115,8 @@ def build_engines(root: bpy.types.Object, materials: dict[str, bpy.types.Materia
             )
         for actuator in range(4):
             angle = math.tau * actuator / 4 + math.pi / 4
-            start = (x + math.cos(angle) * 2.0 * scale, -26.6, z + math.sin(angle) * 2.0 * scale)
-            end = (x + math.cos(angle) * 1.55 * scale, -29.2, z + math.sin(angle) * 1.55 * scale)
+            start = (x + math.cos(angle) * 2.0 * scale, -26.6 + aft, z + math.sin(angle) * 2.0 * scale)
+            end = (x + math.cos(angle) * 1.55 * scale, -29.2 + aft, z + math.sin(angle) * 1.55 * scale)
             oriented_cylinder(
                 f"Engine_{index + 1:02d}_Actuator_{actuator + 1:02d}",
                 start,
@@ -127,7 +128,11 @@ def build_engines(root: bpy.types.Object, materials: dict[str, bpy.types.Materia
             )
         curve_tube(
             f"Engine_{index + 1:02d}_CoolantFeed",
-            ((x - 0.55, -24.8, z + 1.05), (x - 0.85, -27.0, z + 1.5), (x - 0.72, -29.0, z + 1.58)),
+            (
+                (x - 0.55, -24.8 + aft, z + 1.05),
+                (x - 0.85, -27.0 + aft, z + 1.5),
+                (x - 0.72, -29.0 + aft, z + 1.58),
+            ),
             0.11,
             materials["radiator"],
             engine,
@@ -179,6 +184,31 @@ def build_landing_gear(root: bpy.types.Object, materials: dict[str, bpy.types.Ma
             )
 
 
+def _radiator_blade(
+    name: str,
+    x: float,
+    fan: float,
+    parent: bpy.types.Object,
+    material: bpy.types.Material,
+) -> None:
+    outline = ((-8.1, 0.5), (-6.8, 6.0), (1.9, 6.25), (3.9, 5.25), (3.2, 1.1), (2.0, 0.25))
+    thickness = 0.11
+    front = [(x - thickness, y + fan * (z - 3.0), z) for y, z in outline]
+    back = [(x + thickness, y + fan * (z - 3.0), z) for y, z in outline]
+    vertices = front + back
+    count = len(outline)
+    faces = [tuple(range(count)), tuple(reversed(range(count, count * 2)))]
+    for index in range(count):
+        nxt = (index + 1) % count
+        faces.append((index, nxt, count + nxt, count + index))
+    mesh = bpy.data.meshes.new(f"{name}_Mesh")
+    mesh.from_pydata(vertices, [], faces)
+    mesh.update()
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.scene.collection.objects.link(obj)
+    finish_mesh(obj, parent, material, bevel=0.09, bevel_segments=3, smooth=True)
+
+
 def build_thermal_system(root: bpy.types.Object, materials: dict[str, bpy.types.Material]) -> None:
     thermal = empty("THERMAL_ASYMMETRIC_BALANCE", root)
     oriented_cylinder(
@@ -190,36 +220,25 @@ def build_thermal_system(root: bpy.types.Object, materials: dict[str, bpy.types.
         thermal,
         28,
     )
-    box(
-        "Radiator_Port_MainPanel",
-        (0.42, 12.8, 6.2),
-        (-17.15, -2.7, 3.2),
-        materials["radiator"],
-        thermal,
-        rotation=(0.08, 0.0, -0.04),
-        bevel=0.18,
-        segments=3,
-    )
-    for index in range(13):
-        y = -8.15 + index * 0.91
-        box(
-            f"Radiator_Port_FluidRib_{index + 1:02d}",
-            (0.55, 0.095, 5.8),
-            (-17.38, y, 3.2),
+    for index, (x, fan) in enumerate(((-16.95, -0.08), (-17.58, 0.0), (-18.21, 0.08))):
+        _radiator_blade(
+            f"Radiator_Port_TaperedBlade_{index + 1:02d}", x, fan, thermal, materials["radiator"]
+        )
+    for index, z in enumerate((0.62, 1.75, 2.9, 4.05, 5.18, 6.0)):
+        curve_tube(
+            f"Radiator_Port_CoolantRib_{index + 1:02d}",
+            ((-18.35, -7.7, z), (-18.42, -2.5, z + 0.16), (-18.33, 2.6, z - 0.04)),
+            0.055,
             materials["metal"],
             thermal,
-            bevel=0.025,
-            segments=2,
         )
-    for z in (0.25, 6.15):
-        box(
-            f"Radiator_Port_Frame_{int(z * 100):03d}",
-            (0.62, 12.9, 0.18),
-            (-17.42, -2.7, z),
-            materials["metal"],
-            thermal,
-            bevel=0.04,
+    for index, points in enumerate(
+        (
+            ((-18.4, -8.1, 0.5), (-18.4, -6.8, 6.0), (-18.4, 1.9, 6.25)),
+            ((-18.4, 1.9, 6.25), (-18.4, 3.9, 5.25), (-18.4, 2.0, 0.25)),
         )
+    ):
+        curve_tube(f"Radiator_Port_EdgeFrame_{index + 1:02d}", points, 0.09, materials["metal"], thermal)
     curve_tube(
         "Radiator_Port_CoolantSupply",
         ((-8.2, -0.5, 2.9), (-12.0, -1.2, 3.6), (-16.9, -1.2, 5.7)),

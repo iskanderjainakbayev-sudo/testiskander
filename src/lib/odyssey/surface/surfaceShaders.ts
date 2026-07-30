@@ -83,3 +83,27 @@ void main() {
   color+=stars*vec3(0.44,0.62,0.72);
   gl_FragColor=vec4(color,1.0);
 }`;
+
+export const RAIN_VERTEX = `
+precision highp float;
+attribute float aTail;
+attribute float aSpeed;
+uniform float uTime;
+varying float vTail;
+void main() {
+  float fall=mod(position.y-uTime*aSpeed+42.0,42.0);
+  vec3 p=vec3(
+    position.x+sin(uTime*0.7+position.z)*0.34,
+    fall-aTail*(0.42+aSpeed*0.035),
+    position.z+uTime*0.22
+  );
+  vTail=aTail;
+  gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);
+}`;
+
+export const RAIN_FRAGMENT = `
+precision highp float;
+varying float vTail;
+void main() {
+  gl_FragColor=vec4(0.58,0.78,0.79,mix(0.3,0.04,vTail));
+}`;

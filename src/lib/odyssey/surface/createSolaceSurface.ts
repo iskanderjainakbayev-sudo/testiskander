@@ -1,8 +1,15 @@
 import * as THREE from 'three';
 import { disposeSpaceScene } from '../space/disposeSpaceScene';
 import { createSurfaceDetails } from './createSurfaceDetails';
-import { surfaceHeight } from './terrainNoise';
-import { SKY_FRAGMENT, TERRAIN_FRAGMENT, TERRAIN_VERTEX, WATER_FRAGMENT } from './surfaceShaders';
+import { seededRandom, surfaceHeight } from './terrainNoise';
+import {
+  RAIN_FRAGMENT,
+  RAIN_VERTEX,
+  SKY_FRAGMENT,
+  TERRAIN_FRAGMENT,
+  TERRAIN_VERTEX,
+  WATER_FRAGMENT,
+} from './surfaceShaders';
 
 export interface SolaceSurface {
   group: THREE.Group;
@@ -47,6 +54,9 @@ function createWater() {
     transparent: true,
     depthWrite: false,
     side: THREE.DoubleSide,
+    polygonOffset: true,
+    polygonOffsetFactor: -1,
+    polygonOffsetUnits: -1,
   });
   const water = new THREE.Mesh(new THREE.PlaneGeometry(900, 900), material);
   water.rotation.x = -Math.PI / 2;
@@ -72,24 +82,34 @@ function createSky() {
 }
 
 function createPrecipitation() {
-  const random = () => Math.random();
-  const positions = new Float32Array(900 * 3);
-  for (let index = 0; index < 900; index += 1) {
-    positions[index * 3] = (random() - 0.5) * 100;
-    positions[index * 3 + 1] = random() * 42;
-    positions[index * 3 + 2] = (random() - 0.5) * 100;
+  const random = seededRandom(0x501ace);
+  const count = 760;
+  const positions = new Float32Array(count * 6);
+  const tails = new Float32Array(count * 2);
+  const speeds = new Float32Array(count * 2);
+  for (let index = 0; index < count; index += 1) {
+    const base = index * 6;
+    const x = (random() - 0.5) * 100;
+    const y = random() * 42;
+    const z = (random() - 0.5) * 100;
+    const speed = 6.4 + random() * 5.1;
+    positions.set([x, y, z, x, y, z], base);
+    tails[index * 2 + 1] = 1;
+    speeds[index * 2] = speeds[index * 2 + 1] = speed;
   }
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  const material = new THREE.PointsMaterial({
-    color: 0xb9d4d2,
-    size: 0.11,
+  geometry.setAttribute('aTail', new THREE.BufferAttribute(tails, 1));
+  geometry.setAttribute('aSpeed', new THREE.BufferAttribute(speeds, 1));
+  const material = new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 } },
+    vertexShader: RAIN_VERTEX,
+    fragmentShader: RAIN_FRAGMENT,
     transparent: true,
-    opacity: 0.34,
     depthWrite: false,
     blending: THREE.AdditiveBlending,
   });
-  return new THREE.Points(geometry, material);
+  return new THREE.LineSegments(geometry, material);
 }
 
 export function createSolaceSurface(): SolaceSurface {
@@ -116,14 +136,9 @@ export function createSolaceSurface(): SolaceSurface {
     update: (time, camera) => {
       (water.material as THREE.ShaderMaterial).uniforms.uTime.value = time;
       (sky.material as THREE.ShaderMaterial).uniforms.uTime.value = time;
+      (precipitation.material as THREE.ShaderMaterial).uniforms.uTime.value = time;
       sky.position.copy(camera.position);
       precipitation.position.set(camera.position.x, 0, camera.position.z);
-      const attribute = precipitation.geometry.getAttribute('position');
-      for (let index = 0; index < attribute.count; index += 1) {
-        const y = attribute.getY(index) - 0.055;
-        attribute.setY(index, y < 0 ? 42 : y);
-      }
-      attribute.needsUpdate = true;
       details.update(time);
     },
     dispose: () => disposeSpaceScene(group),

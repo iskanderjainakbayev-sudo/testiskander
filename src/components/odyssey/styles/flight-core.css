@@ -44,6 +44,8 @@
 .odx-scan small,.odx-scan strong { display:block; }
 .odx-scan small { color:rgba(186,207,209,.45); font-size:7px; letter-spacing:.18em; }
 .odx-scan strong { margin-top:5px; font-size:8px; letter-spacing:.14em; }
+.odx-scan:disabled { cursor:default; }
+.odx-scan:disabled .odx-scan__ring { background:conic-gradient(var(--odx-amber) 360deg,rgba(149,195,199,.13) 0); }
 .odx-scan.is-scanning .odx-scan__ring { box-shadow:0 0 22px rgba(155,205,209,.16); animation:odx-pulse 1.4s ease-in-out infinite; }
 .odx-flight__hints,.odx-walk__hints { position:absolute; bottom:2.3vh; left:50%; display:flex; gap:21px; transform:translateX(-50%); color:rgba(191,210,212,.35); font-size:7px; letter-spacing:.1em; white-space:nowrap; }
 .odx-flight__hints kbd,.odx-walk__hints kbd { margin-right:5px; color:rgba(220,231,232,.65); }

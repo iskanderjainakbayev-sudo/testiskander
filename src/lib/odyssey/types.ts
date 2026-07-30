@@ -45,6 +45,7 @@ export interface GameSnapshot {
   scanProgress: number;
   transitionProgress: number;
   surfaceSamples: number;
+  solaceSurveyed: boolean;
   locationName: string;
   nearestShipName: string | null;
   nearestShipDistance: number;
@@ -66,4 +67,6 @@ export interface SaveData {
   echoes: number;
   target: DiscoveryId;
   shipPosition: [number, number, number];
+  solaceSurveyed?: boolean;
+  surfaceSamples?: number[];
 }

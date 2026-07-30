@@ -24,6 +24,7 @@ export const INITIAL_SNAPSHOT: GameSnapshot = {
   scanProgress: 0,
   transitionProgress: 0,
   surfaceSamples: 0,
+  solaceSurveyed: false,
   locationName: 'LYRA / DECK 01',
   nearestShipName: null,
   nearestShipDistance: Number.POSITIVE_INFINITY,
@@ -68,7 +69,12 @@ export function createSnapshot(options: SnapshotOptions): GameSnapshot {
   }
   return {
     mode,
-    objective: getObjective(mission.scanned, mode, options.surfaceSamples),
+    objective: getObjective(
+      mission.scanned,
+      mode,
+      options.surfaceSamples,
+      mission.solaceSurveyed,
+    ),
     target: mission.target,
     targetName: discovery.name,
     targetDistance: localTarget.length(),
@@ -90,6 +96,7 @@ export function createSnapshot(options: SnapshotOptions): GameSnapshot {
     scanProgress: mission.scanProgress,
     transitionProgress: options.transitionProgress ?? 0,
     surfaceSamples: options.surfaceSamples ?? 0,
+    solaceSurveyed: mission.solaceSurveyed,
     locationName: options.locationName ?? (mode === 'walking' ? 'LYRA / DECK 01' : 'HELIOS NULL'),
     nearestShipName: options.nearestShipName ?? null,
     nearestShipDistance: options.nearestShipDistance ?? Number.POSITIVE_INFINITY,

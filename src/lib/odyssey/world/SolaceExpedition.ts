@@ -20,6 +20,10 @@ export class SolaceExpedition {
     this.walker.resetExpedition();
   }
 
+  restore(samples: number[]) {
+    this.walker.restoreExpedition(samples);
+  }
+
   nearbyInteraction() {
     const nearby = this.walker.nearbyAction();
     return nearby ? `E  ·  ${nearby.label}` : null;
@@ -33,6 +37,7 @@ export class SolaceExpedition {
       return;
     }
     this.walker.completeSample(nearby.action.index);
+    session.recordSurfaceSample(nearby.action.index);
     session.audio.discovery();
     const count = this.walker.samples.size;
     const message = count < 3

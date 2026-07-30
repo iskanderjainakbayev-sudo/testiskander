@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 
 import bpy
+from mathutils import Vector
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parents[1]
@@ -47,6 +48,32 @@ def main() -> None:
     if missing:
         raise RuntimeError(f"Missing required nodes: {missing}")
     document = glb_json(GLB_PATH)
+    bounds = [
+        obj.matrix_world @ Vector(corner)
+        for obj in groups["LOD0_HERO"].children_recursive
+        if obj.type == "MESH"
+        for corner in obj.bound_box
+    ]
+    minimum = [min(point[axis] for point in bounds) for axis in range(3)]
+    maximum = [max(point[axis] for point in bounds) for axis in range(3)]
+    dimensions = [maximum[axis] - minimum[axis] for axis in range(3)]
+    generic_names = {
+        "Cube",
+        "Cylinder",
+        "Cone",
+        "Sphere",
+        "Torus",
+    }
+    generic_meshes = [
+        mesh.get("name", "")
+        for mesh in document.get("meshes", [])
+        if mesh.get("name", "").split(".")[0] in generic_names
+    ]
+    transformed_mesh_nodes = [
+        node.get("name", f"node_{index}")
+        for index, node in enumerate(document.get("nodes", []))
+        if "mesh" in node and any(key in node for key in ("translation", "rotation", "scale", "matrix"))
+    ]
     report = {
         "file_bytes": GLB_PATH.stat().st_size,
         "lod0_triangles": triangle_count(groups["LOD0_HERO"]),
@@ -62,16 +89,29 @@ def main() -> None:
         "extensions_used": document.get("extensionsUsed", []),
         "root_extras": root.keys(),
         "required_nodes": list(required),
+        "lod0_bounds_min": minimum,
+        "lod0_bounds_max": maximum,
+        "lod0_dimensions": dimensions,
+        "generic_mesh_names": generic_meshes,
+        "transformed_mesh_nodes": transformed_mesh_nodes,
     }
     failures = []
     if not 35_000 <= report["lod0_triangles"] <= 80_000:
         failures.append("LOD0 triangle target")
     if report["lod1_triangles"] >= 12_000:
         failures.append("LOD1 triangle target")
-    if report["materials"] > 8:
+    if report["materials"] != 8:
         failures.append("material budget")
+    if report["images"] != 1:
+        failures.append("embedded atlas image count")
     if report["file_bytes"] >= 8 * 1024 * 1024:
         failures.append("8 MiB preferred GLB size")
+    if not 64.0 <= max(dimensions) <= 66.0:
+        failures.append("65 meter vessel scale")
+    if generic_meshes:
+        failures.append("generic mesh names")
+    if transformed_mesh_nodes:
+        failures.append("unapplied mesh transforms")
     if failures:
         raise RuntimeError(f"Validation failed: {failures}; report={report}")
     print("LYRA_VALIDATION_REPORT", json.dumps(report, sort_keys=True, default=list))

@@ -32,6 +32,17 @@ export class SurfaceController {
     this.reset();
   }
 
+  restoreExpedition(samples: number[]) {
+    this.samples.clear();
+    samples.forEach((index) => {
+      if (index >= 0 && index < this.sampleSites.length) this.samples.add(index);
+    });
+    this.sampleSites.forEach((site, index) => {
+      site.visible = !this.samples.has(index);
+    });
+    this.reset();
+  }
+
   update(
     delta: number,
     input: InputController,

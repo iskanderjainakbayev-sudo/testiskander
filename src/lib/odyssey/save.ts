@@ -25,7 +25,12 @@ function isSaveData(value: unknown): value is SaveData {
     && IDS.includes(save.target as DiscoveryId)
     && Array.isArray(save.shipPosition)
     && save.shipPosition.length === 3
-    && save.shipPosition.every((coordinate) => typeof coordinate === 'number' && Number.isFinite(coordinate));
+    && save.shipPosition.every((coordinate) => typeof coordinate === 'number' && Number.isFinite(coordinate))
+    && (save.solaceSurveyed === undefined || typeof save.solaceSurveyed === 'boolean')
+    && (save.surfaceSamples === undefined || (
+      Array.isArray(save.surfaceSamples)
+      && save.surfaceSamples.every((index) => Number.isInteger(index) && index >= 0 && index < 3)
+    ));
 }
 
 export function storeSave(data: SaveData) {

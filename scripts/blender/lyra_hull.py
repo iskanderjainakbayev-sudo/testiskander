@@ -22,6 +22,33 @@ HULL_SECTIONS = (
 )
 
 
+def smooth_sections(
+    sections: tuple[tuple[float, float, float, float, float, float], ...], subdivisions: int
+) -> tuple[tuple[float, float, float, float, float, float], ...]:
+    dense = []
+    for index in range(len(sections) - 1):
+        previous = sections[max(0, index - 1)]
+        current = sections[index]
+        following = sections[index + 1]
+        after = sections[min(len(sections) - 1, index + 2)]
+        for step in range(subdivisions):
+            t = step / subdivisions
+            values = [current[0] + (following[0] - current[0]) * t]
+            for component in range(1, 6):
+                p0, p1 = previous[component], current[component]
+                p2, p3 = following[component], after[component]
+                value = 0.5 * (
+                    2.0 * p1
+                    + (-p0 + p2) * t
+                    + (2.0 * p0 - 5.0 * p1 + 4.0 * p2 - p3) * t * t
+                    + (-p0 + 3.0 * p1 - 3.0 * p2 + p3) * t * t * t
+                )
+                values.append(max(0.18, value) if component in (1, 2, 3) else value)
+            dense.append(tuple(values))
+    dense.append(sections[-1])
+    return tuple(dense)
+
+
 def _section_at(y: float) -> tuple[float, float, float, float, float]:
     for left, right in zip(HULL_SECTIONS, HULL_SECTIONS[1:], strict=False):
         if left[0] <= y <= right[0]:
@@ -150,28 +177,76 @@ def _wing(
     material: bpy.types.Material,
     thickness: float,
 ) -> bpy.types.Object:
-    points = [(side * x, y, 0.15 + thickness * 0.5) for x, y in outline]
-    points += [(side * x, y, 0.15 - thickness * 0.5) for x, y in outline]
-    count = len(outline)
-    top = tuple(range(count))
-    bottom = tuple(reversed(range(count, count * 2)))
-    faces = [top, bottom]
-    for index in range(count):
-        nxt = (index + 1) % count
-        faces.append((index, nxt, count + nxt, count + index))
+    del outline
+    stations = (
+        (3.4, -21.0, 15.0, thickness),
+        (7.0, -20.2, 14.5, thickness * 0.93),
+        (11.5, -17.2, 11.8, thickness * 0.72),
+        (15.3, -10.4, 6.8, thickness * 0.43),
+        (18.6, -4.5, -3.5, 0.12),
+    )
+    segments = 48
+    points = []
+    for span, aft, fore, height in stations:
+        center_y = (aft + fore) * 0.5
+        half_chord = max(0.12, (fore - aft) * 0.5)
+        for segment in range(segments):
+            angle = math.tau * segment / segments
+            cosine, sine = math.cos(angle), math.sin(angle)
+            y = center_y + half_chord * math.copysign(abs(cosine) ** 0.74, cosine)
+            z = 0.08 + height * 0.5 * math.copysign(abs(sine) ** 0.62, sine)
+            points.append((side * span, y, z))
+    faces = []
+    for station in range(len(stations) - 1):
+        for segment in range(segments):
+            nxt = (segment + 1) % segments
+            a = station * segments + segment
+            b = station * segments + nxt
+            c = (station + 1) * segments + nxt
+            d = (station + 1) * segments + segment
+            faces.append((a, b, c, d))
+    faces.extend(
+        (
+            tuple(reversed(range(segments))),
+            tuple((len(stations) - 1) * segments + index for index in range(segments)),
+        )
+    )
     mesh = bpy.data.meshes.new(f"{name}_Mesh")
     mesh.from_pydata(points, [], faces)
     mesh.update()
     obj = bpy.data.objects.new(name, mesh)
     bpy.context.scene.collection.objects.link(obj)
-    finish_mesh(obj, parent, material, bevel=0.34, bevel_segments=4, smooth=True)
+    finish_mesh(obj, parent, material, smooth=True)
     atlas_uv(obj, "hull")
     return obj
 
 
+def _wing_panel(
+    name: str,
+    side: float,
+    points: tuple[tuple[float, float], ...],
+    parent: bpy.types.Object,
+    material: bpy.types.Material,
+) -> None:
+    vertices = [(side * x, y, 0.76) for x, y in points]
+    mesh = bpy.data.meshes.new(f"{name}_Mesh")
+    mesh.from_pydata(vertices, [], [tuple(range(len(vertices)))])
+    mesh.update()
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.scene.collection.objects.link(obj)
+    bpy.context.view_layer.objects.active = obj
+    obj.select_set(True)
+    solidify = obj.modifiers.new("Flush control-surface depth", "SOLIDIFY")
+    solidify.thickness = 0.08
+    bpy.ops.object.modifier_apply(modifier=solidify.name)
+    obj.select_set(False)
+    finish_mesh(obj, parent, material, bevel=0.035, bevel_segments=2, smooth=True)
+    atlas_uv(obj, "armor")
+
+
 def build_hull(root: bpy.types.Object, materials: dict[str, bpy.types.Material]) -> None:
     hull = empty("HULL_PRIMARY", root)
-    loft_hull("Hull_LiftingBody_LOD0", HULL_SECTIONS, 96, hull, materials["hull"])
+    loft_hull("Hull_LiftingBody_LOD0", smooth_sections(HULL_SECTIONS, 5), 80, hull, materials["hull"])
     outline = ((4.8, -21.5), (11.4, -17.0), (18.7, -4.0), (17.0, 8.5), (9.2, 15.0), (3.6, 11.5))
     _wing("Hull_Port_LiftingSurface", -1.0, outline, hull, materials["hull"], 1.15)
     _wing("Hull_Starboard_LiftingSurface", 1.0, outline, hull, materials["hull"], 1.15)
@@ -211,16 +286,19 @@ def _add_armor_layers(parent: bpy.types.Object, materials: dict[str, bpy.types.M
         shell_patch(
             f"Armor_{name}", y_start, y_end, angle_start, angle_end, parent, materials["armor"], "armor", 0.18
         )
+    panel_shapes = (
+        ((5.8, -15.5), (10.7, -13.4), (12.6, -5.0), (9.7, -1.8), (5.4, -3.6)),
+        ((10.8, -11.8), (14.6, -8.4), (16.2, -3.4), (13.0, -1.7), (11.4, -5.2)),
+        ((5.4, 1.3), (9.5, 2.7), (11.2, 8.9), (7.2, 11.7), (4.8, 8.0)),
+    )
     for side in (-1.0, 1.0):
-        for index, y in enumerate((-13.5, -4.5, 4.5, 11.5)):
-            box(
+        for index, points in enumerate(panel_shapes):
+            _wing_panel(
                 f"Wing_ControlSurface_{'P' if side < 0 else 'S'}_{index + 1:02d}",
-                (4.6, 3.6, 0.24),
-                (side * (12.2 + index % 2), y, 0.84),
-                materials["armor"],
+                side,
+                points,
                 parent,
-                rotation=(0.0, 0.0, side * 0.035),
-                bevel=0.16,
+                materials["armor"],
             )
 
 

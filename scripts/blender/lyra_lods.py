@@ -22,13 +22,14 @@ def build_lod1(root: bpy.types.Object, materials: dict[str, bpy.types.Material])
     shell_patch(
         "LOD1_Canopy", 14.2, 28.2, 0.78, 2.36, lod, materials["glass"], None, 0.22, 8, 14, 0.12
     )
+    aft = -1.5
     for index, (x, z, scale) in enumerate(((-4.8, -0.4, 0.92), (0.0, -0.7, 1.12), (4.8, -0.4, 0.92))):
         cone(
             f"LOD1_Engine_{index + 1:02d}_Nozzle",
             1.15 * scale,
             2.05 * scale,
             3.8,
-            (x, -28.8, z),
+            (x, -28.8 + aft, z),
             materials["heat"],
             lod,
             24,
@@ -39,7 +40,7 @@ def build_lod1(root: bpy.types.Object, materials: dict[str, bpy.types.Material])
             f"LOD1_Engine_{index + 1:02d}_GlowRing",
             1.5 * scale,
             0.14,
-            (x, -30.7, z),
+            (x, -30.7 + aft, z),
             materials["amber"],
             lod,
             major_segments=24,
