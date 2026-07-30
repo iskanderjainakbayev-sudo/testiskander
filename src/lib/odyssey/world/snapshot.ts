@@ -29,7 +29,9 @@ export const INITIAL_SNAPSHOT: GameSnapshot = {
   transitionProgress: 0,
   surfaceSamples: 0,
   solaceSurveyed: false,
+  nacreSurveyed: false,
   locationName: 'LYRA / DECK 01',
+  landingSiteName: 'SOLACE',
   nearestShipName: null,
   nearestShipDistance: Number.POSITIVE_INFINITY,
   canLand: false,
@@ -53,6 +55,7 @@ interface SnapshotOptions {
   transitionProgress?: number;
   surfaceSamples?: number;
   locationName?: string;
+  landingSiteName?: string;
   nearestShipName?: string | null;
   nearestShipDistance?: number;
   canLand?: boolean;
@@ -84,6 +87,8 @@ export function createSnapshot(options: SnapshotOptions): GameSnapshot {
       mode,
       options.surfaceSamples,
       mission.solaceSurveyed,
+      mission.nacreSurveyed,
+      options.landingSiteName?.toLowerCase(),
     ),
     target: mission.target,
     targetName: discovery.name,
@@ -107,7 +112,9 @@ export function createSnapshot(options: SnapshotOptions): GameSnapshot {
     transitionProgress: options.transitionProgress ?? 0,
     surfaceSamples: options.surfaceSamples ?? 0,
     solaceSurveyed: mission.solaceSurveyed,
+    nacreSurveyed: mission.nacreSurveyed,
     locationName: options.locationName ?? (mode === 'walking' ? 'LYRA / DECK 01' : 'HELIOS NULL'),
+    landingSiteName: options.landingSiteName ?? 'SOLACE',
     nearestShipName: options.nearestShipName ?? null,
     nearestShipDistance: options.nearestShipDistance ?? Number.POSITIVE_INFINITY,
     canLand: options.canLand ?? false,

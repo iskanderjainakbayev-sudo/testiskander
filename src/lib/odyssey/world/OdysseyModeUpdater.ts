@@ -2,7 +2,7 @@ import type * as THREE from 'three';
 import type { InputController } from './InputController';
 import type { OdysseyCinematics } from './OdysseyCinematics';
 import type { OdysseySession } from './OdysseySession';
-import type { SolaceExpedition } from './SolaceExpedition';
+import type { PlanetExpeditions } from './PlanetExpeditions';
 import { updateLandingSequence, updateTakeoffSequence } from './updateLanding';
 import { updateEnding, updateFlight, updateMenu, updateSurface, updateWalking } from './updateWorld';
 
@@ -12,7 +12,7 @@ export class OdysseyModeUpdater {
     private readonly input: InputController,
     private readonly camera: THREE.PerspectiveCamera,
     private readonly cinematics: OdysseyCinematics,
-    private readonly expedition: SolaceExpedition,
+    private readonly expedition: PlanetExpeditions,
   ) {}
 
   update(delta: number, time: number) {
@@ -50,13 +50,19 @@ export class OdysseyModeUpdater {
       );
     }
     if (mode === 'takeoff') {
-      updateTakeoffSequence(this.session, this.expedition.surface, this.camera, delta);
+      updateTakeoffSequence(
+        this.session,
+        this.expedition.surface,
+        this.expedition.walker,
+        this.camera,
+        delta,
+      );
     }
     if (mode === 'menu') updateMenu(this.camera, time);
     if (mode === 'ending') updateEnding(this.session, this.camera, delta, time);
   }
 
   private readonly handleSurfaceInteraction = () => {
-    this.expedition.interact(this.session, this.input);
+    this.expedition.interact(this.input);
   };
 }

@@ -4,8 +4,8 @@ import type { TrafficUpdate } from '../space/traffic/createTrafficSystem';
 import type { WorldCallbacks } from '../types';
 import type { OdysseySession } from './OdysseySession';
 import type { FrameMetrics } from './PerformanceMonitor';
+import type { PlanetExpeditions } from './PlanetExpeditions';
 import { createSnapshot } from './snapshot';
-import type { SolaceExpedition } from './SolaceExpedition';
 
 export class SnapshotPublisher {
   private elapsed = 0;
@@ -16,7 +16,7 @@ export class SnapshotPublisher {
     delta: number,
     session: OdysseySession,
     camera: THREE.PerspectiveCamera,
-    expedition: SolaceExpedition,
+    expedition: PlanetExpeditions,
     traffic: TrafficUpdate,
     metrics: FrameMetrics,
     cinematic: CinematicState,
@@ -40,7 +40,8 @@ export class SnapshotPublisher {
       longFramePercent: metrics.longFramePercent,
       transitionProgress: session.landing.progress,
       surfaceSamples: expedition.walker.samples.size,
-      locationName: mode === 'surface' ? 'SOLACE / RAINSHELF 04' : undefined,
+      locationName: mode === 'surface' ? expedition.locationName : undefined,
+      landingSiteName: session.landingTarget.toUpperCase(),
       nearestShipName: traffic.nearestShipName,
       nearestShipDistance: traffic.nearestShipDistance,
       canLand: session.canLand(),

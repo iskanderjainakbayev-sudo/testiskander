@@ -75,7 +75,8 @@ def _image(name: str, pixels: array, color_space: str) -> bpy.types.Image:
     working.colorspace_settings.name = color_space
     working.pixels.foreach_set(pixels)
     working.update()
-    if max(working.pixels[0:4096]) <= 0.0:
+    sample_peak = max(working.pixels[index] for index in range(4096) if index % 4 != 3)
+    if sample_peak <= 0.0:
         raise RuntimeError(f"{name} pixel upload remained black")
     path = ATLAS_CACHE / f"{name}.png"
     working.filepath_raw = str(path)

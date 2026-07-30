@@ -3,6 +3,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import type { LandablePlanetId } from '../types';
 import { createCinematicPass } from './createCinematicPass';
 
 export interface RenderRig {
@@ -11,7 +12,7 @@ export interface RenderRig {
   renderer: THREE.WebGLRenderer;
   render: () => void;
   resize: () => void;
-  setAtmosphere: (surfaceAmount: number) => void;
+  setAtmosphere: (surfaceAmount: number, planet: LandablePlanetId) => void;
   dispose: () => void;
 }
 
@@ -45,7 +46,8 @@ export function createRenderer(canvas: HTMLCanvasElement): RenderRig {
   composer.addPass(outputPass);
   const drawingSize = new THREE.Vector2();
   const spaceFog = new THREE.Color(0x010309);
-  const surfaceFog = new THREE.Color(0x10262a);
+  const solaceFog = new THREE.Color(0x10262a);
+  const nacreFog = new THREE.Color(0x5a2814);
 
   const resize = () => {
     const width = canvas.clientWidth || window.innerWidth;
@@ -71,12 +73,25 @@ export function createRenderer(canvas: HTMLCanvasElement): RenderRig {
       composer.render();
     },
     resize,
-    setAtmosphere: (surfaceAmount) => {
+    setAtmosphere: (surfaceAmount, planet) => {
       const blend = THREE.MathUtils.clamp(surfaceAmount, 0, 1);
+      const surfaceFog = planet === 'nacre' ? nacreFog : solaceFog;
       fog.color.lerpColors(spaceFog, surfaceFog, blend);
-      fog.density = THREE.MathUtils.lerp(0.00002, 0.0026, blend);
-      renderer.toneMappingExposure = THREE.MathUtils.lerp(1.06, 1.12, blend);
-      bloom.strength = THREE.MathUtils.lerp(0.42, 0.34, blend);
+      fog.density = THREE.MathUtils.lerp(
+        0.00002,
+        planet === 'nacre' ? 0.00175 : 0.0026,
+        blend,
+      );
+      renderer.toneMappingExposure = THREE.MathUtils.lerp(
+        1.06,
+        planet === 'nacre' ? 1.16 : 1.12,
+        blend,
+      );
+      bloom.strength = THREE.MathUtils.lerp(
+        0.42,
+        planet === 'nacre' ? 0.3 : 0.34,
+        blend,
+      );
     },
     dispose: () => {
       window.removeEventListener('resize', resize);

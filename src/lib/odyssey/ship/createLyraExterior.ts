@@ -12,7 +12,13 @@ export interface LyraExterior {
   spaceGroup: THREE.Group;
   landedGroup: THREE.Group;
   ready: Promise<boolean>;
-  update: (camera: THREE.Camera, mode: GameMode, progress: number) => void;
+  update: (
+    camera: THREE.Camera,
+    mode: GameMode,
+    progress: number,
+    groundHeight: (x: number, z: number) => number,
+    rootZ: number,
+  ) => void;
   setSpaceVisible: (visible: boolean) => void;
   dispose: () => void;
 }
@@ -24,13 +30,12 @@ const MODEL_URL = new URL(
 
 export function createLyraExterior(
   scene: THREE.Scene,
-  groundHeight: (x: number, z: number) => number,
   maxAnisotropy: number,
 ): LyraExterior {
   const spaceGroup = new THREE.Group();
   const landedGroup = new THREE.Group();
   spaceGroup.name = 'LYRA exterior in flight';
-  landedGroup.name = 'LYRA exterior landed on Solace';
+  landedGroup.name = 'LYRA exterior landed on planetary surface';
   spaceGroup.visible = false;
   landedGroup.visible = false;
   scene.add(spaceGroup, landedGroup);
@@ -59,10 +64,16 @@ export function createLyraExterior(
     }, undefined, () => resolve(false));
   });
 
-  const update = (camera: THREE.Camera, mode: GameMode, progress: number) => {
-    const ground = groundHeight(0, 75) + 7.55;
+  const update = (
+    camera: THREE.Camera,
+    mode: GameMode,
+    progress: number,
+    groundHeight: (x: number, z: number) => number,
+    rootZ: number,
+  ) => {
+    const ground = groundHeight(0, rootZ) + 7.55;
     const altitude = transitionAltitude(mode, progress);
-    landedGroup.position.set(0, ground + altitude, 75);
+    landedGroup.position.set(0, ground + altitude, rootZ);
     landedGroup.visible = Boolean(landed) && isLandedVisible(mode, progress);
     if (space) selectLyraLod(space, camera.position.length());
     if (landed) selectLyraLod(landed, camera.position.distanceTo(landedGroup.position));

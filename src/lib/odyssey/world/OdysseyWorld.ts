@@ -12,8 +12,8 @@ import { OdysseyCinematics } from './OdysseyCinematics';
 import { OdysseyModeUpdater } from './OdysseyModeUpdater';
 import { OdysseySession } from './OdysseySession';
 import { PerformanceMonitor } from './PerformanceMonitor';
+import { PlanetExpeditions } from './PlanetExpeditions';
 import { SnapshotPublisher } from './SnapshotPublisher';
-import { SolaceExpedition } from './SolaceExpedition';
 
 export class OdysseyWorld {
   readonly hasSave = Boolean(loadSave());
@@ -21,7 +21,7 @@ export class OdysseyWorld {
   private readonly space: SpaceSceneRig;
   private readonly ship: ShipInterior;
   private readonly exterior: LyraExterior;
-  private readonly expedition: SolaceExpedition;
+  private readonly expedition: PlanetExpeditions;
   private readonly input: InputController;
   private readonly session = new OdysseySession();
   private readonly snapshots: SnapshotPublisher;
@@ -42,10 +42,9 @@ export class OdysseyWorld {
     this.ship = createShipInterior(this.render.scene);
     this.space = createSpaceScene();
     this.render.scene.add(this.space.group);
-    this.expedition = new SolaceExpedition(this.render.scene);
+    this.expedition = new PlanetExpeditions(this.render.scene, this.session);
     this.exterior = createLyraExterior(
       this.render.scene,
-      this.expedition.surface.getHeight,
       this.render.renderer.capabilities.getMaxAnisotropy(),
     );
     this.snapshots = new SnapshotPublisher(callbacks);
@@ -71,11 +70,16 @@ export class OdysseyWorld {
   start = (newGame = false) => {
     const save = this.session.start(newGame, this.input);
     if (newGame) this.expedition.reset();
-    else this.expedition.restore(save?.surfaceSamples ?? this.session.surfaceSamples);
+    else {
+      this.expedition.restore(
+        save?.surfaceSamples ?? this.session.solaceSurfaceSamples,
+        save?.nacreSurfaceSamples ?? this.session.nacreSurfaceSamples,
+      );
+    }
   };
   resume = () => this.session.resume(this.input);
   interact = () => {
-    if (this.session.mode === 'surface') this.expedition.interact(this.session, this.input);
+    if (this.session.mode === 'surface') this.expedition.interact(this.input);
     else this.session.interact(this.render.camera);
   };
   scan = () => this.session.scan();
@@ -120,8 +124,15 @@ export class OdysseyWorld {
     this.cinematics.syncShipVisibility(this.ship.group);
     this.render.setAtmosphere(
       this.expedition.atmosphereBlend(this.session.mode, this.session.landing.progress),
+      this.session.landingTarget,
     );
-    this.exterior.update(this.render.camera, this.session.mode, this.session.landing.progress);
+    this.exterior.update(
+      this.render.camera,
+      this.session.mode,
+      this.session.landing.progress,
+      this.expedition.surface.getHeight,
+      this.expedition.rootZ,
+    );
     flight.getInverseQuaternion(this.inverseQuaternion);
     if (this.space.group.visible) {
       this.traffic = this.space.update(

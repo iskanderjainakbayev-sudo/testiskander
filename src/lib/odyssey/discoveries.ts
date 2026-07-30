@@ -61,17 +61,23 @@ export function getObjective(
     };
   }
   if (mode === 'landing') {
+    const isNacre = landingSite === 'nacre';
     return {
-      eyebrow: 'SOLACE / ATMOSPHERIC ENTRY',
+      eyebrow: `${isNacre ? 'NACRE' : 'SOLACE'} / ATMOSPHERIC ENTRY`,
       title: 'Hold the descent corridor',
-      detail: 'Lyra is riding the ion wake toward a singing archipelago.',
+      detail: isNacre
+        ? 'Lyra is threading the dust shear toward a sunlit silica canyon.'
+        : 'Lyra is riding the ion wake toward a singing archipelago.',
     };
   }
   if (mode === 'takeoff') {
+    const isNacre = landingSite === 'nacre';
     return {
-      eyebrow: 'SOLACE / ASCENT',
+      eyebrow: `${isNacre ? 'NACRE' : 'SOLACE'} / ASCENT`,
       title: 'Return to the stars',
-      detail: 'The pulse field is rebuilding above the cloud deck.',
+      detail: isNacre
+        ? 'The silica storm falls away beneath Lyra’s rising wake.'
+        : 'The pulse field is rebuilding above the cloud deck.',
     };
   }
   if (mode === 'surface') {

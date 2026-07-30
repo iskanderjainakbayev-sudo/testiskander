@@ -1,11 +1,11 @@
 import * as THREE from 'three';
-import type { SolaceSurface } from '../surface/createSolaceSurface';
 import type { OdysseySession } from './OdysseySession';
+import type { PlanetSurface } from './PlanetExpeditions';
 import type { SurfaceController } from './SurfaceController';
 
 export function updateLandingSequence(
   session: OdysseySession,
-  surface: SolaceSurface,
+  surface: PlanetSurface,
   walker: SurfaceController,
   camera: THREE.PerspectiveCamera,
   delta: number,
@@ -17,9 +17,13 @@ export function updateLandingSequence(
     camera.rotation.set(-progress * 0.12, 0, Math.sin(progress * 31) * progress * 0.004);
   } else {
     const descent = smoothstep(0.59, 1, progress);
-    const ground = surface.getHeight(0, 28);
-    camera.position.set(0, THREE.MathUtils.lerp(ground + 38, ground + 1.68, descent), 44 - descent * 16);
-    camera.lookAt(0, ground + 1.1, -14);
+    const ground = surface.getHeight(0, walker.spawnZ);
+    camera.position.set(
+      0,
+      THREE.MathUtils.lerp(ground + 38, ground + 1.68, descent),
+      walker.spawnZ + 16 - descent * 16,
+    );
+    camera.lookAt(0, ground + 1.1, walker.spawnZ - 42);
   }
   camera.fov = 68 + Math.sin(progress * Math.PI) * 8;
   camera.updateProjectionMatrix();
@@ -35,7 +39,8 @@ export function updateLandingSequence(
 
 export function updateTakeoffSequence(
   session: OdysseySession,
-  surface: SolaceSurface,
+  surface: PlanetSurface,
+  walker: SurfaceController,
   camera: THREE.PerspectiveCamera,
   delta: number,
 ) {
@@ -43,9 +48,9 @@ export function updateTakeoffSequence(
   const progress = session.landing.progress;
   if (progress < 0.51) {
     const ascent = smoothstep(0, 0.51, progress);
-    const ground = surface.getHeight(0, 28);
-    camera.position.set(0, ground + 1.68 + ascent * 39, 28 + ascent * 16);
-    camera.lookAt(0, ground + 1.2, -18);
+    const ground = surface.getHeight(0, walker.spawnZ);
+    camera.position.set(0, ground + 1.68 + ascent * 39, walker.spawnZ + ascent * 16);
+    camera.lookAt(0, ground + 1.2, walker.spawnZ - 46);
   } else {
     camera.position.set(0, 1.52, -4.45 + smoothstep(0.51, 1, progress) * 0.55);
     camera.rotation.set(-0.1 * (1 - progress), 0, Math.sin(progress * 28) * 0.003);
