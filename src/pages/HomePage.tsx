@@ -1,13 +1,5 @@
+import { Link } from 'wouter';
+
 export function HomePage() {
-  return (
-    <main className="container">
-      <section className="hello">
-        <h1>Привет! 🚀</h1>
-        <p>Это твой проект. Пока тут пусто — самое интересное впереди.</p>
-        <p className="hello__hint">
-          Открой Codex и опиши свою идею — этот экран станет твоим приложением.
-        </p>
-      </section>
-    </main>
-  );
+  return <main className="home-page"><div className="home-noise" /><section><p>THE BACKROOMS ARCHIVE</p><h1>LOST<br /><i>LEVELS</i></h1><b>There is no way back. Only deeper.</b><Link href="/game">ENTER THE ROOMS <span>→</span></Link><small>AN EXPLORATION HORROR EXPERIENCE · LOCAL SAVE ENABLED</small></section></main>;
 }

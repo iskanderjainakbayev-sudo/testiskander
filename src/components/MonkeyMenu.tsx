@@ -1,0 +1,4 @@
+type Props = { paused: boolean; onStart: () => void; onResume: () => void; onOpen: (panel: 'shop' | 'settings') => void };
+export function MonkeyMenu({ paused, onStart, onResume, onOpen }: Props) {
+  return <section className="menu-screen"><div className="menu-leaf leaf-one" /><div className="menu-leaf leaf-two" /><div className="menu-card"><span className="eyebrow">THE ISLANDS ARE CALLING</span><h1>MONKEY<br /><i>ADVENTURE</i></h1><p>{paused ? 'The jungle waits exactly where you left it.' : 'An open-world jungle expedition'}</p><button className="primary" onClick={paused ? onResume : onStart}>{paused ? 'Continue expedition' : 'Start adventure'}</button>{paused && <button className="text-button" onClick={() => onOpen('shop')}>Canopy market</button>}<button className="text-button" onClick={() => onOpen('settings')}>Settings</button><small>WASD to explore · SHIFT to sprint</small></div></section>;
+}
