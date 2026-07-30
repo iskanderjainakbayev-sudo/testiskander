@@ -29,6 +29,9 @@ export const INITIAL_SNAPSHOT: GameSnapshot = {
   nearestShipDistance: Number.POSITIVE_INFINITY,
   canLand: false,
   frameRate: 60,
+  frameTimeP95: 16.67,
+  frameTimeP99: 16.67,
+  longFramePercent: 0,
 };
 
 interface SnapshotOptions {
@@ -45,6 +48,9 @@ interface SnapshotOptions {
   nearestShipName?: string | null;
   nearestShipDistance?: number;
   canLand?: boolean;
+  frameTimeP95?: number;
+  frameTimeP99?: number;
+  longFramePercent?: number;
 }
 
 export function createSnapshot(options: SnapshotOptions): GameSnapshot {
@@ -89,5 +95,8 @@ export function createSnapshot(options: SnapshotOptions): GameSnapshot {
     nearestShipDistance: options.nearestShipDistance ?? Number.POSITIVE_INFINITY,
     canLand: options.canLand ?? false,
     frameRate: options.frameRate,
+    frameTimeP95: options.frameTimeP95 ?? 16.67,
+    frameTimeP99: options.frameTimeP99 ?? 16.67,
+    longFramePercent: options.longFramePercent ?? 0,
   };
 }

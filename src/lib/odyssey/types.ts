@@ -50,6 +50,9 @@ export interface GameSnapshot {
   nearestShipDistance: number;
   canLand: boolean;
   frameRate: number;
+  frameTimeP95: number;
+  frameTimeP99: number;
+  longFramePercent: number;
 }
 
 export interface WorldCallbacks {

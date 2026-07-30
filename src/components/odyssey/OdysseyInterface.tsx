@@ -41,7 +41,12 @@ export function OdysseyInterface({
 
   return (
     <div className={`odx-interface odx-interface--${snapshot.mode}`}>
-      <CinematicFrame frameRate={snapshot.frameRate} />
+      <CinematicFrame
+        frameRate={snapshot.frameRate}
+        frameTimeP95={snapshot.frameTimeP95}
+        frameTimeP99={snapshot.frameTimeP99}
+        longFramePercent={snapshot.longFramePercent}
+      />
       {snapshot.mode === 'menu' && (
         <MainMenu
           hasSave={hasSave}

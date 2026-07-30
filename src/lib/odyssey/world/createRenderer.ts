@@ -11,13 +11,15 @@ export interface RenderRig {
   renderer: THREE.WebGLRenderer;
   render: () => void;
   resize: () => void;
+  setAtmosphere: (surfaceAmount: number) => void;
   dispose: () => void;
 }
 
 export function createRenderer(canvas: HTMLCanvasElement): RenderRig {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x010309);
-  scene.fog = new THREE.FogExp2(0x06090e, 0.007);
+  const fog = new THREE.FogExp2(0x010309, 0.00002);
+  scene.fog = fog;
 
   const camera = new THREE.PerspectiveCamera(68, 1, 0.04, 8000);
   const renderer = new THREE.WebGLRenderer({
@@ -42,6 +44,8 @@ export function createRenderer(canvas: HTMLCanvasElement): RenderRig {
   const outputPass = new OutputPass();
   composer.addPass(outputPass);
   const drawingSize = new THREE.Vector2();
+  const spaceFog = new THREE.Color(0x010309);
+  const surfaceFog = new THREE.Color(0x10262a);
 
   const resize = () => {
     const width = canvas.clientWidth || window.innerWidth;
@@ -67,6 +71,13 @@ export function createRenderer(canvas: HTMLCanvasElement): RenderRig {
       composer.render();
     },
     resize,
+    setAtmosphere: (surfaceAmount) => {
+      const blend = THREE.MathUtils.clamp(surfaceAmount, 0, 1);
+      fog.color.lerpColors(spaceFog, surfaceFog, blend);
+      fog.density = THREE.MathUtils.lerp(0.00002, 0.0026, blend);
+      renderer.toneMappingExposure = THREE.MathUtils.lerp(1.06, 1.12, blend);
+      bloom.strength = THREE.MathUtils.lerp(0.42, 0.34, blend);
+    },
     dispose: () => {
       window.removeEventListener('resize', resize);
       bloom.dispose();

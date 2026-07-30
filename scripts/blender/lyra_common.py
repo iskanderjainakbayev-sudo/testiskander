@@ -32,6 +32,7 @@ def finish_mesh(
     bevel_segments: int = 3,
     smooth: bool = True,
 ) -> bpy.types.Object:
+    obj.data.name = f"{obj.name}_Mesh"
     bpy.context.view_layer.objects.active = obj
     obj.select_set(True)
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)

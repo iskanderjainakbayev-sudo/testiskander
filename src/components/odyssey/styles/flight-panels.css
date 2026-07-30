@@ -33,6 +33,15 @@
 .odx-systems__echoes i.is-found { border-color:var(--odx-amber); background:rgba(234,181,110,.76); box-shadow:0 0 10px rgba(234,181,110,.4); }
 .odx-systems__echoes b { grid-column:1/-1; margin-top:10px; color:rgba(189,210,212,.3); font-size:6px; font-weight:500; letter-spacing:.16em; text-align:right; }
 
+.odx-contact { position:absolute; right:3.2vw; top:9.5vh; width:190px; padding:12px 13px; border-right:1px solid rgba(131,204,196,.52); background:linear-gradient(-90deg,rgba(5,15,17,.7),rgba(5,15,17,.08)); text-align:right; text-shadow:0 2px 10px #020506; }
+.odx-contact header { color:rgba(158,210,204,.65); font-size:6px; letter-spacing:.16em; }
+.odx-contact header i { display:inline-block; width:4px; height:4px; margin-right:6px; border-radius:50%; background:#84c6be; box-shadow:0 0 8px #84c6be; }
+.odx-contact>strong { display:block; margin:7px 0 8px; font-size:9px; letter-spacing:.15em; }
+.odx-contact>div { height:1px; background:rgba(183,215,212,.13); }
+.odx-contact>div i { display:block; height:1px; margin-left:auto; background:linear-gradient(90deg,rgba(132,198,190,.2),#84c6be); box-shadow:0 0 7px rgba(132,198,190,.45); }
+.odx-contact footer { display:flex; justify-content:space-between; margin-top:7px; color:rgba(197,219,216,.36); font-size:6px; letter-spacing:.13em; }
+.odx-contact footer b { color:rgba(234,181,110,.62); font-weight:600; }
+
 .odx-transmission { position:absolute; left:50%; top:15vh; display:flex; align-items:center; gap:16px; width:min(510px,70vw); padding:13px 17px; border-left:1px solid var(--odx-amber); background:linear-gradient(90deg,rgba(4,10,12,.78),rgba(4,10,12,.12)); backdrop-filter:blur(8px); transform:translateX(-50%); animation:odx-reveal .6s ease both; }
 .odx-transmission__wave { display:flex; align-items:center; gap:2px; height:24px; }
 .odx-transmission__wave i { width:1px; height:22%; background:var(--odx-amber); opacity:.7; animation:odx-wave .9s ease-in-out infinite alternate; }
@@ -40,4 +49,3 @@
 .odx-transmission span { color:var(--odx-amber); font-size:6px; letter-spacing:.2em; }
 .odx-transmission p { margin:5px 0 0; color:rgba(222,230,230,.8); font:italic 12px/1.4 Georgia,serif; letter-spacing:.03em; }
 @keyframes odx-wave { to { height:100%; opacity:1 } }
-

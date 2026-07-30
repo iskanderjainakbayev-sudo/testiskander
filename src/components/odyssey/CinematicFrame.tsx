@@ -1,8 +1,16 @@
 interface CinematicFrameProps {
   frameRate: number;
+  frameTimeP95: number;
+  frameTimeP99: number;
+  longFramePercent: number;
 }
 
-export function CinematicFrame({ frameRate }: CinematicFrameProps) {
+export function CinematicFrame({
+  frameRate,
+  frameTimeP95,
+  frameTimeP99,
+  longFramePercent,
+}: CinematicFrameProps) {
   const performanceClass = frameRate > 0 && frameRate < 44 ? ' is-warm' : '';
 
   return (
@@ -14,8 +22,15 @@ export function CinematicFrame({ frameRate }: CinematicFrameProps) {
       <i className="odx-corner odx-corner--tr" />
       <i className="odx-corner odx-corner--bl" />
       <i className="odx-corner odx-corner--br" />
-      <span className={`odx-performance${performanceClass}`}>LYRA // {Math.round(frameRate || 60)} FPS</span>
+      <span
+        className={`odx-performance${performanceClass}`}
+        data-average-fps={frameRate.toFixed(2)}
+        data-p95-ms={frameTimeP95.toFixed(2)}
+        data-p99-ms={frameTimeP99.toFixed(2)}
+        data-long-frame-percent={longFramePercent.toFixed(3)}
+      >
+        LYRA // {Math.round(frameRate || 60)} FPS
+      </span>
     </div>
   );
 }
-
