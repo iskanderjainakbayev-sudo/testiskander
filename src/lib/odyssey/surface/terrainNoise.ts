@@ -36,8 +36,9 @@ export function surfaceHeight(x: number, z: number) {
   const ridges = 1 - Math.abs(fbm(x + 610, z - 430) * 2 - 1);
   const fractured = Math.pow(Math.max(0, ridges - 0.46), 2) * 38;
   const basin = Math.hypot(x * 0.0012, z * 0.0012) * 5;
-  const landingShelf = Math.exp(-(x * x + (z - 26) ** 2) / 3900) * 7;
-  return (broad - 0.49) * 27 + fractured - basin + landingShelf;
+  const natural = (broad - 0.49) * 27 + fractured - basin;
+  const landingShelf = Math.exp(-(x * x / 780 + (z - 70) ** 2 / 1_850));
+  return natural * (1 - landingShelf) + 3.2 * landingShelf;
 }
 
 export function seededRandom(seed: number) {

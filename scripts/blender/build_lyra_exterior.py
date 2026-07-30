@@ -13,6 +13,7 @@ REPO_ROOT = SCRIPT_DIR.parents[1]
 sys.path.insert(0, str(SCRIPT_DIR))
 
 from lyra_common import clear_scene, convert_curves, empty, triangulate_meshes
+from lyra_batching import batch_by_material
 from lyra_hull import build_hull
 from lyra_lods import build_collider, build_lod1
 from lyra_materials import ATLAS_REGIONS, atlas_uv, create_materials
@@ -86,6 +87,8 @@ def main() -> None:
     convert_curves(root)
     apply_atlas_regions(root)
     triangulate_meshes(root)
+    lod0_batches = batch_by_material(lod0, "LOD0")
+    lod1_batches = batch_by_material(lod1, "LOD1")
     violations = identity_transform_violations(root)
     if violations:
         raise RuntimeError(f"Unapplied mesh transforms: {violations}")
@@ -96,6 +99,8 @@ def main() -> None:
         "collider_triangles": triangle_count(collider),
         "materials": sorted(material.name for material in materials.values()),
         "mesh_nodes": sum(1 for obj in root.children_recursive if obj.type == "MESH"),
+        "lod0_render_batches": len(lod0_batches),
+        "lod1_render_batches": len(lod1_batches),
         "coordinate_convention": root["coordinate_convention"],
         "transform_violations": violations,
     }

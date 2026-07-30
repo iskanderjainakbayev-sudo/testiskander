@@ -79,6 +79,15 @@ def main() -> None:
         "lod0_triangles": triangle_count(groups["LOD0_HERO"]),
         "lod1_triangles": triangle_count(groups["LOD1_DISTANCE"]),
         "collider_triangles": triangle_count(groups["COLLIDER_SIMPLE"]),
+        "lod0_render_meshes": sum(
+            1 for obj in groups["LOD0_HERO"].children_recursive if obj.type == "MESH"
+        ),
+        "lod1_render_meshes": sum(
+            1 for obj in groups["LOD1_DISTANCE"].children_recursive if obj.type == "MESH"
+        ),
+        "collider_meshes": sum(
+            1 for obj in groups["COLLIDER_SIMPLE"].children_recursive if obj.type == "MESH"
+        ),
         "materials": len(document.get("materials", [])),
         "textures": len(document.get("textures", [])),
         "images": len(document.get("images", [])),
@@ -100,6 +109,10 @@ def main() -> None:
         failures.append("LOD0 triangle target")
     if report["lod1_triangles"] >= 12_000:
         failures.append("LOD1 triangle target")
+    if report["lod0_render_meshes"] > 12:
+        failures.append("LOD0 draw-call mesh target")
+    if report["lod1_render_meshes"] > 8:
+        failures.append("LOD1 draw-call mesh target")
     if report["materials"] != 8:
         failures.append("material budget")
     if report["images"] != 1:
