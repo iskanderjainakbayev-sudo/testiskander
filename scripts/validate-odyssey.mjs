@@ -1,5 +1,5 @@
 import { createServer } from 'vite';
-import { Vector3 } from 'three';
+import { Object3D, Vector3 } from 'three';
 
 const vite = await createServer({
   appType: 'custom',
@@ -16,6 +16,15 @@ try {
   );
   const { PerformanceMonitor } = await vite.ssrLoadModule(
     '/src/lib/odyssey/world/PerformanceMonitor.ts',
+  );
+  const { FlightController } = await vite.ssrLoadModule(
+    '/src/lib/odyssey/world/FlightController.ts',
+  );
+  const { LandingController } = await vite.ssrLoadModule(
+    '/src/lib/odyssey/world/LandingController.ts',
+  );
+  const { SurfaceController } = await vite.ssrLoadModule(
+    '/src/lib/odyssey/world/SurfaceController.ts',
   );
   const { createTrafficSystem } = await vite.ssrLoadModule(
     '/src/lib/odyssey/space/traffic/createTrafficSystem.ts',
@@ -70,12 +79,34 @@ try {
   traffic.dispose();
   assert(traffic.group.children.length === 0, 'Traffic disposal must empty its root');
 
+  for (const [planet, height] of [['solace', surfaceHeight], ['nacre', nacreHeight]]) {
+    const flight = new FlightController();
+    const landing = new LandingController();
+    landing.beginLanding(flight, planet);
+    let landed = false;
+    for (let frame = 0; frame < 480; frame += 1) {
+      landed ||= landing.updateLanding(1 / 60, flight);
+    }
+    assert(landed && flight.position.toArray().every(Number.isFinite), `${planet} landing must finish`);
+    landing.beginTakeoff();
+    let launched = false;
+    for (let frame = 0; frame < 420; frame += 1) {
+      launched ||= landing.updateTakeoff(1 / 60, flight);
+    }
+    assert(launched && flight.position.toArray().every(Number.isFinite), `${planet} takeoff must finish`);
+    const sites = [new Object3D(), new Object3D(), new Object3D()];
+    const walker = new SurfaceController(height, sites, planet === 'nacre' ? 28 : 45);
+    walker.resetExpedition();
+    assert(walker.position.toArray().every(Number.isFinite), `${planet} walker spawn must be finite`);
+  }
+
   process.stdout.write(JSON.stringify({
     mission: 'complete',
     cinematicVelocityJump: cinematic.maximumNormalizedVelocityJump,
     syntheticPerformance: metrics,
     traffic: 'finite-and-disposed',
     terrain: 'solace-and-nacre-finite',
+    expeditions: 'two-landings-two-takeoffs-finite',
   }, null, 2) + '\n');
 } finally {
   await vite.close();

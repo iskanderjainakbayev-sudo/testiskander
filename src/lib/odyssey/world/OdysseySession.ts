@@ -1,6 +1,5 @@
 import type * as THREE from 'three';
 import { OdysseyAudio } from '../audio';
-import { clearSave, loadSave } from '../save';
 import type {
   DiscoveryId,
   GameMode,
@@ -12,6 +11,17 @@ import { FlightController } from './FlightController';
 import type { InputController } from './InputController';
 import { LandingController } from './LandingController';
 import { MissionController } from './MissionController';
+import {
+  beginPlanetLanding,
+  beginPlanetTakeoff,
+  findLandableTarget,
+  recordPlanetSample,
+} from './SessionExpeditionActions';
+import {
+  handleVoyagePointerLock,
+  resumeVoyage,
+  startVoyage,
+} from './SessionLifecycleActions';
 import { enterCinematic, enterFinale, enterMenu } from './SessionTransitions';
 import { useShipStation } from './ShipStationInteractions';
 import { VoyageProgress } from './VoyageProgress';
@@ -32,39 +42,11 @@ export class OdysseySession {
   landingTarget: LandablePlanetId = 'solace';
 
   start(newGame: boolean, input: InputController): SaveData | null {
-    void this.audio.start();
-    input.clear();
-    this.manualScanUntil = 0;
-    this.endingTimer = 0;
-    this.flight.reset();
-    const save = newGame ? null : loadSave();
-    if (newGame) clearSave();
-    if (save) {
-      this.mission.restore(
-        save.scanned,
-        save.target,
-        save.solaceSurveyed,
-        save.nacreSurveyed,
-      );
-      this.flight.position.set(...save.shipPosition);
-      this.mode = 'flight';
-    } else {
-      this.mission.reset();
-      this.walking.reset();
-      this.mode = 'walking';
-    }
-    this.progress.restore(save);
-    this.pausedFrom = this.mode;
-    this.fuel = 100;
-    input.requestLock();
-    this.audio.ui('select');
-    return save;
+    return startVoyage(this, this.progress, newGame, input);
   }
 
   resume(input: InputController) {
-    if (this.mode === 'paused') this.mode = this.pausedFrom;
-    input.requestLock();
-    this.audio.ui('select');
+    resumeVoyage(this, input);
   }
 
   scan() {
@@ -72,42 +54,23 @@ export class OdysseySession {
   }
 
   canLand() {
-    return this.landableTarget() !== null;
+    return findLandableTarget(this) !== null;
   }
 
   landableTarget(): LandablePlanetId | null {
-    if (this.mode !== 'flight') return null;
-    if (this.mission.solaceSurveyed && this.flight.distanceTo('solace') < 220) return 'solace';
-    if (this.mission.nacreSurveyed && this.flight.distanceTo('nacre') < 220) return 'nacre';
-    return null;
+    return findLandableTarget(this);
   }
 
   beginLanding(input: InputController) {
-    const target = this.landableTarget();
-    if (!target) return false;
-    this.landingTarget = target;
-    this.landing.beginLanding(this.flight, target);
-    this.mode = 'landing';
-    input.clear();
-    this.audio.discovery();
-    this.mission.showTransmission(`${target.toUpperCase()} CONTROL // DESCENT CORRIDOR ACQUIRED.`);
-    return true;
+    return beginPlanetLanding(this, input);
   }
 
   beginTakeoff(input: InputController) {
-    this.landing.beginTakeoff();
-    this.mode = 'takeoff';
-    input.clear();
-    this.audio.gate();
-    this.persist();
+    beginPlanetTakeoff(this, input);
   }
 
   recordSurfaceSample(index: number) {
-    if (this.landingTarget === 'nacre') {
-      this.progress.recordNacreSample(index, this.mission, this.flight);
-    } else {
-      this.progress.recordSurfaceSample(index, this.mission, this.flight);
-    }
+    recordPlanetSample(this, this.progress, index);
   }
 
   cycleTarget() {
@@ -151,12 +114,7 @@ export class OdysseySession {
   }
 
   handlePointerLock(locked: boolean) {
-    if (!locked && ['walking', 'flight', 'cinematic', 'surface', 'landing', 'takeoff'].includes(this.mode)) {
-      this.pausedFrom = this.mode;
-      this.mode = 'paused';
-      this.flight.boost = false;
-      this.audio.setFlight(0, false);
-    }
+    handleVoyagePointerLock(this, locked);
   }
 
   nearbyInteraction() {
