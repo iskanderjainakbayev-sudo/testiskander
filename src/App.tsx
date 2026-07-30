@@ -1,6 +1,6 @@
 import { Route, Switch } from 'wouter';
 import { HomePage } from './pages/HomePage';
-import { GamePage } from './pages/GamePage';
+import { SpaceGamePage } from './pages/SpaceGamePage';
 import { LoginPage } from './pages/LoginPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
@@ -8,8 +8,9 @@ import { NotFoundPage } from './pages/NotFoundPage';
 export default function App() {
   return (
     <Switch>
-      <Route path="/" component={HomePage} />
-      <Route path="/game" component={GamePage} />
+      <Route path="/" component={SpaceGamePage} />
+      <Route path="/game" component={SpaceGamePage} />
+      <Route path="/afterfall" component={HomePage} />
       <Route path="/login" component={LoginPage} />
       <Route component={NotFoundPage} />
     </Switch>
