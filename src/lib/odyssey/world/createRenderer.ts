@@ -41,7 +41,7 @@ export function createRenderer(canvas: HTMLCanvasElement): RenderRig {
   const resize = () => {
     const width = canvas.clientWidth || window.innerWidth;
     const height = canvas.clientHeight || window.innerHeight;
-    const dpr = Math.min(window.devicePixelRatio, width < 700 ? 1.35 : 1.8);
+    const dpr = Math.min(window.devicePixelRatio, width < 700 ? 1.2 : 1.5);
     renderer.setPixelRatio(dpr);
     renderer.setSize(width, height, false);
     composer.setPixelRatio(dpr);

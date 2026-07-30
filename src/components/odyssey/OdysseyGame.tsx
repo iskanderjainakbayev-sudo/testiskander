@@ -28,6 +28,10 @@ export function OdysseyGame() {
     };
   }, []);
 
+  useEffect(() => {
+    if (snapshot.scanned.length > 0) setHasSave(true);
+  }, [snapshot.scanned.length]);
+
   return (
     <div className="odyssey-game">
       <canvas ref={canvasRef} className="odyssey-canvas" aria-label="The Long Silence game world" />
