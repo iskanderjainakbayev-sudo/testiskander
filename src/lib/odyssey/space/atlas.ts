@@ -104,17 +104,20 @@ export function createAtlas(): AtlasVisual {
     roughness: 0.27,
     clearcoat: 0.22,
   });
+  metal.fog = false;
   const innerMetal = new THREE.MeshStandardMaterial({
     color: 0x34434b,
     metalness: 0.82,
     roughness: 0.38,
   });
+  innerMetal.fog = false;
   const glyphMaterial = new THREE.MeshBasicMaterial({
     color: 0x62ddef,
     transparent: true,
     opacity: 0.72,
     toneMapped: false,
   });
+  glyphMaterial.fog = false;
   const mainRing = new THREE.Mesh(new THREE.TorusGeometry(111, 10, 14, 160), metal);
   root.add(mainRing);
   const innerRing = new THREE.Mesh(new THREE.TorusGeometry(91, 2.8, 8, 128), innerMetal);

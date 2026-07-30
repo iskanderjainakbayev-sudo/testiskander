@@ -6,13 +6,15 @@ export interface PilgrimVisual {
 }
 
 function makeMetal(color: number, roughness: number): THREE.MeshPhysicalMaterial {
-  return new THREE.MeshPhysicalMaterial({
+  const material = new THREE.MeshPhysicalMaterial({
     color,
     metalness: 0.78,
     roughness,
     clearcoat: 0.16,
     clearcoatRoughness: 0.45,
   });
+  material.fog = false;
+  return material;
 }
 
 function addHabitatRing(
@@ -110,6 +112,7 @@ export function createPilgrim(): PilgrimVisual {
     color: 0xffc578,
     toneMapped: false,
   });
+  warmWindows.fog = false;
   const hull = new THREE.Mesh(new THREE.CapsuleGeometry(18, 96, 8, 24), hullMetal);
   hull.rotation.z = Math.PI / 2;
   vessel.add(hull);
@@ -138,6 +141,7 @@ export function createPilgrim(): PilgrimVisual {
     transparent: true,
     opacity: 0.84,
   });
+  glass.fog = false;
   const garden = new THREE.Mesh(new THREE.SphereGeometry(13, 28, 18), glass);
   garden.scale.set(1.42, 0.72, 1);
   garden.position.set(23, 15, 0);
