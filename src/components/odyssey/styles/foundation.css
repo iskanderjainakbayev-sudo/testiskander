@@ -1,3 +1,18 @@
+.odyssey-game {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #010507;
+}
+
+.odyssey-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  outline: none;
+  touch-action: none;
+}
+
 .odx-interface {
   --odx-ivory: #e6eced;
   --odx-dim: #87969a;
@@ -88,4 +103,3 @@
 @keyframes odx-grain { 0% { transform:translate(0,0) } 25% { transform:translate(-1%,1%) } 50% { transform:translate(1%,-1%) } 75% { transform:translate(1%,1%) } }
 @keyframes odx-pulse { 50% { opacity:.35; transform:scale(.94) } }
 @keyframes odx-reveal { from { opacity:0; transform:translateY(18px) } to { opacity:1; transform:translateY(0) } }
-

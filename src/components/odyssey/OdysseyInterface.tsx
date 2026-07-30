@@ -43,7 +43,6 @@ export function OdysseyInterface({
           hasSave={hasSave}
           onStart={onStart}
           onNewGame={onNewGame}
-          onReturnToMenu={onReturnToMenu}
         />
       )}
       {snapshot.mode === 'flight' && (
@@ -71,4 +70,3 @@ export function OdysseyInterface({
     </div>
   );
 }
-

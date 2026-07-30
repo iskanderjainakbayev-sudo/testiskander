@@ -39,7 +39,7 @@ export function FlightHud({ snapshot, onScan, onCycleTarget }: FlightHudProps) {
         <span><small>{scan > 0 ? 'SPECTRAL RESOLUTION' : 'DEEP FIELD ARRAY'}</small><strong>{scan > 0 ? `${Math.round(scan)}%` : 'HOLD Q TO SCAN'}</strong></span>
       </button>
       <div className="odx-flight__hints">
-        <span><kbd>W S</kbd> THRUST</span><span><kbd>A D</kbd> YAW</span><span><kbd>SHIFT</kbd> CRUISE</span><span><kbd>TAB</kbd> TARGET</span>
+        <span><kbd>MOUSE</kbd> STEER</span><span><kbd>W S</kbd> THRUST</span><span><kbd>A D</kbd> ROLL</span><span><kbd>SHIFT</kbd> PULSE</span><span><kbd>T</kbd> TARGET</span>
       </div>
       <Transmission message={snapshot.transmission} />
       <TouchActions mode="flight" onScan={onScan} onCycleTarget={onCycleTarget} />
@@ -51,4 +51,3 @@ function formatBearing(bearing: number) {
   const normalized = Math.round(((bearing % 360) + 360) % 360);
   return `${normalized.toString().padStart(3, '0')}°`;
 }
-

@@ -2,10 +2,9 @@ interface MainMenuProps {
   hasSave: boolean;
   onStart: () => void;
   onNewGame: () => void;
-  onReturnToMenu: () => void;
 }
 
-export function MainMenu({ hasSave, onStart, onNewGame, onReturnToMenu }: MainMenuProps) {
+export function MainMenu({ hasSave, onStart, onNewGame }: MainMenuProps) {
   return (
     <main className="odx-menu" aria-labelledby="odyssey-title">
       <header className="odx-menu__masthead">
@@ -31,7 +30,6 @@ export function MainMenu({ hasSave, onStart, onNewGame, onReturnToMenu }: MainMe
               NEW EXPEDITION
             </button>
           )}
-          <button className="odx-menu__exit" onClick={onReturnToMenu}>RETURN TO ARCHIVE</button>
         </div>
       </section>
 
@@ -43,4 +41,3 @@ export function MainMenu({ hasSave, onStart, onNewGame, onReturnToMenu }: MainMe
     </main>
   );
 }
-

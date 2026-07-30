@@ -27,7 +27,7 @@ export function FlightTelemetry({ snapshot }: FlightTelemetryProps) {
       <div className="odx-telemetry__vector">
         <span>VECTOR</span>
         <strong>{heading.toString().padStart(3, '0')}°</strong>
-        <small>SHIP TIME 03:17:42</small>
+        <small>LOCAL NAV · INERTIAL</small>
       </div>
       {snapshot.boost && <p className="odx-boost"><i /> CRUISE BURN</p>}
     </aside>
@@ -38,4 +38,3 @@ export function normalizePercent(value: number) {
   const percent = value <= 1 ? value * 100 : value;
   return Math.max(0, Math.min(100, Number.isFinite(percent) ? percent : 0));
 }
-

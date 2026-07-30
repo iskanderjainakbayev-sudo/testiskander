@@ -9,6 +9,8 @@ interface WalkingHudProps {
 }
 
 export function WalkingHud({ snapshot, onInteract }: WalkingHudProps) {
+  const interactionLabel = snapshot.nearbyInteraction?.replace(/^E\s*[·:—-]\s*/i, '') ?? null;
+
   return (
     <section className="odx-walk" aria-label="LYRA suit interface">
       <header className="odx-walk__header">
@@ -24,10 +26,10 @@ export function WalkingHud({ snapshot, onInteract }: WalkingHudProps) {
         <i />
         <p>PRESSURE NOMINAL</p>
       </aside>
-      {snapshot.nearbyInteraction && (
+      {interactionLabel && (
         <button className="odx-interact" onClick={onInteract}>
           <span className="odx-interact__key">E</span>
-          <span><small>SHIP INTERFACE</small><strong>{snapshot.nearbyInteraction}</strong></span>
+          <span><small>SHIP INTERFACE</small><strong>{interactionLabel}</strong></span>
           <i aria-hidden="true">→</i>
         </button>
       )}
@@ -37,10 +39,9 @@ export function WalkingHud({ snapshot, onInteract }: WalkingHudProps) {
       <Transmission message={snapshot.transmission} />
       <TouchActions
         mode="walking"
-        canInteract={Boolean(snapshot.nearbyInteraction)}
+        canInteract={Boolean(interactionLabel)}
         onInteract={onInteract}
       />
     </section>
   );
 }
-
