@@ -32,13 +32,13 @@ function createSky(): THREE.Mesh {
 
 function createDust(): THREE.Points {
   const random = nacreRandom(0xd057c10d);
-  const count = 1_160;
+  const count = 1_450;
   const positions = new Float32Array(count * 3);
   const phases = new Float32Array(count);
   const sizes = new Float32Array(count);
   for (let index = 0; index < count; index += 1) {
     positions[index * 3] = (random() - 0.5) * 190;
-    positions[index * 3 + 1] = 22 + Math.pow(random(), 0.72) * 105;
+    positions[index * 3 + 1] = 2.2 + Math.pow(random(), 1.18) * 112;
     positions[index * 3 + 2] = (random() - 0.5) * 180;
     phases[index] = random();
     sizes[index] = 0.55 + random() * 1.7;

@@ -113,11 +113,11 @@ def main() -> None:
     hide_runtime_helpers(root)
     camera, ground = configure_scene()
     views = {
-        "three-quarter-front": ((78.0, 94.0, 38.0), (0.0, 1.0, 0.0), 59.0),
+        "three-quarter-front": ((62.0, 76.0, 31.0), (0.0, 1.0, 0.0), 59.0),
         "port-profile": ((-125.0, -1.0, 4.0), (-1.0, -1.0, 0.0), 61.0),
         "landed-gear": ((76.0, 88.0, 15.0), (0.0, 1.0, -2.2), 55.0),
         "engine-closeup": ((17.5, -49.0, 6.5), (0.0, -29.0, -0.2), 70.0),
-        "surface-detail-closeup": ((34.0, -6.0, 8.0), (8.0, -6.0, 0.5), 68.0),
+        "surface-detail-closeup": ((34.0, -8.2, 5.2), (7.8, -8.2, 0.2), 72.0),
         "dorsal": ((20.0, 5.0, 132.0), (0.0, -1.0, 0.0), 58.0),
     }
     for name, (location, target, lens) in views.items():

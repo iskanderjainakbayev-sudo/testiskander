@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { disposeSpaceScene } from '../space/disposeSpaceScene';
 import { createLandingEquipment } from './createLandingEquipment';
+import { createRainSplashes } from './createRainSplashes';
 import { createSurfaceDetails } from './createSurfaceDetails';
 import { seededRandom, surfaceHeight } from './terrainNoise';
 import {
@@ -122,8 +123,9 @@ export function createSolaceSurface(): SolaceSurface {
   const sky = createSky();
   const precipitation = createPrecipitation();
   const details = createSurfaceDetails();
+  const splashes = createRainSplashes();
   const landingEquipment = createLandingEquipment(surfaceHeight, 45);
-  group.add(sky, terrain, water, precipitation, details.root, landingEquipment);
+  group.add(sky, terrain, water, precipitation, splashes.points, details.root, landingEquipment);
   const sun = new THREE.DirectionalLight(0xb9d6d2, 2.7);
   sun.position.set(-140, 210, 90);
   sun.castShadow = true;
@@ -139,6 +141,7 @@ export function createSolaceSurface(): SolaceSurface {
       (water.material as THREE.ShaderMaterial).uniforms.uTime.value = time;
       (sky.material as THREE.ShaderMaterial).uniforms.uTime.value = time;
       (precipitation.material as THREE.ShaderMaterial).uniforms.uTime.value = time;
+      splashes.update(time);
       sky.position.copy(camera.position);
       precipitation.position.set(camera.position.x, 0, camera.position.z);
       details.update(time);

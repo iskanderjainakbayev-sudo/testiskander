@@ -72,7 +72,7 @@ def create_materials() -> dict[str, bpy.types.Material]:
             "MAT_LYRA_Emission_Cyan", (0.01, 0.22, 0.31, 1), 0.35, 0.18, emission=(0.0, 0.78, 1.0), emission_strength=5.0
         ),
         "amber": _material(
-            "MAT_LYRA_Emission_Amber", (0.31, 0.10, 0.01, 1), 0.28, 0.24, emission=(1.0, 0.20, 0.01), emission_strength=4.2
+            "MAT_LYRA_Emission_Amber", (0.26, 0.055, 0.006, 1), 0.28, 0.26, emission=(1.0, 0.075, 0.004), emission_strength=3.0
         ),
         "radiator": _material("MAT_LYRA_Radiator_Copper", (0.18, 0.055, 0.021, 1), 0.86, 0.40, atlases),
     }

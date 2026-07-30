@@ -112,6 +112,18 @@ def build_engines(root: bpy.types.Object, materials: dict[str, bpy.types.Materia
             materials["metal"],
             engine,
         )
+        _open_nozzle(
+            f"Engine_{index + 1:02d}_CombustorLiner",
+            x,
+            -29.95 + aft,
+            z,
+            0.74 * scale,
+            0.54 * scale,
+            0.72,
+            36,
+            materials["heat"],
+            engine,
+        )
         cylinder(
             f"Engine_{index + 1:02d}_Cowl",
             1.65 * scale,
@@ -145,9 +157,9 @@ def build_engines(root: bpy.types.Object, materials: dict[str, bpy.types.Materia
         )
         cylinder(
             f"Engine_{index + 1:02d}_PlasmaAperture",
-            0.82 * scale,
+            0.44 * scale,
             0.12,
-            (x, -29.65 + aft, z),
+            (x, -29.68 + aft, z),
             materials["amber"],
             engine,
             40,
@@ -177,11 +189,31 @@ def _add_engine_internals(
         major_segments=28,
         minor_segments=5,
     )
+    torus(
+        f"Engine_{index + 1:02d}_CombustorOuterRing",
+        0.72 * scale,
+        0.055,
+        (x, -30.05 + aft, z),
+        materials["metal"],
+        engine,
+        major_segments=24,
+        minor_segments=5,
+    )
+    torus(
+        f"Engine_{index + 1:02d}_CombustorInnerRing",
+        0.44 * scale,
+        0.045,
+        (x, -29.82 + aft, z),
+        materials["heat"],
+        engine,
+        major_segments=24,
+        minor_segments=5,
+    )
     cone(
         f"Engine_{index + 1:02d}_Centerbody",
-        0.24 * scale,
+        0.20 * scale,
         0.055,
-        1.05,
+        1.14,
         (x, -30.45 + aft, z),
         materials["heat"],
         engine,
@@ -190,18 +222,28 @@ def _add_engine_internals(
         0.025,
     )
     vertices, faces = [], []
-    for vane in range(7):
-        angle = math.tau * vane / 7
-        half = 0.06
-        base = len(vertices)
-        for radius, y, offset in (
-            (0.31 * scale, -30.24 + aft, -half),
-            (1.03 * scale, -30.38 + aft, -half),
-            (1.03 * scale, -30.38 + aft, half),
-            (0.31 * scale, -30.24 + aft, half),
-        ):
-            vertices.append((x + math.cos(angle + offset) * radius, y, z + math.sin(angle + offset) * radius))
-        faces.append((base, base + 1, base + 2, base + 3))
+    stages = (
+        (11, 0.31, 1.03, -30.36, 0.035),
+        (9, 0.18, 0.67, -30.06, 0.042),
+    )
+    for vane_count, inner_radius, outer_radius, stage_y, half in stages:
+        for vane in range(vane_count):
+            angle = math.tau * vane / vane_count
+            base = len(vertices)
+            for radius, y, offset in (
+                (inner_radius * scale, stage_y + 0.12 + aft, -half),
+                (outer_radius * scale, stage_y + aft, -half),
+                (outer_radius * scale, stage_y + aft, half),
+                (inner_radius * scale, stage_y + 0.12 + aft, half),
+            ):
+                vertices.append(
+                    (
+                        x + math.cos(angle + offset) * radius,
+                        y,
+                        z + math.sin(angle + offset) * radius,
+                    )
+                )
+            faces.append((base, base + 1, base + 2, base + 3))
     mesh = bpy.data.meshes.new(f"Engine_{index + 1:02d}_InternalVanes_Mesh")
     mesh.from_pydata(vertices, [], faces)
     mesh.update()

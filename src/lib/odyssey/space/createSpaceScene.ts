@@ -4,6 +4,7 @@ import { createNacrePlanet } from '../nacre';
 import type { DiscoveryId } from '../types';
 import { createAtlas } from './atlas';
 import { createDeepSky } from './deepSky';
+import { createDistantBeacon } from './createDistantBeacon';
 import { disposeSpaceScene } from './disposeSpaceScene';
 import { createPilgrim } from './pilgrim';
 import { createSolace } from './solace';
@@ -44,6 +45,7 @@ export function createSpaceScene(): SpaceSceneRig {
   group.add(nearStars.points);
 
   const traffic = createTrafficSystem();
+  const beacon = createDistantBeacon();
   const solace = createSolace();
   const nacre = createNacrePlanet();
   const veil = createVeil();
@@ -60,7 +62,7 @@ export function createSpaceScene(): SpaceSceneRig {
     setBodyPosition(bodies[id], id);
     group.add(bodies[id]);
   });
-  group.add(traffic.group);
+  group.add(beacon.group, traffic.group);
 
   const ambient = new THREE.AmbientLight(0x122134, 0.42);
   const keyLight = new THREE.DirectionalLight(0xb8d5ff, 2.25);
@@ -74,6 +76,7 @@ export function createSpaceScene(): SpaceSceneRig {
     deepSky.material,
     distantStars.material,
     nearStars.material,
+    beacon.material,
     ...solace.materials,
     ...nacre.materials,
     ...veil.materials,
@@ -124,6 +127,7 @@ export function createSpaceScene(): SpaceSceneRig {
     });
 
     solace.update(time);
+    beacon.update(time, cameraInertial);
     nacre.update(time);
     veil.update(time, cameraInertial);
     pilgrim.update(time);
