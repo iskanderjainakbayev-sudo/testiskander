@@ -3,6 +3,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { createCinematicPass } from './createCinematicPass';
 
 export interface RenderRig {
   scene: THREE.Scene;
@@ -36,8 +37,11 @@ export function createRenderer(canvas: HTMLCanvasElement): RenderRig {
   composer.addPass(new RenderPass(scene, camera));
   const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.42, 0.58, 0.88);
   composer.addPass(bloom);
+  const cinematic = createCinematicPass();
+  composer.addPass(cinematic.pass);
   const outputPass = new OutputPass();
   composer.addPass(outputPass);
+  const drawingSize = new THREE.Vector2();
 
   const resize = () => {
     const width = canvas.clientWidth || window.innerWidth;
@@ -57,11 +61,16 @@ export function createRenderer(canvas: HTMLCanvasElement): RenderRig {
     scene,
     camera,
     renderer,
-    render: () => composer.render(),
+    render: () => {
+      renderer.getDrawingBufferSize(drawingSize);
+      cinematic.update(performance.now() / 1000, drawingSize.x, drawingSize.y);
+      composer.render();
+    },
     resize,
     dispose: () => {
       window.removeEventListener('resize', resize);
       bloom.dispose();
+      cinematic.pass.dispose();
       outputPass.dispose();
       composer.dispose();
       renderer.dispose();
