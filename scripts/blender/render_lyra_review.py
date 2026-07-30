@@ -113,12 +113,12 @@ def main() -> None:
     hide_runtime_helpers(root)
     camera, ground = configure_scene()
     views = {
-        "three-quarter-front": ((44.0, 57.0, 24.0), (0.0, 1.0, 0.0), 59.0),
-        "port-profile": ((-59.0, -1.0, 9.0), (-1.0, -1.0, 0.0), 61.0),
-        "landed-gear": ((48.0, 48.0, 7.0), (0.0, 1.0, -2.2), 58.0),
+        "three-quarter-front": ((78.0, 94.0, 38.0), (0.0, 1.0, 0.0), 59.0),
+        "port-profile": ((-125.0, -1.0, 4.0), (-1.0, -1.0, 0.0), 61.0),
+        "landed-gear": ((76.0, 88.0, 15.0), (0.0, 1.0, -2.2), 55.0),
         "engine-closeup": ((17.5, -49.0, 6.5), (0.0, -29.0, -0.2), 70.0),
-        "surface-detail-closeup": ((-27.0, -6.0, 8.5), (-8.2, -7.4, 1.4), 72.0),
-        "dorsal": ((35.0, 17.0, 82.0), (0.0, -1.0, 0.0), 53.0),
+        "surface-detail-closeup": ((34.0, -6.0, 8.0), (8.0, -6.0, 0.5), 68.0),
+        "dorsal": ((20.0, 5.0, 132.0), (0.0, -1.0, 0.0), 58.0),
     }
     for name, (location, target, lens) in views.items():
         ground.hide_render = name != "landed-gear"

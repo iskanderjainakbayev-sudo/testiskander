@@ -32,9 +32,9 @@ def _sample(x: int, y: int) -> tuple[tuple[float, float, float], float, tuple[fl
     groove_x = (1.5 - seam_x) * 0.045 if seam_x < 3 else 0.0
     groove_y = (1.5 - seam_y) * 0.045 if seam_y < 3 else 0.0
     if x < half and y >= half:
-        base = 0.73 + grain * 0.035
-        color = (base + 0.14, base + 0.13, base + 0.09)
-        roughness = 0.50 + grain * 0.085
+        base = 0.61 + grain * 0.035
+        color = (base + 0.12, base + 0.11, base + 0.08)
+        roughness = 0.56 + grain * 0.085
         if (68 < v % 192 < 74 and 30 < u % 256 < 150):
             color = tuple(channel * 0.28 for channel in color)
         if (136 < v % 256 < 141 and 178 < u % 256 < 244):
@@ -55,10 +55,10 @@ def _sample(x: int, y: int) -> tuple[tuple[float, float, float], float, tuple[fl
         color = (0.10 + heat + soot, 0.078 + heat * 0.45, 0.062 + heat * 0.18)
         roughness = 0.52 + soot * 0.75 + grain * 0.045
     else:
-        rib = 0.09 if u % 34 < 5 else 0.0
+        rib = 0.065 if u % 34 < 5 else 0.0
         oxidation = 0.025 * (grain + 1.0)
-        color = (0.21 + rib + oxidation, 0.076 + rib * 0.31, 0.028 + oxidation)
-        roughness = 0.34 + oxidation * 1.7 + (0.13 if rib else 0.0)
+        color = (0.17 + rib + oxidation, 0.058 + rib * 0.31, 0.022 + oxidation)
+        roughness = 0.40 + oxidation * 1.7 + (0.13 if rib else 0.0)
     if seam:
         color = tuple(channel * 0.78 for channel in color)
         roughness += 0.15
