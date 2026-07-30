@@ -16,7 +16,6 @@ export function buildInteriorLighting(
   cockpit.target.position.set(0, 0.62, -5.55);
   cockpit.castShadow = true;
   cockpit.shadow.mapSize.set(512, 512);
-  cockpit.shadow.bias = -0.0004;
   cockpit.shadow.normalBias = 0.018;
   group.add(cockpit, cockpit.target);
 

@@ -23,7 +23,6 @@ export function createSurfaceSun(): SurfaceSun {
   light.shadow.camera.near = 1;
   light.shadow.camera.far = 430;
   light.shadow.camera.updateProjectionMatrix();
-  light.shadow.bias = -0.00008;
   light.shadow.normalBias = 0.035;
   light.position.set(-140, 210, 90);
 
