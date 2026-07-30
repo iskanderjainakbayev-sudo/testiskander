@@ -1,18 +1,15 @@
-import * as THREE from 'three';
-import { audioSceneFor } from '../audio/AmbientBed';
 import { loadSave } from '../save';
 import { createLyraExterior, type LyraExterior } from '../ship/createLyraExterior';
 import { createSpaceScene, type SpaceSceneRig } from '../space/createSpaceScene';
-import type { TrafficUpdate } from '../space/traffic/createTrafficSystem';
 import type { WorldCallbacks } from '../types';
 import { installCaptureConsole } from './CaptureConsole';
 import { createRenderer, type RenderRig } from './createRenderer';
 import { createShipInterior, type ShipInterior } from './createShipInterior';
 import { InputController } from './InputController';
 import { OdysseyCinematics } from './OdysseyCinematics';
+import { OdysseyFrameLoop } from './OdysseyFrameLoop';
 import { OdysseyModeUpdater } from './OdysseyModeUpdater';
 import { OdysseySession } from './OdysseySession';
-import { PerformanceMonitor } from './PerformanceMonitor';
 import { PlanetExpeditions } from './PlanetExpeditions';
 import { SnapshotPublisher } from './SnapshotPublisher';
 
@@ -28,16 +25,8 @@ export class OdysseyWorld {
   private readonly snapshots: SnapshotPublisher;
   private readonly cinematics: OdysseyCinematics;
   private readonly modeUpdater: OdysseyModeUpdater;
-  private frameId = 0;
-  private captureCleanup = () => undefined;
-  private lastTime = performance.now();
-  private readonly performanceMonitor = new PerformanceMonitor();
-  private traffic: TrafficUpdate = {
-    nearestShipName: null,
-    nearestShipDistance: Number.POSITIVE_INFINITY,
-    encounterMessage: null,
-  };
-  private readonly inverseQuaternion = new THREE.Quaternion();
+  private readonly frameLoop: OdysseyFrameLoop;
+  private captureCleanup: () => void = () => undefined;
 
   constructor(canvas: HTMLCanvasElement, private readonly callbacks: WorldCallbacks) {
     this.render = createRenderer(canvas);
@@ -68,13 +57,22 @@ export class OdysseyWorld {
     this.captureCleanup = installCaptureConsole(
       this.session,
       this.input,
-      this.render.camera,
       this.expedition,
       this.cinematics,
       () => this.placeMenuCamera(),
     );
     this.placeMenuCamera();
-    this.frameId = requestAnimationFrame(this.animate);
+    this.frameLoop = new OdysseyFrameLoop(
+      this.render,
+      this.space,
+      this.ship,
+      this.exterior,
+      this.expedition,
+      this.session,
+      this.modeUpdater,
+      this.cinematics,
+      this.snapshots,
+    );
   }
 
   start = (newGame = false) => {
@@ -103,7 +101,7 @@ export class OdysseyWorld {
   };
 
   dispose() {
-    cancelAnimationFrame(this.frameId);
+    this.frameLoop.dispose();
     this.session.mode = 'menu';
     this.captureCleanup();
     this.input.releaseLock();
@@ -116,60 +114,6 @@ export class OdysseyWorld {
     this.ship.dispose();
     this.render.dispose();
   }
-
-  private readonly animate = (time: number) => {
-    this.frameId = requestAnimationFrame(this.animate);
-    const elapsed = time - this.lastTime;
-    const delta = Math.min(elapsed / 1000, 0.05);
-    this.lastTime = time;
-    this.performanceMonitor.push(elapsed);
-    const { mode, flight } = this.session;
-    this.modeUpdater.update(delta, time);
-    this.session.audio.setScene(audioSceneFor(this.session.mode));
-    this.expedition.syncVisibility(
-      this.session.mode,
-      this.session.landing.progress,
-      this.space.group,
-      this.ship.group,
-    );
-    this.cinematics.syncShipVisibility(this.ship.group);
-    this.render.setAtmosphere(
-      this.expedition.atmosphereBlend(this.session.mode, this.session.landing.progress),
-      this.session.landingTarget,
-    );
-    this.exterior.update(
-      this.render.camera,
-      this.session.mode,
-      this.session.landing.progress,
-      this.expedition.surface.getHeight,
-      this.expedition.rootZ,
-    );
-    flight.getInverseQuaternion(this.inverseQuaternion);
-    if (this.space.group.visible) {
-      this.traffic = this.space.update(
-        time / 1000,
-        this.render.camera,
-        flight.position,
-        this.inverseQuaternion,
-      );
-      if (mode === 'flight' && this.traffic.encounterMessage) {
-        this.session.mission.showTransmission(this.traffic.encounterMessage, 6);
-      }
-    }
-    this.expedition.update(time / 1000, this.render.camera);
-    this.space.setWarp?.(flight.boost ? flight.throttle : 0);
-    if (this.ship.group.visible) this.ship.update(time / 1000);
-    this.render.render();
-    this.snapshots.update(
-      delta,
-      this.session,
-      this.render.camera,
-      this.expedition,
-      this.traffic,
-      this.performanceMonitor.read(),
-      this.cinematics.state,
-    );
-  };
 
   private placeMenuCamera() {
     this.render.camera.position.set(0.42, 1.48, -3.6);

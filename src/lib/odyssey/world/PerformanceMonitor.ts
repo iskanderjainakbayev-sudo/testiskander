@@ -10,6 +10,7 @@ const WINDOW_SIZE = 1_800;
 
 export class PerformanceMonitor {
   private readonly frames = new Float32Array(WINDOW_SIZE);
+  private readonly ordered = new Float32Array(WINDOW_SIZE);
   private cursor = 0;
   private count = 0;
   private totalPushed = 0;
@@ -32,9 +33,16 @@ export class PerformanceMonitor {
 
   read(): FrameMetrics {
     if (this.count === 0 || this.totalPushed - this.computedAt < 30) return this.cached;
-    const samples = Array.from(this.frames.subarray(0, this.count)).sort((a, b) => a - b);
-    const total = samples.reduce((sum, value) => sum + value, 0);
-    const longFrames = samples.filter((value) => value > 33).length;
+    this.ordered.set(this.frames.subarray(0, this.count));
+    const samples = this.ordered.subarray(0, this.count);
+    samples.sort();
+    let total = 0;
+    let longFrames = 0;
+    for (let index = 0; index < samples.length; index += 1) {
+      const value = samples[index];
+      total += value;
+      if (value > 33) longFrames += 1;
+    }
     this.cached = {
       averageFps: 1_000 / Math.max(total / this.count, 0.001),
       p95Milliseconds: percentile(samples, 0.95),
@@ -47,7 +55,7 @@ export class PerformanceMonitor {
   }
 }
 
-function percentile(sorted: number[], ratio: number) {
+function percentile(sorted: Float32Array, ratio: number) {
   const index = Math.min(sorted.length - 1, Math.ceil(sorted.length * ratio) - 1);
   return sorted[Math.max(0, index)] ?? 0;
 }

@@ -8,6 +8,7 @@ import bpy
 from mathutils import Vector
 
 from lyra_common import box, cone, cylinder, empty, finish_mesh, oriented_cylinder, sphere
+from lyra_hull import surface_point
 
 
 def _oriented_torus(
@@ -77,7 +78,36 @@ def build_sensor_suite(root: bpy.types.Object, materials: dict[str, bpy.types.Ma
     sensors = empty("SENSOR_SUITE_STARBOARD", root)
     oriented_cylinder("Sensor_Mast_ForeLeg", (7.1, 0.2, 4.1), (9.3, -0.4, 7.4), 0.18, materials["metal"], sensors, 24)
     oriented_cylinder("Sensor_Mast_AftLeg", (7.9, -3.2, 4.2), (9.3, -0.4, 7.4), 0.18, materials["metal"], sensors, 24)
-    cylinder("Sensor_Mast_Gimbal", 0.62, 0.52, (9.3, -0.4, 7.4), materials["armor"], sensors, 36, bevel=0.08)
+    cylinder("Sensor_Mast_Gimbal", 0.76, 0.42, (9.3, -0.4, 7.32), materials["armor"], sensors, 36, bevel=0.08)
+    _oriented_torus(
+        "Sensor_Mast_AzimuthRing",
+        (9.3, -0.4, 7.52),
+        (0.0, 0.0, 1.0),
+        0.67,
+        0.105,
+        sensors,
+        materials["metal"],
+        (32, 8),
+    )
+    for side in (-1.0, 1.0):
+        oriented_cylinder(
+            f"Sensor_Dish_ElevationYoke_{'P' if side < 0 else 'S'}",
+            (9.3 + side * 0.61, -0.4, 7.48),
+            (9.3 + side * 0.61, -0.4, 8.04),
+            0.105,
+            materials["metal"],
+            sensors,
+            18,
+        )
+    oriented_cylinder(
+        "Sensor_Dish_ElevationAxle",
+        (8.54, -0.4, 7.94),
+        (10.06, -0.4, 7.94),
+        0.12,
+        materials["metal"],
+        sensors,
+        20,
+    )
     direction = (0.38, 0.78, 0.5)
     _dish("Sensor_DeepRange_Dish", (9.3, -0.4, 7.85), direction, 2.65, sensors, materials["metal"])
     feed_end = tuple(Vector((9.3, -0.4, 7.85)) + Vector(direction).normalized() * 1.75)
@@ -149,10 +179,13 @@ def build_rcs_and_service_details(root: bpy.types.Object, materials: dict[str, b
     for side in (-1.0, 1.0):
         label = "Port" if side < 0 else "Starboard"
         for station, y in (("Fore", 18.0), ("Aft", -17.5)):
+            surface_angle = math.pi if side < 0 else 0.0
+            surface_x, _, surface_z = surface_point(y, surface_angle, 0.28)
+            pod_location = (surface_x, y, surface_z)
             box(
                 f"RCS_{label}_{station}_Pod",
                 (1.3, 2.5, 1.7),
-                (side * 9.25, y, 1.0),
+                pod_location,
                 materials["armor"],
                 details,
                 bevel=0.28,
@@ -164,7 +197,11 @@ def build_rcs_and_service_details(root: bpy.types.Object, materials: dict[str, b
                     0.18,
                     0.34,
                     0.7,
-                    (side * 9.95, y + (nozzle - 0.5) * 0.75, 1.0 + z_offset),
+                    (
+                        surface_x + side * 0.67,
+                        y + (nozzle - 0.5) * 0.75,
+                        surface_z + z_offset,
+                    ),
                     materials["heat"],
                     details,
                     28,
@@ -176,7 +213,7 @@ def build_rcs_and_service_details(root: bpy.types.Object, materials: dict[str, b
                 0.17,
                 0.32,
                 0.65,
-                (side * 9.25, y, 1.95),
+                (surface_x, y, surface_z + 0.92),
                 materials["heat"],
                 details,
                 28,
@@ -191,10 +228,12 @@ def _add_service_louvers(
 ) -> None:
     for side in (-1.0, 1.0):
         for index, y in enumerate((-20.0, -13.0, 2.0, 9.0)):
+            angle = math.pi + 0.34 if side < 0 else -0.34
+            x, _, z = surface_point(y, angle, 0.24)
             box(
                 f"Service_Louver_{'P' if side < 0 else 'S'}_{index + 1:02d}",
                 (0.18, 3.8, 0.42),
-                (side * (9.7 - index * 0.35), y, -1.25),
+                (x, y, z),
                 materials["metal"],
                 details,
                 bevel=0.06,

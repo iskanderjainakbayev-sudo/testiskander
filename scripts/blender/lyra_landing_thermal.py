@@ -19,14 +19,14 @@ def build_landing_gear(root: bpy.types.Object, materials: dict[str, bpy.types.Ma
     )
     for name, mount, knee, pad_location, pad_dimensions in stations:
         pivot = empty(f"Gear_{name}_Pivot", gear)
-        oriented_cylinder(f"Gear_{name}_PrimaryStrut", mount, knee, 0.29, materials["metal"], pivot, 28)
+        oriented_cylinder(f"Gear_{name}_PrimaryStrut", mount, knee, 0.36, materials["metal"], pivot, 28)
         brace_end = (knee[0] * 0.82, knee[1] + 1.15, knee[2] + 0.35)
-        oriented_cylinder(f"Gear_{name}_Brace", mount, brace_end, 0.16, materials["metal"], pivot, 20)
+        oriented_cylinder(f"Gear_{name}_Brace", mount, brace_end, 0.21, materials["metal"], pivot, 20)
         side = 1.0 if knee[0] >= 0.0 else -1.0
         piston_start = (mount[0] + side * 0.26, mount[1] + 0.18, mount[2] - 0.18)
         piston_end = (knee[0] + side * 0.18, knee[1] + 0.12, knee[2] + 0.82)
         oriented_cylinder(
-            f"Gear_{name}_HydraulicPiston", piston_start, piston_end, 0.105, materials["metal"], pivot, 18
+            f"Gear_{name}_HydraulicPiston", piston_start, piston_end, 0.135, materials["metal"], pivot, 18
         )
         curve_tube(
             f"Gear_{name}_HydraulicHose",
@@ -94,6 +94,39 @@ def build_landing_gear(root: bpy.types.Object, materials: dict[str, bpy.types.Ma
                 12,
                 6,
             )
+        _add_footpad_claws(name, pad_location, pad_dimensions, pivot, materials)
+
+
+def _add_footpad_claws(
+    name: str,
+    pad_location: tuple[float, float, float],
+    pad_dimensions: tuple[float, float, float],
+    parent: bpy.types.Object,
+    materials: dict[str, bpy.types.Material],
+) -> None:
+    x, y, z = pad_location
+    width, length, height = pad_dimensions
+    for direction in (-1.0, 1.0):
+        box(
+            f"Gear_{name}_GroundClaw_Longitudinal_{'A' if direction < 0 else 'B'}",
+            (width * 0.72, 0.58, 0.22),
+            (x, y + direction * (length * 0.5 + 0.17), z - height * 0.34),
+            materials["metal"],
+            parent,
+            rotation=(direction * 0.13, 0.0, 0.0),
+            bevel=0.07,
+            segments=2,
+        )
+        box(
+            f"Gear_{name}_GroundClaw_Lateral_{'A' if direction < 0 else 'B'}",
+            (0.58, length * 0.52, 0.22),
+            (x + direction * (width * 0.5 + 0.17), y, z - height * 0.34),
+            materials["metal"],
+            parent,
+            rotation=(0.0, direction * 0.13, 0.0),
+            bevel=0.07,
+            segments=2,
+        )
 
 
 def _radiator_blade(
@@ -103,10 +136,11 @@ def _radiator_blade(
     parent: bpy.types.Object,
     material: bpy.types.Material,
 ) -> None:
-    outline = ((-8.1, 0.5), (-6.8, 6.0), (1.9, 6.25), (3.9, 5.25), (3.2, 1.1), (2.0, 0.25))
+    outline = ((-7.1, 0.7), (-6.1, 5.5), (1.6, 5.7), (3.4, 4.8), (2.8, 1.2), (1.7, 0.5))
+    y_offset = -6.5
     thickness = 0.11
-    front = [(x - thickness, y + fan * (z - 3.0), z) for y, z in outline]
-    back = [(x + thickness, y + fan * (z - 3.0), z) for y, z in outline]
+    front = [(x - thickness, y + y_offset + fan * (z - 3.0), z) for y, z in outline]
+    back = [(x + thickness, y + y_offset + fan * (z - 3.0), z) for y, z in outline]
     vertices = front + back
     count = len(outline)
     faces = [tuple(range(count)), tuple(reversed(range(count, count * 2)))]
@@ -124,43 +158,69 @@ def _radiator_blade(
 
 def build_thermal_system(root: bpy.types.Object, materials: dict[str, bpy.types.Material]) -> None:
     thermal = empty("THERMAL_ASYMMETRIC_BALANCE", root)
+    cylinder(
+        "Radiator_Port_HullGimbal",
+        0.58,
+        1.45,
+        (-8.25, -7.5, 2.55),
+        materials["armor"],
+        thermal,
+        32,
+        (0.0, math.pi / 2.0, 0.0),
+        0.09,
+    )
     oriented_cylinder(
         "Radiator_Port_DeploymentBoom",
-        (-8.6, -1.5, 2.5),
-        (-16.4, -2.4, 3.1),
-        0.28,
+        (-8.6, -7.5, 2.55),
+        (-16.35, -7.8, 3.05),
+        0.34,
         materials["metal"],
         thermal,
         28,
     )
-    for index, (x, fan) in enumerate(((-16.95, -0.08), (-17.58, 0.0), (-18.21, 0.08))):
+    truss_booms = (
+        ((-8.2, -6.25, 3.2), (-16.35, -3.55, 5.15)),
+        ((-8.4, -8.85, 1.9), (-16.35, -13.2, 1.05)),
+        ((-9.0, -6.15, 3.25), (-15.2, -11.7, 1.25)),
+    )
+    for index, (start, end) in enumerate(truss_booms):
+        oriented_cylinder(
+            f"Radiator_Port_Truss_{index + 1:02d}",
+            start,
+            end,
+            0.17 if index < 2 else 0.12,
+            materials["metal"],
+            thermal,
+            20,
+        )
+    for index, (x, fan) in enumerate(((-16.95, -0.15), (-17.58, 0.0), (-18.21, 0.15))):
         _radiator_blade(
             f"Radiator_Port_TaperedBlade_{index + 1:02d}", x, fan, thermal, materials["radiator"]
         )
-    for index, z in enumerate((0.62, 1.75, 2.9, 4.05, 5.18, 6.0)):
+    for index, z in enumerate((0.72, 1.64, 2.58, 3.52, 4.46, 5.4)):
         curve_tube(
             f"Radiator_Port_CoolantRib_{index + 1:02d}",
-            ((-18.35, -7.7, z), (-18.42, -2.5, z + 0.16), (-18.33, 2.6, z - 0.04)),
+            ((-18.35, -13.55, z), (-18.42, -8.3, z + 0.16), (-18.33, -3.25, z - 0.04)),
             0.055,
             materials["metal"],
             thermal,
         )
     edge_paths = (
-        ((-18.4, -8.1, 0.5), (-18.4, -6.8, 6.0), (-18.4, 1.9, 6.25)),
-        ((-18.4, 1.9, 6.25), (-18.4, 3.9, 5.25), (-18.4, 2.0, 0.25)),
+        ((-18.4, -13.6, 0.7), (-18.4, -12.6, 5.5), (-18.4, -4.9, 5.7)),
+        ((-18.4, -4.9, 5.7), (-18.4, -3.1, 4.8), (-18.4, -4.8, 0.5)),
     )
     for index, points in enumerate(edge_paths):
         curve_tube(f"Radiator_Port_EdgeFrame_{index + 1:02d}", points, 0.09, materials["metal"], thermal)
     curve_tube(
         "Radiator_Port_CoolantSupply",
-        ((-8.2, -0.5, 2.9), (-12.0, -1.2, 3.6), (-16.9, -1.2, 5.7)),
+        ((-8.2, -6.2, 2.9), (-12.0, -6.9, 3.6), (-16.9, -5.1, 5.35)),
         0.13,
         materials["radiator"],
         thermal,
     )
     curve_tube(
         "Radiator_Port_CoolantReturn",
-        ((-8.4, -2.4, 2.3), (-12.4, -3.3, 2.0), (-16.9, -3.9, 0.7)),
+        ((-8.4, -8.7, 2.3), (-12.4, -9.6, 2.0), (-16.9, -12.8, 0.9)),
         0.13,
         materials["radiator"],
         thermal,

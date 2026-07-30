@@ -40,9 +40,14 @@ def _sample(x: int, y: int) -> tuple[tuple[float, float, float], float, tuple[fl
         if (136 < v % 256 < 141 and 178 < u % 256 < 244):
             color = (0.68, 0.23, 0.035)
     elif x >= half and y >= half:
-        weave = 0.018 * math.sin((u + v) * 0.22) * math.sin((u - v) * 0.19)
-        color = (0.045 + grain * 0.012, 0.055 + weave, 0.063 + weave)
-        roughness = 0.44 + abs(weave) * 2.1 + grain * 0.035
+        brushed = 0.018 * math.sin((u + v) * 0.11) + 0.011 * math.sin((u - v) * 0.037)
+        oxidation = 0.018 * max(0.0, math.sin(u * 0.019 + v * 0.007))
+        color = (
+            0.125 + grain * 0.026 + brushed,
+            0.142 + grain * 0.021 + brushed * 0.72 + oxidation * 0.35,
+            0.151 + grain * 0.018 + brushed * 0.56 + oxidation,
+        )
+        roughness = 0.46 + abs(brushed) * 1.45 + grain * 0.045 + oxidation * 1.2
     elif x < half:
         radial = math.hypot(u - half * 0.5, v - half * 0.5) / (half * 0.72)
         heat = max(0.0, 1.0 - radial) * 0.11
@@ -50,10 +55,10 @@ def _sample(x: int, y: int) -> tuple[tuple[float, float, float], float, tuple[fl
         color = (0.10 + heat + soot, 0.078 + heat * 0.45, 0.062 + heat * 0.18)
         roughness = 0.52 + soot * 0.75 + grain * 0.045
     else:
-        rib = 0.13 if u % 34 < 5 else 0.0
+        rib = 0.09 if u % 34 < 5 else 0.0
         oxidation = 0.025 * (grain + 1.0)
-        color = (0.26 + rib + oxidation, 0.105 + rib * 0.35, 0.045 + oxidation)
-        roughness = 0.28 + oxidation * 1.7 + (0.13 if rib else 0.0)
+        color = (0.21 + rib + oxidation, 0.076 + rib * 0.31, 0.028 + oxidation)
+        roughness = 0.34 + oxidation * 1.7 + (0.13 if rib else 0.0)
     if seam:
         color = tuple(channel * 0.78 for channel in color)
         roughness += 0.15

@@ -1,8 +1,10 @@
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { disposeSpaceScene } from '../space/disposeSpaceScene';
 import type { LandablePlanetId } from '../types';
 import { createCinematicPass } from './createCinematicPass';
 
@@ -36,6 +38,13 @@ export function createRenderer(canvas: HTMLCanvasElement): RenderRig {
   renderer.toneMappingExposure = 1.06;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  const room = new RoomEnvironment();
+  const environment = pmrem.fromScene(room, 0.045).texture;
+  scene.environment = environment;
+  scene.environmentIntensity = 0.38;
+  disposeSpaceScene(room);
+  pmrem.dispose();
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
   const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.42, 0.58, 0.88);
@@ -99,6 +108,7 @@ export function createRenderer(canvas: HTMLCanvasElement): RenderRig {
       cinematic.pass.dispose();
       outputPass.dispose();
       composer.dispose();
+      environment.dispose();
       renderer.dispose();
     },
   };

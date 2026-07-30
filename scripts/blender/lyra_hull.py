@@ -171,6 +171,60 @@ def shell_patch(
     )
 
 
+def _framed_recess(
+    name: str,
+    y_start: float,
+    y_end: float,
+    angle_start: float,
+    angle_end: float,
+    parent: bpy.types.Object,
+    materials: dict[str, bpy.types.Material],
+) -> None:
+    shell_patch(
+        f"{name}_ShadowWell",
+        y_start,
+        y_end,
+        angle_start,
+        angle_end,
+        parent,
+        materials["heat"],
+        "heat",
+        offset=0.045,
+        rows=6,
+        columns=14,
+        thickness=0.055,
+    )
+    boundaries = (
+        [surface_point(y, angle_start, 0.27) for y in (y_start, (y_start + y_end) * 0.5, y_end)],
+        [surface_point(y, angle_end, 0.27) for y in (y_start, (y_start + y_end) * 0.5, y_end)],
+        [
+            surface_point(y_start, angle, 0.27)
+            for angle in (angle_start, (angle_start + angle_end) * 0.5, angle_end)
+        ],
+        [
+            surface_point(y_end, angle, 0.27)
+            for angle in (angle_start, (angle_start + angle_end) * 0.5, angle_end)
+        ],
+    )
+    for index, points in enumerate(boundaries):
+        curve_tube(f"{name}_Frame_{index + 1:02d}", points, 0.075, materials["metal"], parent, 1)
+    angle_mid = (angle_start + angle_end) * 0.5
+    for index, fraction in enumerate((0.31, 0.69)):
+        y = y_start + (y_end - y_start) * fraction
+        curve_tube(
+            f"{name}_InternalConduit_{index + 1:02d}",
+            (
+                surface_point(y, angle_start + 0.035, 0.12),
+                surface_point(y, angle_mid, 0.12),
+                surface_point(y, angle_end - 0.035, 0.12),
+            ),
+            0.045,
+            materials["radiator"] if index == 0 else materials["metal"],
+            parent,
+            1,
+        )
+
+
 def _wing(
     name: str,
     side: float,
@@ -184,9 +238,9 @@ def _wing(
     stations = (
         (3.4, -21.0, 15.0, thickness),
         (7.0, -20.2, 14.5, thickness * 0.93),
-        (11.5, -17.2, 11.8, thickness * 0.72),
-        (15.3, -10.4, 6.8, thickness * 0.43),
-        (18.6, -4.5, -3.5, 0.12),
+        (10.2, -17.2, 11.8, thickness * 0.72),
+        (13.4, -10.4, 6.8, thickness * 0.43),
+        (15.2, -4.5, -3.5, 0.12),
     )
     segments = 48
     points = []
@@ -292,22 +346,124 @@ def build_hull(root: bpy.types.Object, materials: dict[str, bpy.types.Material])
             materials["metal"],
             hull,
         )
+    _add_section_breaks(hull, materials)
+    _add_integrated_recesses(hull, materials)
     _add_armor_layers(hull, materials)
     _add_service_shell(hull, materials)
     add_hull_hardware(hull, materials, surface_point)
 
 
+def _add_integrated_recesses(
+    parent: bpy.types.Object, materials: dict[str, bpy.types.Material]
+) -> None:
+    recesses = (
+        ("ServiceTrench_Starboard", -13.0, 1.5, 0.06, 0.43),
+        ("ThermalInterface_Port", -13.0, -2.5, 2.70, 3.08),
+        ("ReactorAccess_Dorsal", -7.0, 4.5, 1.30, 1.84),
+    )
+    for name, y_start, y_end, angle_start, angle_end in recesses:
+        _framed_recess(
+            name,
+            y_start,
+            y_end,
+            angle_start,
+            angle_end,
+            parent,
+            materials,
+        )
+    shell_patch(
+        "PressureDoor_Starboard_OffWhite",
+        -11.6,
+        -2.0,
+        0.48,
+        0.73,
+        parent,
+        materials["hull"],
+        "hull",
+        0.19,
+        7,
+        12,
+        0.10,
+    )
+    shell_patch(
+        "PressureDoor_Port_OffWhite",
+        -12.0,
+        -3.5,
+        2.43,
+        2.65,
+        parent,
+        materials["hull"],
+        "hull",
+        0.19,
+        7,
+        12,
+        0.10,
+    )
+
+
+def _add_section_breaks(
+    parent: bpy.types.Object, materials: dict[str, bpy.types.Material]
+) -> None:
+    for index, y in enumerate((-20.5, -8.0, 8.0, 18.5)):
+        shell_patch(
+            f"Hull_PressureSectionBreak_{index + 1:02d}",
+            y - 0.11,
+            y + 0.11,
+            0.0,
+            math.tau,
+            parent,
+            materials["heat"],
+            "heat",
+            0.038,
+            2,
+            48,
+            0.035,
+        )
+    chines = (
+        ("StarboardUpper", 0.60, 0.67),
+        ("PortUpper", math.pi - 0.67, math.pi - 0.60),
+        ("StarboardLower", -0.67, -0.60),
+        ("PortLower", math.pi + 0.60, math.pi + 0.67),
+    )
+    for name, angle_start, angle_end in chines:
+        shell_patch(
+            f"Hull_LongitudinalChine_{name}",
+            -23.0,
+            20.0,
+            angle_start,
+            angle_end,
+            parent,
+            materials["armor"],
+            "armor",
+            0.19,
+            18,
+            3,
+            0.09,
+        )
+    shell_patch(
+        "Hull_VentralStructuralKeel",
+        -22.0,
+        18.0,
+        -1.70,
+        -1.44,
+        parent,
+        materials["armor"],
+        "armor",
+        0.24,
+        16,
+        6,
+        0.13,
+    )
+
+
 def _add_armor_layers(parent: bpy.types.Object, materials: dict[str, bpy.types.Material]) -> None:
     panel_specs = (
-        ("Port_Forward", 7.0, 19.5, 2.55, 3.03, "hull"),
-        ("Port_Mid", -8.0, 5.5, 2.58, 3.06, "armor"),
-        ("Port_Aft", -21.5, -10.0, 2.52, 3.02, "hull"),
+        ("Port_Forward", 15.1, 20.5, 2.55, 3.03, "hull"),
+        ("Port_Aft", -21.5, -14.2, 2.52, 3.02, "hull"),
         ("Starboard_Forward", 5.5, 18.0, 0.10, 0.58, "hull"),
-        ("Starboard_Mid", -9.5, 3.5, 0.08, 0.56, "armor"),
         ("Starboard_Aft", -22.0, -11.2, 0.12, 0.62, "hull"),
-        ("Dorsal_Aft", -20.0, -7.5, 1.18, 1.86, "armor"),
-        ("Dorsal_Port_Mid", -5.5, 7.5, 1.63, 2.08, "hull"),
-        ("Dorsal_Starboard_Mid", -5.5, 7.5, 1.06, 1.51, "hull"),
+        ("Dorsal_Port_Mid", -5.5, 7.5, 1.90, 2.18, "hull"),
+        ("Dorsal_Starboard_Mid", -5.5, 7.5, 0.96, 1.24, "hull"),
     )
     for name, y_start, y_end, angle_start, angle_end, material_key in panel_specs:
         shell_patch(
