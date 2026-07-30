@@ -22,6 +22,15 @@ def build_lod1(root: bpy.types.Object, materials: dict[str, bpy.types.Material])
     shell_patch(
         "LOD1_Canopy", 14.2, 28.2, 0.78, 2.36, lod, materials["glass"], None, 0.22, 8, 14, 0.12
     )
+    box(
+        "LOD1_DorsalEngineeringSpine",
+        (6.0, 25.0, 1.7),
+        (0.0, -6.0, 5.0),
+        materials["armor"],
+        lod,
+        bevel=0.22,
+        segments=2,
+    )
     aft = -1.5
     for index, (x, z, scale) in enumerate(((-4.8, -0.4, 0.92), (0.0, -0.7, 1.12), (4.8, -0.4, 0.92))):
         cone(
