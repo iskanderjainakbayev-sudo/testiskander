@@ -59,7 +59,8 @@ export function createDistantLanes(
   const positions: number[] = [];
   const phases: number[] = [];
   const sample = new THREE.Vector3();
-  routes.forEach((route, routeIndex) => {
+  let routeIndex = 0;
+  routes.forEach((route) => {
     const samples = route.id === 'long-haul' ? 144 : 72;
     for (let index = 0; index < samples; index += 1) {
       const start = index / samples;
@@ -71,6 +72,7 @@ export function createDistantLanes(
       positions.push(sample.x, sample.y, sample.z);
       phases.push(end + routeIndex * .17);
     }
+    routeIndex += 1;
   });
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));

@@ -109,7 +109,7 @@ export function createFleetUpdater(
   materials: TrafficMaterials,
 ): (time: number, shipPosition: THREE.Vector3) => TrafficUpdate {
   return (time, shipPosition) => {
-    let nearest: VesselRuntime | null = null;
+    let nearestName: string | null = null;
     let nearestDistance = Number.POSITIVE_INFINITY;
     let encounterMessage: string | null = null;
     runtimes.forEach((runtime, vesselIndex) => {
@@ -117,7 +117,7 @@ export function createFleetUpdater(
       updateEffects(runtime, vesselIndex, progress, visuals, time);
       const distance = runtime.position.distanceTo(shipPosition);
       if (distance < nearestDistance) {
-        nearest = runtime;
+        nearestName = runtime.spec.name;
         nearestDistance = distance;
       }
       const encounterRange = runtime.spec.class === 'freighter' ? 76 : 58;
@@ -130,7 +130,7 @@ export function createFleetUpdater(
     materials.lane.uniforms.uTime.value = time;
     markUpdates(visuals);
     return {
-      nearestShipName: nearest ? nearest.spec.name : null,
+      nearestShipName: nearestName,
       nearestShipDistance: nearestDistance,
       encounterMessage,
     };
