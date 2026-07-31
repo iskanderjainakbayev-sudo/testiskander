@@ -59,6 +59,9 @@ export class OceanCombat {
       this.audio.creatureAttack(creature === 'Abyssal Dragon', soundHz, attack);
     });
     this.audio.setBossNear(Boolean(this.threat?.isBoss));
+    if (this.threat && this.threat.distance < 24) {
+      this.audio.creatureNearby(now, this.threat.soundHz, this.threat.mode);
+    }
   }
 
   weaponReady(now: number): boolean {

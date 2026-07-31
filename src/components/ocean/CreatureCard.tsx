@@ -24,6 +24,7 @@ export function CreatureCard({ species }: { species: Species }) {
         <div><dt>WEAKNESS</dt><dd>{species.weaknesses.join(' · ')}</dd></div>
         <div><dt>MOTION</dt><dd>{species.animations.slice(0, 5).join(' · ')}</dd></div>
         <div><dt>CALL</dt><dd>{species.soundSet.family} · {species.soundSet.callHz} Hz</dd></div>
+        <div><dt>PALETTE</dt><dd>{species.palette.map((tone) => `#${tone.toString(16).padStart(6, '0')}`).join(' · ')}</dd></div>
       </dl>
     </article>
   );

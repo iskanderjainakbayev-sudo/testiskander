@@ -3,6 +3,7 @@ import { SPECIES } from './creatureCatalog';
 import { createCreatureModel } from './creatureModels';
 import { animateCreature } from './creatureMotion';
 import { thinkCreature, type CreatureStimulus } from './CreatureBrain';
+import { creatureAttackDelay, creatureAttackRange, updateEcosystemTarget } from './creatureEcosystem';
 import {
   createCreatureActor,
   hitCreature,
@@ -10,6 +11,7 @@ import {
   respawnCreature,
   type CreatureActor,
   type WeaponHit,
+  type CreatureMode,
 } from './creatureRuntime';
 import { floorAt, seededRandom } from './terrain';
 
@@ -20,6 +22,8 @@ export interface PredatorAlert {
   health: number;
   maxHealth: number;
   isBoss: boolean;
+  soundHz: number;
+  mode: CreatureMode;
 }
 
 export class CreatureSystem {
@@ -66,7 +70,7 @@ export class CreatureSystem {
       if (!creature.mesh.visible) continue;
       creature.attackCooldown = Math.max(0, creature.attackCooldown - delta);
       const distance = creature.mesh.position.distanceTo(player);
-      this.updateEcosystem(creature, time);
+      updateEcosystemTarget(creature, this.creatures, time, this.random);
       const brainIntent = thinkCreature(creature, player, time, stimulus, this.random);
       const hostile = ['stalk', 'circle', 'flank', 'chase', 'attack', 'search'].includes(brainIntent.mode);
       const bossIntent = creature.boss && hostile
@@ -91,10 +95,13 @@ export class CreatureSystem {
           health: creature.health,
           maxHealth: creature.maxHealth,
           isBoss: Boolean(creature.boss),
+          soundHz: creature.species.soundSet.callHz,
+          mode: brainIntent.mode,
         };
       }
       const canStrike = bossIntent?.canStrike ?? brainIntent.canStrike;
-      if (hostile && canStrike && distance < creature.species.size * 1.4 + 1 && creature.attackCooldown === 0) {
+      const attackRange = creatureAttackRange(creature);
+      if (hostile && canStrike && distance < attackRange && creature.attackCooldown === 0) {
         const damage = creature.species.damage;
         onAttack(
           protectedBySub ? Math.max(3, damage * .34) : damage,
@@ -103,7 +110,7 @@ export class CreatureSystem {
           creature.species.attack,
         );
         creature.mesh.position.addScaledVector(direction, -2.5);
-        creature.attackCooldown = this.attackDelay(creature);
+        creature.attackCooldown = creatureAttackDelay(creature);
       }
       const prey = creature.ecosystemTarget;
       if (brainIntent.mode === 'hunt' && prey && prey.health > 0
@@ -130,33 +137,4 @@ export class CreatureSystem {
     return hitCreatureInCone(this.creatures, origin, direction, range, damage, time);
   }
 
-  private updateEcosystem(creature: CreatureActor, time: number): void {
-    if (time < creature.ecosystemCheckAt) return;
-    creature.ecosystemCheckAt = time + 1.2 + this.random();
-    creature.ecosystemTarget = null;
-    creature.ecosystemThreat = null;
-    let preyDistance = 15;
-    let threatDistance = 12;
-    for (const other of this.creatures) {
-      if (other === creature || !other.mesh.visible || other.health <= 0) continue;
-      const distance = creature.mesh.position.distanceTo(other.mesh.position);
-      const stronger = other.species.threat > creature.species.threat + 1;
-      if (stronger && distance < threatDistance) {
-        creature.ecosystemThreat = other;
-        threatDistance = distance;
-      }
-      const huntsFish = creature.species.diet.includes('fish') || creature.species.diet.includes('predator');
-      if (huntsFish && other.species.temperament === 'passive' && distance < preyDistance) {
-        creature.ecosystemTarget = other;
-        preyDistance = distance;
-      }
-    }
-  }
-
-  private attackDelay(creature: CreatureActor): number {
-    if (creature.species.attack === 'shock') return 3.4;
-    if (creature.species.attack === 'poison') return 2.8;
-    if (creature.species.attack === 'charge' || creature.species.attack === 'ram') return 2.5;
-    return 1.8;
-  }
 }

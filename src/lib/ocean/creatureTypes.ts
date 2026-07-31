@@ -41,6 +41,7 @@ export interface Species extends SpeciesSeed {
   scannerEntry: string;
   animations: string[];
   soundSet: { family: string; callHz: number; warningHz: number };
+  palette: [number, number, number];
   silhouette: { width: number; height: number; length: number; appendages: number; crest: number };
   senses: { sight: number; sound: number; light: number; motion: number };
 }
@@ -95,6 +96,7 @@ export function defineSpecies(seed: SpeciesSeed): Species {
       callHz: 70 + (hash % 620),
       warningHz: 45 + ((hash >> 8) % 310),
     },
+    palette: [seed.color, seed.glow, (seed.color ^ (hash & 0xffffff)) >>> 0],
     silhouette: {
       width: 0.72 + (hash % 57) / 100,
       height: 0.58 + ((hash >> 5) % 48) / 100,

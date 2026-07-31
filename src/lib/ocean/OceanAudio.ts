@@ -4,6 +4,7 @@ export class OceanAudio {
   private readonly engine = new OceanSoundEngine();
   private warningAt = 0;
   private swimAt = 0;
+  private creatureCallAt = 0;
   private bossNear = false;
 
   start(): void {
@@ -69,6 +70,13 @@ export class OceanAudio {
     this.engine.noise(boss ? .34 : .18, noisy ? .12 : .07, attack === 'shock' ? 1200 : 310);
     this.engine.tone(boss ? 42 : voiceHz, attack === 'shock' ? voiceHz * 2.4 : voiceHz * .48, boss ? .72 : .38, boss ? .1 : .055);
     if (attack === 'shock') this.engine.tone(voiceHz * 1.5, voiceHz * .6, .22, .035, .06);
+  }
+
+  creatureNearby(now: number, voiceHz: number, mode: string): void {
+    if (now - this.creatureCallAt < (mode === 'warn' ? 2400 : 4800)) return;
+    this.creatureCallAt = now;
+    const urgent = mode === 'warn' || mode === 'chase' || mode === 'attack';
+    this.engine.tone(voiceHz, urgent ? voiceHz * .62 : voiceHz * 1.18, urgent ? .42 : .7, urgent ? .035 : .018);
   }
 
   setBossNear(near: boolean): void {

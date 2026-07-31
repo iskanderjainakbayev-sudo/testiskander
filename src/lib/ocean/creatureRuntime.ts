@@ -76,18 +76,29 @@ export function hitCreature(
   damage: number,
   time: number,
 ): WeaponHit | null {
-  let closest: { creature: CreatureActor; point: THREE.Vector3; distance: number } | null = null;
+  let closest: { creature: CreatureActor; point: THREE.Vector3; distance: number; weakPoint: boolean } | null = null;
   for (const creature of creatures) {
     if (!creature.mesh.visible || creature.health <= 0) continue;
     const contact = raycaster.intersectObject(creature.mesh, true)[0];
     if (contact && (!closest || contact.distance < closest.distance)) {
-      closest = { creature, point: contact.point.clone(), distance: contact.distance };
+      closest = {
+        creature,
+        point: contact.point.clone(),
+        distance: contact.distance,
+        weakPoint: contact.object.name.startsWith('weak-point') || contact.object.name.toLowerCase().includes('eye'),
+      };
     }
   }
   if (!closest) return null;
   const { creature, point } = closest;
-  creature.health = Math.max(0, creature.health - damage);
+  creature.health = Math.max(0, creature.health - damage * (closest.weakPoint ? 1.8 : 1));
   creature.provokedUntil = time + 24;
+  if (!creature.species.isBoss && creature.species.senses.sight > .68) {
+    const dodge = raycaster.ray.direction.clone().cross(new THREE.Vector3(0, 1, 0)).normalize();
+    creature.mesh.position.addScaledVector(dodge, creature.phase % 2 > 1 ? 1.2 : -1.2);
+    creature.mode = creature.health / creature.maxHealth < .27 ? 'retreat' : 'flank';
+    creature.modeUntil = time + 1.2;
+  }
   creature.mesh.userData.hitUntil = time + 0.16;
   creature.boss?.onHit(time, creature.health / creature.maxHealth);
   const killed = creature.health <= 0;

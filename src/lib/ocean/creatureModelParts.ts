@@ -29,6 +29,7 @@ export function addEyes(group: THREE.Group, species: Species, spread = .48, z = 
   const material = species.temperament === 'aggressive' ? hostileEye : calmEye;
   for (const side of [-1, 1]) {
     const eye = new THREE.Mesh(new THREE.SphereGeometry(species.size * .105, 8, 6), material);
+    eye.name = 'weak-point-eye';
     eye.position.set(side * species.size * spread, species.size * .16, species.size * z);
     group.add(eye);
   }
