@@ -26,8 +26,10 @@ export class PlayerController {
 
   update(delta: number, state: OceanState, inSub: boolean): void {
     const [lookX, lookY] = this.input.takeLook();
-    this.yaw -= lookX * 0.00215;
-    this.pitch = THREE.MathUtils.clamp(this.pitch - lookY * 0.0018, -1.38, 1.38);
+    const keyLookX = Number(this.input.isDown('ArrowRight')) - Number(this.input.isDown('ArrowLeft'));
+    const keyLookY = Number(this.input.isDown('ArrowDown')) - Number(this.input.isDown('ArrowUp'));
+    this.yaw -= lookX * 0.00215 + keyLookX * delta * 1.65;
+    this.pitch = THREE.MathUtils.clamp(this.pitch - lookY * 0.0018 - keyLookY * delta * 1.35, -1.38, 1.38);
     const forward = new THREE.Vector3(
       -Math.sin(this.yaw) * Math.cos(this.pitch),
       Math.sin(this.pitch),

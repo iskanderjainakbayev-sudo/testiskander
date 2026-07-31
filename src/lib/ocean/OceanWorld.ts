@@ -35,6 +35,7 @@ export class OceanWorld {
   private lastTime = performance.now();
   private lastSnapshot = 0;
   private lastSave = 0;
+  private failed = false;
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -87,6 +88,10 @@ export class OceanWorld {
     if (this.running && !this.paused) this.input.requestLock();
   }
 
+  setVirtualKey(code: string, active: boolean): void {
+    this.input.setVirtualKey(code, active);
+  }
+
   craft(recipeId: RecipeId): boolean {
     const result = this.actions.craft(recipeId);
     this.publish(performance.now());
@@ -117,15 +122,22 @@ export class OceanWorld {
   }
 
   private readonly loop = (now: number) => {
+    if (this.failed) return;
     this.frame = requestAnimationFrame(this.loop);
-    const delta = Math.min(0.05, (now - this.lastTime) / 1000);
-    this.lastTime = now;
-    const time = now / 1000;
-    if (this.running && !this.paused) this.update(delta, now, time);
-    const depth = Math.max(0, -this.player.position.y);
-    this.environment.update(time, biomeAtDepth(depth), this.lightsOn || this.inSub);
-    this.environment.renderer.render(this.environment.scene, this.environment.camera);
-    if (now - this.lastSnapshot > 110) this.publish(now);
+    try {
+      const delta = Math.min(0.05, (now - this.lastTime) / 1000);
+      this.lastTime = now;
+      const time = now / 1000;
+      if (this.running && !this.paused) this.update(delta, now, time);
+      const depth = Math.max(0, -this.player.position.y);
+      this.environment.update(time, biomeAtDepth(depth), this.lightsOn || this.inSub);
+      this.environment.renderer.render(this.environment.scene, this.environment.camera);
+      if (now - this.lastSnapshot > 110) this.publish(now);
+    } catch {
+      this.failed = true;
+      cancelAnimationFrame(this.frame);
+      this.onEvent('fatal');
+    }
   };
 
   private update(delta: number, now: number, time: number): void {

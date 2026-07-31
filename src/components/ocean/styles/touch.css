@@ -1,0 +1,57 @@
+.ocean-touch-controls {
+  position: absolute;
+  z-index: 8;
+  inset: 0;
+  display: none;
+  pointer-events: none;
+}
+
+.ocean-touch-controls button {
+  pointer-events: auto;
+  touch-action: none;
+  border: 1px solid #aaf8ed63;
+  color: #dffffa;
+  background: #052d38b8;
+  font-size: 10px;
+  font-weight: 800;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.touch-move {
+  position: absolute;
+  bottom: 25px;
+  left: 20px;
+  display: grid;
+  grid-template: repeat(3, 44px) / repeat(3, 44px);
+  gap: 4px;
+}
+
+.touch-move .up { grid-area: 1 / 2; }
+.touch-move .left { grid-area: 2 / 1; }
+.touch-move .down { grid-area: 2 / 2; }
+.touch-move .right { grid-area: 2 / 3; }
+
+.touch-actions {
+  position: absolute;
+  right: 20px;
+  bottom: 25px;
+  display: grid;
+  grid-template-columns: repeat(2, 56px);
+  gap: 6px;
+}
+
+.touch-actions button { height: 42px; border-radius: 50%; font-size: 8px; }
+.touch-actions .interact {
+  height: 56px;
+  color: #05242b;
+  background: #65f1dd;
+  font-size: 16px;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .ocean-touch-controls { display: block; }
+  .ocean-meters { bottom: 168px; }
+  .ocean-quickbar { display: none; }
+  .sub-readout { bottom: 168px; }
+}

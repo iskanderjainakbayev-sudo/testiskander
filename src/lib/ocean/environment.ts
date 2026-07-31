@@ -75,7 +75,7 @@ export class OceanEnvironment {
       this.scene.fog.density = palette[1];
     }
     this.hemi.intensity = palette[2];
-    this.updateBubbles(time);
+    this.updateBubbles();
   }
 
   resize = (): void => {
@@ -118,9 +118,10 @@ export class OceanEnvironment {
     }));
   }
 
-  private updateBubbles(time: number): void {
+  private updateBubbles(): void {
     for (let index = 1; index < this.bubblePositions.length; index += 3) {
-      this.bubblePositions[index] = ((this.bubblePositions[index] + 0.035 + time * 0.00001) % 121) - 120;
+      this.bubblePositions[index] += 0.035;
+      if (this.bubblePositions[index] > 0) this.bubblePositions[index] = -120;
     }
     this.bubbles.geometry.attributes.position.needsUpdate = true;
     this.bubbles.position.copy(this.camera.position).multiplyScalar(0.45);
