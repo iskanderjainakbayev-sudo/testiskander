@@ -4,7 +4,6 @@ import { CinematicFrame } from './CinematicFrame';
 import { CinematicHud } from './CinematicHud';
 import { EndingSequence } from './EndingSequence';
 import { FlightHud } from './FlightHud';
-import { FocusPrompt } from './FocusPrompt';
 import { LandingSequence } from './LandingSequence';
 import { MainMenu } from './MainMenu';
 import { PauseOverlay } from './PauseOverlay';
@@ -14,7 +13,6 @@ import { WalkingHud } from './WalkingHud';
 export interface OdysseyInterfaceProps {
   snapshot: GameSnapshot;
   hasSave: boolean;
-  pointerLocked: boolean;
   onStart: () => void;
   onResume: () => void;
   onNewGame: () => void;
@@ -29,7 +27,6 @@ export interface OdysseyInterfaceProps {
 export function OdysseyInterface({
   snapshot,
   hasSave,
-  pointerLocked,
   onStart,
   onResume,
   onNewGame,
@@ -40,8 +37,6 @@ export function OdysseyInterface({
   onSkipCinematic,
   onReturnToMenu,
 }: OdysseyInterfaceProps) {
-  const isActive = ['walking', 'flight', 'surface'].includes(snapshot.mode);
-
   return (
     <div className={`odx-interface odx-interface--${snapshot.mode}`}>
       <CinematicFrame
@@ -91,7 +86,6 @@ export function OdysseyInterface({
       {snapshot.mode === 'ending' && (
         <EndingSequence onNewGame={onNewGame} onReturnToMenu={onReturnToMenu} />
       )}
-      {isActive && !pointerLocked && <FocusPrompt onResume={onResume} />}
     </div>
   );
 }

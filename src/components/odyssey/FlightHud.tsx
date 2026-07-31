@@ -58,7 +58,7 @@ export function FlightHud({ snapshot, onInteract, onScan, onCycleTarget, onLand 
         </span>
       </button>
       <div className="odx-flight__hints">
-        <span><kbd>MOUSE</kbd> STEER</span><span><kbd>W S</kbd> THRUST</span><span><kbd>A D</kbd> ROLL</span><span><kbd>SPACE</kbd> BRAKE</span><span><kbd>SHIFT</kbd> PULSE</span><span><kbd>F</kbd> ALIGN</span><span><kbd>T</kbd> TARGET</span>{snapshot.canLand && <span><kbd>L</kbd> LAND</span>}
+        <span><kbd>W S</kbd> THRUST</span><span><kbd>A D</kbd> TURN</span><span><kbd>↑ ↓</kbd> PITCH</span><span><kbd>MOUSE</kbd> LOOK</span><span><kbd>SPACE</kbd> BRAKE</span><span><kbd>SHIFT</kbd> PULSE</span><span><kbd>F</kbd> ALIGN</span>{snapshot.canLand && <span><kbd>L</kbd> LAND</span>}
       </div>
       {snapshot.canLand && (
         <button

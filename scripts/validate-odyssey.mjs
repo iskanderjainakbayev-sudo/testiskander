@@ -6,6 +6,10 @@ const vite = await createServer({
   logLevel: 'error',
   server: { middlewareMode: true },
 });
+Object.defineProperty(globalThis, 'localStorage', {
+  configurable: true,
+  value: { getItem: () => null, removeItem: () => undefined, setItem: () => undefined },
+});
 
 try {
   const { MissionController } = await vite.ssrLoadModule(
@@ -22,6 +26,9 @@ try {
   );
   const { LandingController } = await vite.ssrLoadModule(
     '/src/lib/odyssey/world/LandingController.ts',
+  );
+  const { OdysseySession } = await vite.ssrLoadModule(
+    '/src/lib/odyssey/world/OdysseySession.ts',
   );
   const { SurfaceController } = await vite.ssrLoadModule(
     '/src/lib/odyssey/world/SurfaceController.ts',
@@ -62,6 +69,21 @@ try {
   const metrics = monitor.read();
   assert(metrics.averageFps >= 60, 'Synthetic 60 fps trace misreported');
   assert(metrics.p99Milliseconds < 17, 'Synthetic p99 trace misreported');
+
+  const activeKeys = new Set(['KeyW', 'KeyA']);
+  const flightInput = {
+    isDown: (code) => activeKeys.has(code),
+    takeLook: () => ({ x: 0, y: 0 }),
+  };
+  const keyboardFlight = new FlightController();
+  for (let frame = 0; frame < 180; frame += 1) keyboardFlight.update(1 / 60, flightInput);
+  assert(keyboardFlight.speed > 50, 'W must accelerate the ship');
+  assert(keyboardFlight.position.length() > 40, 'Keyboard thrust must move the ship');
+  assert(Math.abs(keyboardFlight.quaternion.y) > 0.2, 'A/D must steer, not only roll');
+
+  const session = new OdysseySession();
+  session.start(false, { clear() {}, requestLock() {} });
+  assert(session.mode === 'flight', 'A new voyage must begin at the helm');
 
   for (let x = -420; x <= 420; x += 35) {
     for (let z = -420; z <= 420; z += 35) {
@@ -105,6 +127,8 @@ try {
     cinematicVelocityJump: cinematic.maximumNormalizedVelocityJump,
     syntheticPerformance: metrics,
     traffic: 'finite-and-disposed',
+    keyboardFlight: 'thrust-and-steering-ready',
+    startupMode: session.mode,
     terrain: 'solace-and-nacre-finite',
     expeditions: 'two-landings-two-takeoffs-finite',
   }, null, 2) + '\n');

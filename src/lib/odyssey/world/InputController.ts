@@ -11,6 +11,7 @@ export class InputController {
   private moveStartY = 0;
   private lookX = 0;
   private lookY = 0;
+  private hadPointerLock = false;
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
@@ -45,8 +46,13 @@ export class InputController {
   }
 
   requestLock() {
-    if (document.pointerLockElement !== this.canvas) {
-      void this.canvas.requestPointerLock().catch(() => undefined);
+    this.canvas.focus();
+    if (document.pointerLockElement === this.canvas) return;
+    try {
+      const request = this.canvas.requestPointerLock();
+      void request?.catch(() => undefined);
+    } catch {
+      // Keyboard steering still works when pointer lock is unavailable.
     }
   }
 
@@ -93,8 +99,15 @@ export class InputController {
 
   private readonly onLockChange = () => {
     const locked = document.pointerLockElement === this.canvas;
-    if (!locked) this.clear();
-    this.onPointerLock(locked);
+    if (locked) {
+      this.hadPointerLock = true;
+      this.onPointerLock(true);
+      return;
+    }
+    this.clear();
+    if (!this.hadPointerLock) return;
+    this.hadPointerLock = false;
+    this.onPointerLock(false);
   };
 
   private readonly onTouchStart = (event: TouchEvent) => {

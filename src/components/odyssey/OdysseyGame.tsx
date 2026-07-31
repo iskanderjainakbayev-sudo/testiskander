@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { OdysseyWorld } from '../../lib/odyssey/world/OdysseyWorld';
 import { INITIAL_SNAPSHOT } from '../../lib/odyssey/world/snapshot';
-import type { GameSnapshot } from '../../lib/odyssey/types';
+import { getObjective } from '../../lib/odyssey/discoveries';
+import type { GameMode, GameSnapshot } from '../../lib/odyssey/types';
 import { OdysseyInterface } from './OdysseyInterface';
 import '../../styles/odyssey.css';
 
@@ -9,7 +10,6 @@ export function OdysseyGame() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const worldRef = useRef<OdysseyWorld | null>(null);
   const [snapshot, setSnapshot] = useState<GameSnapshot>(INITIAL_SNAPSHOT);
-  const [pointerLocked, setPointerLocked] = useState(false);
   const [hasSave, setHasSave] = useState(false);
   const [startupError, setStartupError] = useState<string | null>(null);
 
@@ -20,7 +20,7 @@ export function OdysseyGame() {
     try {
       world = new OdysseyWorld(canvas, {
         onSnapshot: setSnapshot,
-        onPointerLock: setPointerLocked,
+        onPointerLock: () => undefined,
         onComplete: () => undefined,
       });
     } catch (error) {
@@ -39,9 +39,38 @@ export function OdysseyGame() {
     if (snapshot.scanned.length > 0) setHasSave(true);
   }, [snapshot.scanned.length]);
 
+  const syncMode = (mode: GameMode) => {
+    setSnapshot((current) => ({
+      ...current,
+      mode,
+      objective: getObjective(
+        current.scanned,
+        mode,
+        current.surfaceSamples,
+        current.solaceSurveyed,
+        current.nacreSurveyed,
+        current.landingSiteName.toLowerCase().startsWith('nacre') ? 'nacre' : 'solace',
+      ),
+    }));
+  };
+
+  const beginVoyage = (newGame: boolean) => {
+    const world = worldRef.current;
+    if (!world) return setStartupError('Flight controls are still initializing. Please try again.');
+    setStartupError(null);
+    world.start(newGame);
+    syncMode(world.mode);
+    if (newGame) setHasSave(false);
+  };
+
   return (
     <div className="odyssey-game">
-      <canvas ref={canvasRef} className="odyssey-canvas" aria-label="The Long Silence game world" />
+      <canvas
+        ref={canvasRef}
+        className="odyssey-canvas"
+        tabIndex={0}
+        aria-label="The Long Silence game world"
+      />
       {startupError && (
         <div className="odx-startup-error">
           <strong>GRAPHICS LINK INTERRUPTED</strong>
@@ -52,13 +81,12 @@ export function OdysseyGame() {
       <OdysseyInterface
         snapshot={snapshot}
         hasSave={hasSave}
-        pointerLocked={pointerLocked}
-        onStart={() => worldRef.current?.start()}
-        onResume={() => worldRef.current?.resume()}
-        onNewGame={() => {
-          worldRef.current?.start(true);
-          setHasSave(false);
+        onStart={() => beginVoyage(false)}
+        onResume={() => {
+          worldRef.current?.resume();
+          if (worldRef.current) syncMode(worldRef.current.mode);
         }}
+        onNewGame={() => beginVoyage(true)}
         onInteract={() => worldRef.current?.interact()}
         onScan={() => worldRef.current?.scan()}
         onCycleTarget={() => worldRef.current?.cycleTarget()}

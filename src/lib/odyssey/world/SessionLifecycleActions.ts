@@ -27,12 +27,11 @@ export function startVoyage(
       save.nacreSurveyed,
     );
     session.flight.position.set(...save.shipPosition);
-    session.mode = 'flight';
   } else {
     session.mission.reset();
     session.walking.reset();
-    session.mode = 'walking';
   }
+  session.mode = 'flight';
   progress.restore(save);
   session.pausedFrom = session.mode;
   session.fuel = 100;

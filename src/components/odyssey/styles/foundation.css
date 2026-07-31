@@ -104,24 +104,6 @@
 .odx-button--quiet { color:var(--odx-dim)!important; background:rgba(11,20,23,.38); border:1px solid var(--odx-line); }
 .odx-button--quiet:hover { color:var(--odx-ivory)!important; border-color:rgba(230,236,237,.5); }
 
-.odx-focus {
-  position:absolute;
-  left:50%; top:50%;
-  width:250px;
-  padding:22px 18px 18px;
-  border:1px solid rgba(205,227,229,.28);
-  background:rgba(4,10,12,.76);
-  backdrop-filter:blur(13px);
-  transform:translate(-50%,-50%);
-  cursor:pointer;
-  pointer-events:auto;
-}
-.odx-focus strong,.odx-focus small { display:block; }
-.odx-focus strong { margin-top:15px; font-size:10px; letter-spacing:.18em; }
-.odx-focus small { margin-top:7px; color:var(--odx-dim); font-size:9px; }
-.odx-focus__mark { position:relative; display:block; width:25px; height:25px; margin:auto; transform:rotate(45deg); border:1px solid var(--odx-amber); }
-.odx-focus__mark i { position:absolute; inset:6px; border:1px solid rgba(234,181,110,.4); }
-
 @keyframes odx-grain { 0% { transform:translate(0,0) } 25% { transform:translate(-1%,1%) } 50% { transform:translate(1%,-1%) } 75% { transform:translate(1%,1%) } }
 @keyframes odx-pulse { 50% { opacity:.35; transform:scale(.94) } }
 @keyframes odx-reveal { from { opacity:0; transform:translateY(18px) } to { opacity:1; transform:translateY(0) } }

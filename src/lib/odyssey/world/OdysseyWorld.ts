@@ -1,7 +1,7 @@
 import { loadSave } from '../save';
 import { createLyraExterior, type LyraExterior } from '../ship/createLyraExterior';
 import { createSpaceScene, type SpaceSceneRig } from '../space/createSpaceScene';
-import type { WorldCallbacks } from '../types';
+import type { GameMode, WorldCallbacks } from '../types';
 import { installCaptureConsole } from './CaptureConsole';
 import { createRenderer, type RenderRig } from './createRenderer';
 import { createShipInterior, type ShipInterior } from './createShipInterior';
@@ -85,6 +85,7 @@ export class OdysseyWorld {
       );
     }
   };
+  get mode(): GameMode { return this.session.mode; }
   resume = () => this.session.resume(this.input);
   interact = () => {
     if (this.session.mode === 'surface') this.expedition.interact(this.input);
