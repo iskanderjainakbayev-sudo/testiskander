@@ -110,6 +110,21 @@
   letter-spacing: .15em;
 }
 
+.menu-actions .menu-auth {
+  padding: 16px 19px;
+  border: 1px solid #9befe859;
+  color: #bce7e3;
+  background: #0a3943c9;
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .15em;
+}
+
+.menu-actions .menu-auth:hover {
+  background: #14525f9c;
+}
+
 .menu-actions .primary,
 .ending-screen button {
   min-width: 225px;

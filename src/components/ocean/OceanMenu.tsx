@@ -1,3 +1,5 @@
+import { Link } from "wouter";
+
 interface OceanMenuProps {
   canContinue: boolean;
   ready: boolean;
@@ -28,6 +30,9 @@ export function OceanMenu({ canContinue, ready, failed, onNew, onContinue, onRet
             {primaryLabel} <span>→</span>
           </button>
           {ready && canContinue && <button onClick={onNew}>NEW EXPEDITION</button>}
+          <Link className="menu-auth" href="/signup">
+            <b>REGISTRATION</b> WITH GOOGLE
+          </Link>
         </div>
         {failed && <strong className="menu-error">3D startup failed. Retry, or enable WebGL in your browser.</strong>}
         <small>AN ORIGINAL COMPACT SURVIVAL ADVENTURE</small>
