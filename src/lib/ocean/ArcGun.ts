@@ -16,10 +16,12 @@ export class ArcGun {
   private readonly bullets: BulletEffects;
   private readonly core = new THREE.Mesh();
   private readonly rings = new THREE.Group();
+  private readonly muzzleFlash = new THREE.PointLight(0x8ffff4, 0, 4);
   private nextShotAt = 0;
   private nextSpecialAt = 0;
   private recoilUntil = 0;
   private pulseUntil = 0;
+  private flashUntil = 0;
 
   constructor(scene: THREE.Scene) {
     this.bullets = new BulletEffects(scene);
@@ -33,6 +35,8 @@ export class ArcGun {
     if (special) this.nextSpecialAt = now + 3200;
     this.recoilUntil = now + (special ? 420 : 150);
     this.pulseUntil = special ? now + 650 : this.pulseUntil;
+    this.flashUntil = now + (special ? 170 : 75);
+    this.muzzleFlash.color.setHex(special ? 0xff8b36 : 0x8ffff4);
     const shotDirection = direction.clone().normalize();
     const hit = creatures.hit(origin, shotDirection, range, special ? 138 : 46, now / 1000);
     const end = hit?.point ?? origin.clone().addScaledVector(shotDirection, range);
@@ -48,6 +52,7 @@ export class ArcGun {
     this.rings.rotation.z = now * 0.004;
     this.rings.scale.setScalar(1 + Math.sin(now * 0.008) * 0.08 + pulse * 0.65);
     this.core.scale.setScalar(1 + pulse * 1.8);
+    this.muzzleFlash.intensity = now < this.flashUntil ? (pulse > 0 ? 18 : 8) : 0;
     this.bullets.update(now);
   }
 
@@ -76,7 +81,8 @@ export class ArcGun {
       ring.rotation.set(index * 0.5, index * 0.65, 0);
       this.rings.add(ring);
     }
-    this.model.add(barrel, handle, this.core, this.rings);
+    this.muzzleFlash.position.z = -0.58;
+    this.model.add(barrel, handle, this.core, this.rings, this.muzzleFlash);
     this.model.position.set(0.34, -0.27, -0.74);
     this.model.rotation.set(-0.05, -0.08, -0.04);
     this.model.traverse((object) => {
