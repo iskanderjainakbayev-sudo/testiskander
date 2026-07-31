@@ -4,7 +4,7 @@ import type { Climbable, CollisionBox, WalkableSurface } from "./maps/types";
 const up = new THREE.Vector3(0, 1, 0);
 const eyeHeight = 1.75;
 const walkSpeed = 6;
-const sprintSpeed = 10;
+const sprintSpeed = 11.3;
 
 export type PlayerMoveState = {
   isMoving: boolean;

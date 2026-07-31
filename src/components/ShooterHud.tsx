@@ -49,7 +49,7 @@ export function ShooterHud({ state, onPause }: ShooterHudProps) {
       {state.missionBoss && <div className="boss-warning">COMMANDER VOSS <b><i style={{ width: `${(state.bossHealth / 18) * 100}%` }} /></b></div>}
       {state.isAiming && <div className="aiming-readout">AIMING</div>}
       <div className={`crosshair ${state.isAiming ? "aiming" : ""}`} aria-hidden="true" />
-      <footer className="shooter-controls">1–0/- LOADOUT · RMB AIM · E INTERACT · V MELEE · F INSPECT · R RELOAD</footer>
+      <footer className="shooter-controls">1–0/- LOADOUT · SHIFT SPRINT · RMB AIM · E INTERACT · V MELEE · F INSPECT · R RELOAD</footer>
     </>
   );
 }

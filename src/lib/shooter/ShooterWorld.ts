@@ -14,8 +14,8 @@ import { ShooterInput } from "./worldInput";
 import { createWorldSnapshot } from "./worldSnapshot";
 
 const maxStamina = 100;
-const sprintDrain = 33;
-const staminaRecover = 20;
+const sprintDrain = 38;
+const staminaRecover = 23;
 const maxHealth = 160;
 
 export class ShooterWorld {

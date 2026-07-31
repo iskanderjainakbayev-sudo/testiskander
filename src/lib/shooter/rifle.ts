@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { hitEnemy, type Enemy } from "./enemies";
 import { ProjectileSystem } from "./projectiles";
-import { getWeapon, weaponCatalog, type WeaponDefinition, type WeaponStats } from "./weapons/weaponCatalog";
+import { getWeapon, weaponCatalog, type WeaponDefinition } from "./weapons/weaponCatalog";
 type FireResult = { fired: boolean; killed: boolean };
 type MeleeResult = { hit: boolean; killed: boolean };
 export class Rifle {
