@@ -11,15 +11,22 @@ export function OdysseyGame() {
   const [snapshot, setSnapshot] = useState<GameSnapshot>(INITIAL_SNAPSHOT);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [hasSave, setHasSave] = useState(false);
+  const [startupError, setStartupError] = useState<string | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const world = new OdysseyWorld(canvas, {
-      onSnapshot: setSnapshot,
-      onPointerLock: setPointerLocked,
-      onComplete: () => undefined,
-    });
+    let world: OdysseyWorld;
+    try {
+      world = new OdysseyWorld(canvas, {
+        onSnapshot: setSnapshot,
+        onPointerLock: setPointerLocked,
+        onComplete: () => undefined,
+      });
+    } catch (error) {
+      setStartupError(error instanceof Error ? error.message : 'Unknown graphics error');
+      return;
+    }
     worldRef.current = world;
     setHasSave(world.hasSave);
     return () => {
@@ -35,6 +42,13 @@ export function OdysseyGame() {
   return (
     <div className="odyssey-game">
       <canvas ref={canvasRef} className="odyssey-canvas" aria-label="The Long Silence game world" />
+      {startupError && (
+        <div className="odx-startup-error">
+          <strong>GRAPHICS LINK INTERRUPTED</strong>
+          <span>{startupError}</span>
+          <button type="button" onClick={() => window.location.reload()}>RELOAD</button>
+        </div>
+      )}
       <OdysseyInterface
         snapshot={snapshot}
         hasSave={hasSave}

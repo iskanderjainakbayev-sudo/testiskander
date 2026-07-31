@@ -9,11 +9,20 @@ function canvasTexture(
   size: number,
   painter: (context: CanvasRenderingContext2D, size: number) => void,
   color = true,
-): THREE.CanvasTexture {
+): THREE.Texture {
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = size;
   const context = canvas.getContext('2d');
-  if (!context) throw new Error('Canvas textures are not supported');
+  if (!context) {
+    const fallback = new THREE.DataTexture(
+      new Uint8Array([92, 100, 98, 255]),
+      1,
+      1,
+      THREE.RGBAFormat,
+    );
+    fallback.needsUpdate = true;
+    return fallback;
+  }
   painter(context, size);
   const texture = new THREE.CanvasTexture(canvas);
   if (color) texture.colorSpace = THREE.SRGBColorSpace;
@@ -22,7 +31,7 @@ function canvasTexture(
   return texture;
 }
 
-export function makeBrushedMetal(): THREE.CanvasTexture {
+export function makeBrushedMetal(): THREE.Texture {
   const texture = canvasTexture(256, (context, size) => {
     context.fillStyle = '#747a79';
     context.fillRect(0, 0, size, size);
@@ -42,7 +51,7 @@ export function makeBrushedMetal(): THREE.CanvasTexture {
   return texture;
 }
 
-export function makeFloorSurface(): THREE.CanvasTexture {
+export function makeFloorSurface(): THREE.Texture {
   const texture = canvasTexture(256, (context, size) => {
     context.fillStyle = '#535a57';
     context.fillRect(0, 0, size, size);
@@ -65,7 +74,7 @@ export function makeFloorSurface(): THREE.CanvasTexture {
   return texture;
 }
 
-export function makeMicroNormal(): THREE.CanvasTexture {
+export function makeMicroNormal(): THREE.Texture {
   const texture = canvasTexture(128, (context, size) => {
     const image = context.createImageData(size, size);
     for (let index = 0; index < size * size; index += 1) {
@@ -81,7 +90,7 @@ export function makeMicroNormal(): THREE.CanvasTexture {
   return texture;
 }
 
-export function makeScreenTexture(title: string, accent = '#eab16d'): THREE.CanvasTexture {
+export function makeScreenTexture(title: string, accent = '#eab16d'): THREE.Texture {
   return canvasTexture(512, (context, size) => {
     context.fillStyle = '#061014';
     context.fillRect(0, 0, size, size);
