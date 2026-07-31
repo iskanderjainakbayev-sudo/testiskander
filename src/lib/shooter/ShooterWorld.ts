@@ -13,6 +13,9 @@ import { WeaponViewModel } from "./weapons/WeaponViewModel";
 import { ShooterInput } from "./worldInput";
 import { createWorldSnapshot } from "./worldSnapshot";
 
+const maxStamina = 100;
+const sprintDrain = 33;
+const staminaRecover = 20;
 const maxHealth = 160;
 
 export class ShooterWorld {
@@ -33,8 +36,11 @@ export class ShooterWorld {
   private previous = 0;
   private score = 0;
   private health = maxHealth;
+  private stamina = maxStamina;
   private nextDamage = 0;
   private running = false;
+  private footstepAt = 0;
+  private sprinting = false;
   constructor(private readonly options: ShooterWorldOptions) {
     this.renderer = new THREE.WebGLRenderer({
       canvas: options.canvas,
@@ -66,6 +72,9 @@ export class ShooterWorld {
     this.audio.unlock();
     this.score = 0;
     this.health = maxHealth;
+    this.stamina = maxStamina;
+    this.sprinting = false;
+    this.footstepAt = 0;
     this.input.firing = false;
     this.input.aiming = false;
     this.camera.fov = 72;
@@ -103,7 +112,18 @@ export class ShooterWorld {
     this.renderer.render(this.scene, this.camera);
   };
   private update(delta: number, time: number) {
-    movePlayer(this.camera, this.input.keys, delta, this.jump, this.map.definition.surfaces, this.map.collision, this.map.definition.climbables, this.map.definition.bounds);
+    const movement = movePlayer(
+      this.camera,
+      this.input.keys,
+      delta,
+      this.jump,
+      this.map.definition.surfaces,
+      this.map.collision,
+      this.map.definition.climbables,
+      this.map.definition.bounds,
+      this.stamina > 5,
+    );
+    this.handleMovement(time, delta, movement);
     this.updateAim(delta);
     this.map.update(delta);
     this.atmosphere.update(delta, time, this.camera.position);
@@ -150,8 +170,44 @@ export class ShooterWorld {
       this.nextDamage = performance.now() + 260;
     }
   };
+  private handleMovement = (time: number, delta: number, movement: ReturnType<typeof movePlayer>) => {
+    if (movement.didJump) {
+      this.audio.jump();
+      if (this.stamina > 5) this.stamina = Math.max(0, this.stamina - 4);
+    }
+    if (movement.didLand) {
+      this.stamina = Math.min(maxStamina, this.stamina + 8);
+      this.audio.land();
+    }
+    if (movement.isSprinting && movement.isMoving) {
+      if (!this.sprinting) this.audio.sprintStart();
+      this.stamina = Math.max(0, this.stamina - sprintDrain * delta);
+      this.sprinting = true;
+    } else {
+      if (this.sprinting) this.audio.sprintStop();
+      this.sprinting = false;
+      this.stamina = Math.min(maxStamina, this.stamina + staminaRecover * delta);
+    }
+    if (movement.isMoving && this.audio && time > this.footstepAt) {
+      this.audio.step(movement.isSprinting);
+      this.footstepAt = time + (movement.isSprinting ? 0.1 : 0.2);
+    }
+    if (!movement.isMoving) {
+      this.stamina = Math.min(maxStamina, this.stamina + staminaRecover * 0.3 * delta);
+      this.footstepAt = 0;
+    }
+  };
   private snapshot() {
-    const snapshot = createWorldSnapshot({ score: this.score, health: this.health, maxHealth, enemies: this.enemies, rifle: this.rifle, levelManager: this.levelManager });
+    const snapshot = createWorldSnapshot({
+      score: this.score,
+      health: this.health,
+      maxHealth,
+      enemies: this.enemies,
+      rifle: this.rifle,
+      levelManager: this.levelManager,
+      stamina: this.stamina,
+      maxStamina,
+    });
     return { ...snapshot, isAiming: this.input.aiming, mapName: this.map.definition.name, mapSubtitle: this.map.definition.subtitle };
   }
   private emit() {
@@ -170,8 +226,11 @@ export class ShooterWorld {
       if (result.killed) { this.score += 125; this.audio.hit(); }
     }
     if (key === "e") this.map.toggleNearestDoor(this.camera);
-    const slot = key === "0" ? 10 : Number(key);
-    if (Number.isInteger(slot) && slot > 0 && this.rifle.select(slot)) this.weaponView.equip(this.rifle.definition);
+    const slot = key === "0" ? 10 : key === "-" ? 11 : Number(key);
+    if (Number.isInteger(slot) && slot > 0 && slot <= 11 && this.rifle.select(slot)) {
+      this.audio.weaponEquip();
+      this.weaponView.equip(this.rifle.definition);
+    }
   };
   private updateAim(delta: number) {
     this.weaponView.setAiming(this.input.aiming, delta);

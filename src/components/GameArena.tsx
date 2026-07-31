@@ -11,6 +11,7 @@ import "../styles/shooter-color.css";
 
 const initialState: ShooterSnapshot = {
   score: 0, health: 160, maxHealth: 160, enemies: 0, ammo: 24, reserveAmmo: 96,
+  stamina: 100, maxStamina: 100,
   isReloading: false, isAiming: false, weapon: "AR-9", fireMode: "AUTO", level: 1, levelName: "KESTREL RANGE // TRAINING",
   missionName: "TRAINING", missionBoss: false, bossHealth: 0, objective: "Clear the training patrol.",
   mapName: "SUNBURST ISLAND", mapSubtitle: "Brightwater Basin // clear skies",

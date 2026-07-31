@@ -32,6 +32,15 @@ export function ShooterHud({ state, onPause }: ShooterHudProps) {
           {state.health}/{state.maxHealth}
         </strong>
       </div>
+      <div className="stamina-meter">
+        <span>STAMINA</span>
+        <div>
+          <b style={{ width: `${(state.stamina / state.maxStamina) * 100}%` }} />
+        </div>
+        <strong>
+          {Math.round(state.stamina)}/{state.maxStamina}
+        </strong>
+      </div>
       <div className="ammo-meter">
         <span>{state.isReloading ? "RELOADING" : `${state.weapon} · ${state.fireMode}`}</span>
         <b>{state.ammo}</b>
