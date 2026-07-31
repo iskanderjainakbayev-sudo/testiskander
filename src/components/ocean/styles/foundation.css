@@ -1,0 +1,142 @@
+.ocean-game {
+  --ice: #dffdfa;
+  --aqua: #65f1dd;
+  --amber: #ffb46b;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  color: var(--ice);
+  background: #03101c;
+  font-family: Inter, "Avenir Next", Arial, sans-serif;
+}
+
+.ocean-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  outline: 0;
+}
+
+.ocean-game button {
+  border: 0;
+  color: inherit;
+  font: inherit;
+}
+
+.ocean-overlay {
+  position: absolute;
+  z-index: 20;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(110deg, #01131bd9, #042b3591),
+    repeating-linear-gradient(90deg, transparent 0 70px, #87fff806 71px 72px);
+  backdrop-filter: blur(8px);
+}
+
+.ocean-menu {
+  place-items: center start;
+  padding: clamp(28px, 6vw, 90px);
+  background:
+    radial-gradient(circle at 78% 42%, transparent 0 9%, #3af1e00f 9.2% 9.6%, transparent 9.8% 15%, #3af1e00d 15.2% 15.5%, transparent 15.7%),
+    linear-gradient(90deg, #011720f2 0 32%, #04313e8f 67%, #02141f9e);
+  backdrop-filter: blur(3px);
+}
+
+.ocean-menu section {
+  width: min(590px, 88vw);
+  animation: ocean-rise 900ms cubic-bezier(.2,.8,.2,1);
+}
+
+.menu-kicker,
+.ocean-menu > section > small {
+  color: #9bded8;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .24em;
+}
+
+.menu-kicker i {
+  display: inline-block;
+  width: 28px;
+  height: 1px;
+  margin: 0 9px 3px 0;
+  background: var(--aqua);
+  box-shadow: 0 0 9px var(--aqua);
+}
+
+.ocean-menu h1 {
+  margin: 25px 0 24px;
+  color: #f0fffc;
+  font-size: clamp(68px, 10.5vw, 132px);
+  font-weight: 780;
+  line-height: .72;
+  letter-spacing: -.09em;
+  text-shadow: 0 12px 45px #001018;
+}
+
+.ocean-menu h1 em {
+  color: transparent;
+  font-style: normal;
+  -webkit-text-stroke: 1px #76eadf;
+  text-shadow: 0 0 32px #2debd236;
+}
+
+.ocean-menu p {
+  max-width: 470px;
+  margin: 0 0 30px;
+  color: #c1dcda;
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.menu-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.menu-actions button,
+.ending-screen button {
+  padding: 16px 19px;
+  border: 1px solid #9befe859;
+  color: #bce7e3;
+  background: #0a3943c9;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .15em;
+}
+
+.menu-actions .primary,
+.ending-screen button {
+  min-width: 225px;
+  color: #05222a;
+  background: var(--aqua);
+  box-shadow: 0 8px 28px #25d6be2b;
+}
+
+.menu-actions .primary span { float: right; font-size: 16px; }
+.menu-coordinate {
+  position: absolute;
+  right: 34px;
+  bottom: 32px;
+  color: #80b8b4;
+  font-size: 9px;
+  line-height: 1.7;
+  letter-spacing: .19em;
+  text-align: right;
+}
+
+@keyframes ocean-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 650px) {
+  .ocean-menu { align-items: end; padding: 28px 22px 60px; }
+  .menu-actions { flex-direction: column; }
+  .menu-actions button { width: 100%; }
+  .menu-coordinate { display: none; }
+}
