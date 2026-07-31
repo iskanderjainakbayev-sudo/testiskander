@@ -11,7 +11,11 @@ export type RecipeId =
   | 'rocketHull' | 'rocketCore' | 'rocketFuel';
 
 export type Inventory = Record<ResourceId, number>;
-export type BiomeId = 'Safe Reef' | 'Lumen Kelp' | 'The Abyss';
+export type BiomeId =
+  | 'Coral Paradise' | 'Giant Kelp Forest' | 'Mushroom Reef' | 'Underwater Jungle'
+  | 'Crystal Caverns' | 'Ancient Ruins' | 'Volcanic Depths' | 'Frozen Ocean'
+  | 'Bioluminescent Abyss' | 'Black Trench';
+export type GraphicsQuality = 'Low' | 'Medium' | 'High' | 'Ultra';
 export type OceanWeapon = 'gun' | 'knife';
 
 export interface Recipe {
@@ -51,6 +55,10 @@ export interface OceanSnapshot {
   depth: number;
   heading: number;
   biome: BiomeId;
+  weather: import('./climate').OceanWeather;
+  dayPhase: import('./climate').DayPhase;
+  nearbySite: string;
+  nearbySiteDistance: number;
   objective: string;
   objectiveAngle: number;
   objectiveDistance: number;

@@ -86,6 +86,31 @@
   letter-spacing: .13em;
 }
 
+.ocean-climate {
+  position: absolute;
+  top: 78px;
+  right: 28px;
+  display: grid;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.ocean-climate small,
+.ocean-site small { color: #77d9d1; font-size: 7px; letter-spacing: .18em; }
+.ocean-climate b { margin-top: 3px; color: #dffdfa; font-size: 9px; letter-spacing: .12em; }
+.ocean-site {
+  position: absolute;
+  top: 120px;
+  right: 28px;
+  display: grid;
+  padding: 9px 11px;
+  border-right: 2px solid var(--amber);
+  background: #00192070;
+  text-align: right;
+}
+.ocean-site b { margin-top: 4px; color: var(--amber); font-size: 10px; }
+.ocean-site span { margin-top: 2px; color: #9bcac6; font-size: 8px; }
+
 .ocean-reticle {
   position: absolute;
   top: 50%;
@@ -144,6 +169,8 @@
   .ocean-objective b { font-size: 10px; }
   .ocean-compass { top: 78px; }
   .ocean-depth { top: 17px; right: 16px; }
+  .ocean-climate { top: 70px; right: 16px; }
+  .ocean-site { display: none; }
   .ocean-controls { display: none; }
   .sub-readout { right: 16px; bottom: 18px; }
 }

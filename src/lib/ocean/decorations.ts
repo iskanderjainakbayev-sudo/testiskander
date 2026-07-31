@@ -60,12 +60,13 @@ function createCrystal(random: () => number): THREE.Group {
 export function createDecorations(scene: THREE.Scene): OceanDecor {
   const random = seededRandom(77421);
   const plants: THREE.Object3D[] = [];
-  for (let index = 0; index < 86; index += 1) {
-    const radius = 8 + random() * 128;
+  for (let index = 0; index < 186; index += 1) {
+    const radius = 8 + random() * 262;
     const angle = random() * Math.PI * 2;
     const x = Math.cos(angle) * radius;
     const z = 8 + Math.sin(angle) * radius;
-    const object = radius < 35 ? createCoral(random) : radius < 88 ? createKelp(random) : createCrystal(random);
+    const object = radius < 38 || (radius > 90 && index % 5 === 0)
+      ? createCoral(random) : radius < 92 || index % 3 === 0 ? createKelp(random) : createCrystal(random);
     object.position.set(x, floorAt(x, z), z);
     object.rotation.y = random() * Math.PI * 2;
     scene.add(object);

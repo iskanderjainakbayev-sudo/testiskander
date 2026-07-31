@@ -1,6 +1,7 @@
 import type { OceanState } from './OceanState';
 import type { PlayerController } from './PlayerController';
-import { biomeAtDepth } from './terrain';
+import { biomeAt } from './biomes';
+import { getOceanClimate } from './climate';
 import type { PredatorAlert } from './CreatureSystem';
 import type { Interactable, OceanSnapshot, OceanWeapon } from './types';
 
@@ -16,6 +17,7 @@ interface SnapshotOptions {
   specialWeaponReady: boolean;
   activeWeapon: OceanWeapon;
   objectiveTarget: { position: import('three').Vector3; label: string };
+  nearbySite: { name: string; distance: number };
 }
 
 function promptFor(item: Interactable | null): string {
@@ -36,6 +38,7 @@ export function createSnapshot(
   const forward = player.forward().setY(0).normalize();
   const toObjective = options.objectiveTarget.position.clone().sub(player.position).setY(0);
   const objectiveDistance = toObjective.length();
+  const climate = getOceanClimate(state.elapsed);
   toObjective.normalize();
   const objectiveAngle = Math.atan2(
     forward.x * toObjective.z - forward.z * toObjective.x,
@@ -52,7 +55,11 @@ export function createSnapshot(
     water: state.water,
     depth,
     heading: player.heading(),
-    biome: biomeAtDepth(depth),
+    biome: biomeAt(player.position),
+    weather: climate.weather,
+    dayPhase: climate.phase,
+    nearbySite: options.nearbySite.name,
+    nearbySiteDistance: options.nearbySite.distance,
     objective: state.objective,
     objectiveAngle,
     objectiveDistance,

@@ -27,5 +27,12 @@ export const SPECIES: Species[] = [
   { name: 'Rift Stalker', assetId: 'rift-stalker', color: 0xf05f54, glow: 0x6f130e, size: 1.35, speed: 2.0, temperament: 'aggressive', band: [52, 88], damage: 11, alertRadius: 23 },
   { name: 'Ink Maw', assetId: 'ink-maw', color: 0x7532a5, glow: 0x341050, size: 1.65, speed: 1.55, temperament: 'aggressive', band: [84, 120], damage: 14, alertRadius: 25 },
   { name: 'Glassjaw', assetId: 'glassjaw', color: 0x8bc5d2, glow: 0x2b6877, size: 1.8, speed: 2.1, temperament: 'aggressive', band: [98, 134], damage: 16, alertRadius: 27 },
+  { name: 'Petal Drifter', assetId: 'petal-drifter', color: 0xff9fcf, glow: 0x8b315f, size: 0.7, speed: 0.7, temperament: 'passive', band: [48, 118] },
+  { name: 'Frost Mantle', assetId: 'frost-mantle', color: 0xd5f5ff, glow: 0x4c83a3, size: 1.4, speed: 0.8, temperament: 'passive', band: [115, 195] },
+  { name: 'Choir Whale', assetId: 'choir-whale', color: 0x526f8f, glow: 0x233f68, size: 3.2, speed: 0.48, temperament: 'passive', band: [155, 250] },
+  { name: 'Ember Grazer', assetId: 'ember-grazer', color: 0xe66f48, glow: 0x8d2814, size: 1.15, speed: 0.85, temperament: 'neutral', band: [100, 195] },
+  { name: 'Prism Squid', assetId: 'prism-squid', color: 0x9379e8, glow: 0x4431a3, size: 1.3, speed: 1.4, temperament: 'neutral', band: [130, 245] },
+  { name: 'Trench Warden', assetId: 'trench-warden', color: 0x17223c, glow: 0x8b39cf, size: 2.1, speed: 1.72, temperament: 'aggressive', band: [175, 265], damage: 18, alertRadius: 29 },
+  { name: 'Cinder Hunter', assetId: 'cinder-hunter', color: 0x8f352e, glow: 0xff4e28, size: 1.75, speed: 2.05, temperament: 'aggressive', band: [125, 220], damage: 15, alertRadius: 25 },
   { name: 'Abyssal Dragon', assetId: 'abyssal-dragon', color: 0x07142f, glow: 0x1569df, size: 4.2, speed: 1.35, temperament: 'aggressive', band: [128, 140], damage: 30, alertRadius: 42, isBoss: true },
 ];

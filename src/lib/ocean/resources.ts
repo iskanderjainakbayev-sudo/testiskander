@@ -27,6 +27,7 @@ const BANDS: ResourceBand[] = [
   { min: 8, max: 34, items: ['scrap', 'copper', 'quartz', 'coral', 'stone', 'scrap', 'copper'] },
   { min: 40, max: 82, items: ['fiber', 'oil', 'crystal', 'scrap', 'copper', 'fiber', 'oil', 'cell', 'scrap', 'crystal'] },
   { min: 98, max: 134, items: ['gem', 'crystal', 'oil', 'gem', 'quartz', 'gem', 'cell'] },
+  { min: 145, max: 268, items: ['gem', 'cell', 'crystal', 'oil', 'scrap', 'quartz', 'gem'] },
 ];
 
 function createResourceMesh(id: ResourceId): THREE.Group {
@@ -60,7 +61,7 @@ export function createResourceNodes(scene: THREE.Scene): Interactable[] {
   const random = seededRandom(1907);
   const nodes: Interactable[] = [];
   BANDS.forEach((band, bandIndex) => {
-    const count = bandIndex === 0 ? 38 : bandIndex === 1 ? 30 : 28;
+    const count = bandIndex === 0 ? 38 : bandIndex === 1 ? 30 : bandIndex === 2 ? 28 : 46;
     for (let index = 0; index < count; index += 1) {
       const radius = band.min + random() * (band.max - band.min);
       const angle = random() * Math.PI * 2;

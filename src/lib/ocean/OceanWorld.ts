@@ -1,5 +1,6 @@
 import { createSnapshot } from './createSnapshot';
 import { createDecorations } from './decorations';
+import { biomeAt } from './biomes';
 import { OceanEnvironment } from './environment';
 import { InputController } from './InputController';
 import { OceanAudio } from './OceanAudio';
@@ -9,8 +10,7 @@ import { OceanInteraction } from './OceanInteraction';
 import { OceanSessionActions } from './OceanSessionActions';
 import { OceanState } from './OceanState';
 import { PlayerController } from './PlayerController';
-import { biomeAtDepth } from './terrain';
-import type { Interactable, OceanSnapshot, RecipeId, WorldEvent } from './types';
+import type { GraphicsQuality, Interactable, OceanSnapshot, RecipeId, WorldEvent } from './types';
 import { WorldContent } from './WorldContent';
 
 export class OceanWorld {
@@ -107,6 +107,10 @@ export class OceanWorld {
     this.publish(performance.now());
   }
 
+  setQuality(quality: GraphicsQuality): void {
+    this.environment.setQuality(quality);
+  }
+
   dispose(): void {
     cancelAnimationFrame(this.frame);
     window.removeEventListener('resize', this.environment.resize);
@@ -133,8 +137,7 @@ export class OceanWorld {
       this.lastTime = now;
       const time = now / 1000;
       if (this.running && !this.paused) this.update(delta, now, time);
-      const depth = Math.max(0, -this.player.position.y);
-      this.environment.update(time, biomeAtDepth(depth), this.lightsOn || this.inSub);
+      this.environment.update(time, this.state.elapsed, biomeAt(this.player.position), this.lightsOn || this.inSub);
       this.environment.render();
       if (now - this.lastSnapshot > 110) this.publish(now);
     } catch {
@@ -192,6 +195,7 @@ export class OceanWorld {
       weaponReady: this.combat.weaponReady(now),
       specialWeaponReady: this.combat.specialWeaponReady(now),
       objectiveTarget,
+      nearbySite: this.content.nearestSite(this.player.position),
     }));
   }
 }

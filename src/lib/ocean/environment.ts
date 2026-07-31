@@ -4,7 +4,9 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { createTerrain, updateTerrainCaustics } from './terrain';
-import type { BiomeId } from './types';
+import { BIOME_PALETTES } from './biomes';
+import { getOceanClimate } from './climate';
+import type { BiomeId, GraphicsQuality } from './types';
 import { createGodRays, updateGodRays } from './waterEffects';
 import { WaterParticles } from './WaterParticles';
 import { createSurfaceWorld, updateSurfaceWorld } from './surfaceWorld';
@@ -12,10 +14,11 @@ import { createSurfaceWorld, updateSurfaceWorld } from './surfaceWorld';
 const SURFACE_VERTEX = `
   varying vec2 vUv;
   uniform float uTime;
+  uniform float uWave;
   void main() {
     vUv = uv;
     vec3 p = position;
-    p.z += sin(p.x * .09 + uTime) * .55 + cos(p.y * .07 - uTime * .8) * .38;
+    p.z += (sin(p.x * .09 + uTime) * .55 + cos(p.y * .07 - uTime * .8) * .38) * uWave;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
   }
 `;
@@ -36,7 +39,7 @@ const SURFACE_FRAGMENT = `
 
 export class OceanEnvironment {
   readonly scene = new THREE.Scene();
-  readonly camera = new THREE.PerspectiveCamera(76, 1, 0.08, 240);
+  readonly camera = new THREE.PerspectiveCamera(76, 1, 0.08, 520);
   readonly renderer: THREE.WebGLRenderer;
   private readonly composer: EffectComposer;
   readonly light = new THREE.SpotLight(0xbffcff, 0, 32, Math.PI / 5, 0.7);
@@ -81,34 +84,43 @@ export class OceanEnvironment {
     this.resize();
   }
 
-  update(time: number, biome: BiomeId, lightsOn: boolean): void {
+  update(time: number, elapsed: number, biome: BiomeId, lightsOn: boolean): void {
+    const climate = getOceanClimate(elapsed);
     this.surface.material.uniforms.uTime.value = time;
+    this.surface.material.uniforms.uWave.value = climate.waveStrength;
     updateTerrainCaustics(this.terrain, time);
     updateGodRays(this.godRays, time, Math.max(0, -this.camera.position.y));
     this.sun.position.x = Math.sin(time * 0.025) * 55;
-    this.sun.intensity = 2.15 + Math.sin(time * 0.025) * 0.7;
+    this.sun.intensity = (1.65 + climate.daylight * 1.2) * (climate.weather === 'Storm' ? 0.48 : 1);
     this.light.intensity = lightsOn ? 48 : 0;
-    const palette = biome === 'Safe Reef'
-      ? [0x2b9fa7, 0.014, 1.45] : biome === 'Lumen Kelp'
-        ? [0x0b4e5a, 0.024, 0.82] : [0x020b1a, 0.038, 0.28];
-    const color = new THREE.Color(palette[0]);
+    const palette = BIOME_PALETTES[biome];
+    const color = new THREE.Color(palette.color).multiplyScalar(0.42 + climate.daylight * 0.58);
     this.scene.background = color;
     if (this.scene.fog instanceof THREE.FogExp2) {
       this.scene.fog.color.copy(color);
-      this.scene.fog.density = palette[1];
+      this.scene.fog.density = palette.fog * climate.fogMultiplier;
     }
-    this.hemi.intensity = palette[2];
+    this.hemi.intensity = palette.light * (0.38 + climate.daylight * 0.62);
     this.particles.update(time, this.camera);
     updateSurfaceWorld(this.surfaceWorld, time);
     if (this.camera.position.y > 0.12) {
-      const surfaceSky = new THREE.Color(0x78c8dc);
+      const surfaceSky = new THREE.Color(climate.phase === 'Night' ? 0x07142e
+        : climate.phase === 'Sunset' ? 0xc27865 : 0x78c8dc);
       this.scene.background = surfaceSky;
       if (this.scene.fog instanceof THREE.FogExp2) {
         this.scene.fog.color.copy(surfaceSky);
-        this.scene.fog.density = 0.0022;
+        this.scene.fog.density = 0.0022 * climate.fogMultiplier;
       }
-      this.hemi.intensity = 2.3;
+      this.hemi.intensity = 0.45 + climate.daylight * 1.85;
     }
+  }
+
+  setQuality(quality: GraphicsQuality): void {
+    const pixelRatio = quality === 'Low' ? 0.75
+      : quality === 'Medium' ? 1 : quality === 'High' ? 1.4 : 1.8;
+    this.renderer.setPixelRatio(Math.min(devicePixelRatio, pixelRatio));
+    this.renderer.shadowMap.enabled = quality === 'High' || quality === 'Ultra';
+    this.resize();
   }
 
   resize = (): void => {
@@ -131,14 +143,14 @@ export class OceanEnvironment {
 
   private createSurface() {
     const material = new THREE.ShaderMaterial({
-      uniforms: { uTime: { value: 0 } },
+      uniforms: { uTime: { value: 0 }, uWave: { value: 1 } },
       vertexShader: SURFACE_VERTEX,
       fragmentShader: SURFACE_FRAGMENT,
       transparent: true,
       side: THREE.DoubleSide,
       depthWrite: false,
     });
-    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(330, 330, 32, 32), material);
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(620, 620, 48, 48), material);
     mesh.rotateX(-Math.PI / 2);
     mesh.position.y = 0.15;
     return mesh;

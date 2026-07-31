@@ -73,8 +73,8 @@ export class PlayerController {
     this.velocity.lerp(movement, 1 - Math.exp(-delta * (inSub ? 3.8 : 5.5)));
     this.position.addScaledVector(this.velocity, delta);
     const radius = Math.hypot(this.position.x, this.position.z - 8);
-    if (radius > 142) {
-      const scale = 142 / radius;
+    if (radius > 284) {
+      const scale = 284 / radius;
       this.position.x *= scale;
       this.position.z = 8 + (this.position.z - 8) * scale;
     }

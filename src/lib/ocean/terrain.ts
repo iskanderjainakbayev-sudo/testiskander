@@ -10,17 +10,14 @@ export function floorAt(x: number, z: number): number {
   const reef = -17 - Math.sin(x * 0.13) * 2.1 - Math.cos(z * 0.17) * 1.4;
   const kelp = THREE.MathUtils.lerp(reef, -50, smoothstep(28, 62, radius));
   const abyss = THREE.MathUtils.lerp(kelp, -122, smoothstep(82, 122, radius));
-  return abyss - Math.sin((x + z) * 0.08) * 3.2;
-}
-
-export function biomeAtDepth(depth: number) {
-  if (depth < 28) return 'Safe Reef' as const;
-  if (depth < 78) return 'Lumen Kelp' as const;
-  return 'The Abyss' as const;
+  const outerShelf = THREE.MathUtils.lerp(abyss, -178, smoothstep(155, 250, radius));
+  const ridges = Math.sin((x + z) * 0.08) * 3.2 + Math.sin(x * 0.031) * Math.cos(z * 0.027) * 12;
+  const trench = Math.max(0, Math.cos(Math.atan2(z - 8, x) * 3.5)) * smoothstep(165, 265, radius) * 28;
+  return outerShelf - ridges - trench;
 }
 
 export function createTerrain(): THREE.Mesh<THREE.PlaneGeometry, THREE.MeshStandardMaterial> {
-  const geometry = new THREE.PlaneGeometry(310, 310, 64, 64);
+  const geometry = new THREE.PlaneGeometry(620, 620, 96, 96);
   geometry.rotateX(-Math.PI / 2);
   const positions = geometry.getAttribute('position');
   for (let index = 0; index < positions.count; index += 1) {

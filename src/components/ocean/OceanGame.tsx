@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { hasOceanSave } from '../../lib/ocean/save';
 import type { OceanWorld as OceanWorldType } from '../../lib/ocean/OceanWorld';
-import type { RecipeId, WorldEvent } from '../../lib/ocean/types';
+import type { GraphicsQuality, RecipeId, WorldEvent } from '../../lib/ocean/types';
 import { CraftingPanel } from './CraftingPanel';
 import { DEFAULT_SNAPSHOT } from './defaultSnapshot';
 import { EndingScreen } from './EndingScreen';
+import { GraphicsSettings } from './GraphicsSettings';
 import { OceanHud } from './OceanHud';
 import { OceanMenu } from './OceanMenu';
 import { PausePanel } from './PausePanel';
@@ -18,7 +19,12 @@ import './styles/panels.css';
 import './styles/touch.css';
 import './styles/navigation.css';
 
-type Screen = 'menu' | 'playing' | 'pause' | 'craft' | 'pda' | 'ending';
+type Screen = 'menu' | 'playing' | 'pause' | 'craft' | 'pda' | 'settings' | 'ending';
+
+function savedQuality(): GraphicsQuality {
+  const value = localStorage.getItem('ocean-graphics-quality');
+  return value === 'Low' || value === 'Medium' || value === 'High' || value === 'Ultra' ? value : 'High';
+}
 
 export function OceanGame() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -27,6 +33,7 @@ export function OceanGame() {
   const [snapshot, setSnapshot] = useState(DEFAULT_SNAPSHOT);
   const [bootAttempt, setBootAttempt] = useState(0);
   const [bootState, setBootState] = useState<'loading' | 'ready' | 'failed'>('loading');
+  const [quality, setQuality] = useState<GraphicsQuality>(savedQuality);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -47,6 +54,7 @@ export function OceanGame() {
             }
           },
         );
+        worldRef.current.setQuality(quality);
         setBootState('ready');
       })
       .catch(() => {
@@ -80,6 +88,12 @@ export function OceanGame() {
     worldRef.current?.craft(id);
   };
 
+  const changeQuality = (next: GraphicsQuality) => {
+    localStorage.setItem('ocean-graphics-quality', next);
+    setQuality(next);
+    worldRef.current?.setQuality(next);
+  };
+
   return (
     <div className="ocean-game">
       <canvas
@@ -108,12 +122,16 @@ export function OceanGame() {
           onResume={resume}
           onCraft={() => open('craft')}
           onPda={() => open('pda')}
+          onSettings={() => open('settings')}
           onSave={() => worldRef.current?.save()}
           onMenu={() => open('menu')}
         />
       )}
       {screen === 'craft' && <CraftingPanel snapshot={snapshot} onCraft={craft} onClose={resume} />}
       {screen === 'pda' && <PdaPanel logs={snapshot.logs} onClose={resume} />}
+      {screen === 'settings' && (
+        <GraphicsSettings quality={quality} onChange={changeQuality} onClose={resume} />
+      )}
       {screen === 'ending' && <EndingScreen elapsed={snapshot.elapsed} onRestart={() => play(false)} />}
     </div>
   );

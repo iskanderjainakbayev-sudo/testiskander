@@ -1,18 +1,28 @@
 import * as THREE from 'three';
 import type { OceanDecor } from './decorations';
+import { createExplorationSites, type ExplorationSite } from './explorationSites';
 import { createLandmarks } from './landmarks';
 import { createResourceNodes } from './resources';
 import type { Interactable, RecipeId } from './types';
 
 export class WorldContent {
   private readonly interactions: Interactable[];
+  private readonly sites: ExplorationSite[];
   private scanUntil = 0;
 
   constructor(scene: THREE.Scene, private readonly decor: OceanDecor) {
+    this.sites = createExplorationSites(scene);
     this.interactions = [
       ...createResourceNodes(scene),
       ...createLandmarks(scene, decor),
     ];
+  }
+
+  nearestSite(position: THREE.Vector3): { name: string; distance: number } {
+    const nearest = this.sites
+      .map((site) => ({ name: site.name, distance: site.position.distanceTo(position) }))
+      .sort((left, right) => left.distance - right.distance)[0];
+    return nearest ?? { name: '', distance: 0 };
   }
 
   nearest(position: THREE.Vector3, forward: THREE.Vector3): Interactable | null {

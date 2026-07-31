@@ -30,6 +30,17 @@ export function OceanHud({ snapshot }: { snapshot: OceanSnapshot }) {
         <span>METERS</span>
         <i>{snapshot.biome}</i>
       </section>
+      <section className="ocean-climate">
+        <small>{snapshot.dayPhase}</small>
+        <b>{snapshot.weather}</b>
+      </section>
+      {snapshot.nearbySiteDistance < 70 && (
+        <section className="ocean-site">
+          <small>NEARBY DISCOVERY</small>
+          <b>{snapshot.nearbySite}</b>
+          <span>{Math.round(snapshot.nearbySiteDistance)}M</span>
+        </section>
+      )}
       <SurvivalMeters
         health={snapshot.health}
         stamina={snapshot.stamina}

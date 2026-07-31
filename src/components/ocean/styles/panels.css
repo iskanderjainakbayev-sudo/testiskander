@@ -125,6 +125,26 @@
 .pause-panel button.primary { color: #05232a; background: var(--aqua); }
 .pause-panel button.quiet { margin-top: 11px; color: #779e9b; background: transparent; }
 
+.settings-panel { width: min(680px, 92vw); }
+.quality-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 9px;
+  padding: 22px 25px;
+}
+.quality-options button {
+  display: grid;
+  gap: 6px;
+  padding: 18px;
+  border: 1px solid #83dcd32f;
+  color: #a9d2ce;
+  background: #0a354080;
+  text-align: left;
+}
+.quality-options button.active { border-color: var(--aqua); background: #11606a9c; }
+.quality-options b { color: #e9fffc; font-size: 11px; letter-spacing: .14em; }
+.quality-options span { color: #82aaa7; font-size: 9px; }
+
 .ending-screen { background: radial-gradient(circle, #10505cc7, #001018f7 70%); }
 .ending-screen section { width: min(620px, 88vw); text-align: center; animation: ocean-rise 1.2s ease-out; }
 .ending-screen small { color: #7bd5cd; font-size: 9px; letter-spacing: .2em; }
@@ -140,4 +160,5 @@
   .recipe-list { grid-template-columns: 1fr; }
   .ocean-panel { max-height: 92vh; }
   .recipe-list { max-height: 62vh; }
+  .quality-options { grid-template-columns: 1fr; }
 }
