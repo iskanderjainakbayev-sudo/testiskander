@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { Species } from './creatureCatalog';
+import { replaceWithBlenderFish } from './FishModel';
 import { createSeaDragonModel } from './SeaDragonModel';
 
 const skins = new Map<string, THREE.MeshPhysicalMaterial>();
@@ -118,6 +119,8 @@ function createRay(species: Species): THREE.Group {
 
 export function createCreatureModel(species: Species): THREE.Group {
   if (species.isBoss) return createSeaDragonModel(species);
-  if (species.name === 'Sunveil Ray' || species.name === 'Night Kite') return createRay(species);
-  return createFish(species);
+  const group = species.name === 'Sunveil Ray' || species.name === 'Night Kite'
+    ? createRay(species) : createFish(species);
+  replaceWithBlenderFish(group, species);
+  return group;
 }

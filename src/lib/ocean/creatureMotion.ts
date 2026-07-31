@@ -24,6 +24,14 @@ export function animateCreature(mesh: THREE.Group, phase: number, time: number, 
     child.position.y = restY + Math.cos(wave * 0.72) * Math.min(0.55, index * 0.035);
     child.rotation.y = Math.sin(wave) * 0.16;
   });
+  mesh.traverse((child) => {
+    if (!child.name.startsWith('eel-segment-')) return;
+    const index = Number(child.name.slice(-2));
+    const restX = child.userData.restX as number | undefined ?? 0;
+    const restY = child.userData.restY as number | undefined ?? 0;
+    child.position.x = restX + Math.sin(beat * 0.55 - index * 0.7) * index * 0.025;
+    child.position.y = restY + Math.cos(beat * 0.42 - index * 0.55) * index * 0.012;
+  });
   const hitScale = time < (mesh.userData.hitUntil as number | undefined ?? 0) ? 1.14 : 1;
   mesh.scale.lerp(new THREE.Vector3(hitScale, hitScale, hitScale), 0.22);
 }
