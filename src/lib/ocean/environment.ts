@@ -1,6 +1,7 @@
 import * as THREE from 'three';
-import { createTerrain } from './terrain';
+import { createTerrain, updateTerrainCaustics } from './terrain';
 import type { BiomeId } from './types';
+import { createGodRays, updateGodRays } from './waterEffects';
 
 const SURFACE_VERTEX = `
   varying vec2 vUv;
@@ -30,6 +31,8 @@ export class OceanEnvironment {
   private readonly sun = new THREE.DirectionalLight(0xd9fff5, 2.7);
   private readonly hemi = new THREE.HemisphereLight(0x8dfff1, 0x08292e, 1.4);
   private readonly surface: THREE.Mesh<THREE.PlaneGeometry, THREE.ShaderMaterial>;
+  private readonly terrain = createTerrain();
+  private readonly godRays = createGodRays();
   private readonly bubbles: THREE.Points;
   private readonly bubblePositions: Float32Array;
 
@@ -41,7 +44,7 @@ export class OceanEnvironment {
     this.renderer.toneMappingExposure = 1.15;
     this.scene.background = new THREE.Color(0x2c9ea7);
     this.scene.fog = new THREE.FogExp2(0x25848d, 0.016);
-    this.scene.add(createTerrain(), this.sun, this.hemi);
+    this.scene.add(this.terrain, this.godRays, this.sun, this.hemi);
     this.sun.position.set(-35, 70, 25);
     this.surface = this.createSurface();
     this.bubblePositions = new Float32Array(360);
@@ -57,6 +60,8 @@ export class OceanEnvironment {
 
   update(time: number, biome: BiomeId, lightsOn: boolean): void {
     this.surface.material.uniforms.uTime.value = time;
+    updateTerrainCaustics(this.terrain, time);
+    updateGodRays(this.godRays, time, Math.max(0, -this.camera.position.y));
     this.sun.position.x = Math.sin(time * 0.025) * 55;
     this.sun.intensity = 2.15 + Math.sin(time * 0.025) * 0.7;
     this.light.intensity = lightsOn ? 48 : 0;
@@ -121,4 +126,3 @@ export class OceanEnvironment {
     this.bubbles.position.copy(this.camera.position).multiplyScalar(0.45);
   }
 }
-

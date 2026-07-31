@@ -19,7 +19,7 @@ export function biomeAtDepth(depth: number) {
   return 'The Abyss' as const;
 }
 
-export function createTerrain(): THREE.Mesh {
+export function createTerrain(): THREE.Mesh<THREE.PlaneGeometry, THREE.MeshStandardMaterial> {
   const geometry = new THREE.PlaneGeometry(310, 310, 64, 64);
   geometry.rotateX(-Math.PI / 2);
   const positions = geometry.getAttribute('position');
@@ -35,9 +35,37 @@ export function createTerrain(): THREE.Mesh {
     metalness: 0.04,
     vertexColors: false,
   });
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.uOceanTime = { value: 0 };
+    shader.vertexShader = `varying vec3 vOceanWorld;\n${shader.vertexShader}`
+      .replace(
+        '#include <project_vertex>',
+        'vOceanWorld = (modelMatrix * vec4(transformed, 1.0)).xyz;\n#include <project_vertex>',
+      );
+    shader.fragmentShader = `varying vec3 vOceanWorld;\nuniform float uOceanTime;\n${shader.fragmentShader}`
+      .replace(
+        '#include <emissivemap_fragment>',
+        `#include <emissivemap_fragment>
+        float causticWave = max(0.0, sin(vOceanWorld.x * 1.7 + uOceanTime * 1.8)
+          * cos(vOceanWorld.z * 1.35 - uOceanTime * 1.3));
+        float causticDepth = clamp((vOceanWorld.y + 105.0) / 100.0, 0.0, 1.0);
+        totalEmissiveRadiance += vec3(0.04, 0.3, 0.27) * pow(causticWave, 5.0) * causticDepth;`,
+      );
+    material.userData.causticShader = shader;
+  };
   const terrain = new THREE.Mesh(geometry, material);
   terrain.position.z = 8;
   return terrain;
+}
+
+export function updateTerrainCaustics(
+  terrain: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshStandardMaterial>,
+  time: number,
+): void {
+  const shader = terrain.material.userData.causticShader as
+    | { uniforms: { uOceanTime: { value: number } } }
+    | undefined;
+  if (shader) shader.uniforms.uOceanTime.value = time;
 }
 
 export function seededRandom(seed: number): () => number {
@@ -50,4 +78,3 @@ export function seededRandom(seed: number): () => number {
     return ((result ^ (result >>> 14)) >>> 0) / 4294967296;
   };
 }
-

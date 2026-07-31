@@ -24,8 +24,8 @@ interface ResourceBand {
 
 const BANDS: ResourceBand[] = [
   { min: 8, max: 34, items: ['scrap', 'copper', 'quartz', 'coral', 'stone', 'scrap', 'copper'] },
-  { min: 40, max: 82, items: ['fiber', 'oil', 'crystal', 'copper', 'fiber', 'oil', 'crystal'] },
-  { min: 98, max: 134, items: ['gem', 'crystal', 'oil', 'gem', 'quartz', 'gem'] },
+  { min: 40, max: 82, items: ['fiber', 'oil', 'crystal', 'scrap', 'copper', 'fiber', 'oil', 'cell', 'scrap', 'crystal'] },
+  { min: 98, max: 134, items: ['gem', 'crystal', 'oil', 'gem', 'quartz', 'gem', 'cell'] },
 ];
 
 function createResourceMesh(id: ResourceId): THREE.Group {
@@ -82,4 +82,3 @@ export function createResourceNodes(scene: THREE.Scene): Interactable[] {
   });
   return nodes;
 }
-

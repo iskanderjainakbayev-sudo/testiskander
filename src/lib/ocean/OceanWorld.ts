@@ -1,15 +1,15 @@
-import * as THREE from 'three';
 import { CreatureSystem } from './CreatureSystem';
 import { createSnapshot } from './createSnapshot';
 import { createDecorations } from './decorations';
 import { OceanEnvironment } from './environment';
 import { InputController } from './InputController';
 import { OceanAudio } from './OceanAudio';
+import { OceanControls } from './OceanControls';
 import { OceanInteraction } from './OceanInteraction';
+import { OceanSessionActions } from './OceanSessionActions';
 import { OceanState } from './OceanState';
 import { PlayerController } from './PlayerController';
 import { biomeAtDepth } from './terrain';
-import { clearOceanSave, readOceanSave, writeOceanSave } from './save';
 import type { Interactable, OceanSnapshot, RecipeId, WorldEvent } from './types';
 import { WorldContent } from './WorldContent';
 
@@ -22,6 +22,8 @@ export class OceanWorld {
   private readonly creatures: CreatureSystem;
   private readonly audio = new OceanAudio();
   private readonly interaction: OceanInteraction;
+  private readonly controls: OceanControls;
+  private readonly actions: OceanSessionActions;
   private running = false;
   private paused = true;
   private inSub = false;
@@ -51,27 +53,28 @@ export class OceanWorld {
       this.state, this.content, this.audio, this.player,
       (message, duration) => this.showToast(message, duration),
     );
+    this.controls = new OceanControls(
+      this.input, this.state, this.content, this.audio, this.interaction,
+      (message, duration) => this.showToast(message, duration),
+    );
+    this.actions = new OceanSessionActions(
+      this.state, this.player, this.content, this.audio,
+      (message, duration) => this.showToast(message, duration),
+    );
     window.addEventListener('resize', this.environment.resize);
     this.publish(performance.now());
     this.frame = requestAnimationFrame(this.loop);
   }
 
   startNew(): void {
-    clearOceanSave();
-    this.state.reset();
-    this.player.reset();
-    this.startSession();
+    this.actions.newDive();
+    this.startSession(false);
   }
 
   continue(): void {
-    const save = readOceanSave();
-    if (!save) {
-      this.startNew();
-      return;
-    }
-    this.state.restore(save);
-    this.player.reset(save.position);
-    this.startSession();
+    const save = this.actions.loadDive();
+    if (!save) this.actions.newDive();
+    this.startSession(save?.inSub ?? false);
   }
 
   setPaused(paused: boolean): void {
@@ -85,23 +88,14 @@ export class OceanWorld {
   }
 
   craft(recipeId: RecipeId): boolean {
-    const result = this.state.craft(recipeId);
-    this.showToast(result.message, result.ok ? 3200 : 2200);
-    if (result.ok) {
-      this.audio.discovery();
-      this.content.reconcile(this.state.crafted, this.state.logs);
-    } else {
-      this.audio.danger();
-    }
+    const result = this.actions.craft(recipeId);
     this.publish(performance.now());
-    return result.ok;
+    return result;
   }
 
   save(): void {
-    const { x, y, z } = this.player.position;
-    writeOceanSave(this.state.makeSave([x, y, z]));
+    this.actions.save(this.inSub);
     this.lastSave = performance.now();
-    this.showToast('Dive saved', 2200);
     this.publish(performance.now());
   }
 
@@ -113,17 +107,13 @@ export class OceanWorld {
     this.environment.dispose();
   }
 
-  private startSession(): void {
+  private startSession(inSub: boolean): void {
     this.running = true;
-    this.inSub = false;
+    this.inSub = inSub;
     this.lightsOn = false;
-    this.content.reconcile(this.state.crafted, this.state.logs);
-    if (this.state.crafted.includes('submarine')) {
-      this.content.setSubPosition(this.player.position.clone().add(new THREE.Vector3(4, 0, 0)));
-    }
-    this.audio.start();
+    this.actions.prepare();
+    if (inSub) this.content.setSubVisible(false);
     this.setPaused(false);
-    this.showToast('WASD swim · SPACE rise · CTRL dive', 5200);
   }
 
   private readonly loop = (now: number) => {
@@ -149,34 +139,13 @@ export class OceanWorld {
       this.audio.danger();
     });
     this.currentInteraction = this.content.nearest(this.player.position, this.player.forward());
-    this.handleInput(now);
+    const control = this.controls.update(now, this.inSub, this.lightsOn, this.currentInteraction);
+    this.inSub = control.inSub;
+    this.lightsOn = control.lightsOn;
+    if (control.event) this.pauseFor(control.event);
     if (this.state.oxygen < 22 && !this.inSub) this.audio.lowOxygen(now);
     if (this.state.health <= 0) this.respawn();
     if (now - this.lastSave > 120_000) this.save();
-  }
-
-  private handleInput(now: number): void {
-    if (this.input.consume('KeyE')) {
-      if (this.inSub) {
-        this.inSub = false;
-        this.interaction.exitSub();
-      } else if (this.currentInteraction) {
-        const outcome = this.interaction.use(this.currentInteraction, now);
-        if (outcome === 'enterSub') this.inSub = true;
-        if (outcome === 'ending') this.pauseFor('ending');
-      }
-    }
-    if (this.input.consume('KeyF') && (this.inSub || this.state.crafted.includes('flashlight'))) {
-      this.lightsOn = !this.lightsOn;
-      this.showToast(this.lightsOn ? 'Lights on' : 'Lights off', 1200);
-    }
-    if (this.input.consume('KeyQ') && this.state.crafted.includes('scanner')) {
-      this.content.scan(now);
-      this.audio.scan();
-      this.showToast('Scanner pulse active', 2200);
-    }
-    if (this.input.consume('KeyC')) this.pauseFor('craft');
-    if (this.input.consume('KeyJ')) this.pauseFor('pda');
   }
 
   private pauseFor(event: WorldEvent): void {
@@ -187,9 +156,7 @@ export class OceanWorld {
 
   private respawn(): void {
     this.inSub = false;
-    this.state.servicePod();
-    this.player.reset();
-    this.showToast('Pod med-system recovered you', 3600);
+    this.actions.respawn();
   }
 
   private showToast(message: string, duration: number): void {

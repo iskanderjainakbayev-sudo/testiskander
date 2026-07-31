@@ -26,6 +26,7 @@ export interface Recipe {
 export interface OceanSave {
   version: 1;
   position: [number, number, number];
+  inSub?: boolean;
   inventory: Inventory;
   crafted: RecipeId[];
   logs: string[];
@@ -71,4 +72,3 @@ export interface Interactable {
 }
 
 export type WorldEvent = 'pause' | 'craft' | 'pda' | 'ending';
-

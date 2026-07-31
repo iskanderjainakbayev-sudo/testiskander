@@ -106,10 +106,11 @@ export class OceanState {
     if (this.crafted.includes('charger') || this.subBattery < 12) this.subBattery = 100;
   }
 
-  makeSave(position: [number, number, number]): OceanSave {
+  makeSave(position: [number, number, number], inSub: boolean): OceanSave {
     return {
       version: 1,
       position,
+      inSub,
       inventory: { ...this.inventory },
       crafted: [...this.crafted],
       logs: [...this.logs],
@@ -122,4 +123,3 @@ export class OceanState {
     };
   }
 }
-
