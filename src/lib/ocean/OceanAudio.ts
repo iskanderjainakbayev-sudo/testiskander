@@ -3,6 +3,8 @@ export class OceanAudio {
   private master: GainNode | null = null;
   private noiseBuffer: AudioBuffer | null = null;
   private warningAt = 0;
+  private swimAt = 0;
+  private bossNear = false;
 
   start(): void {
     if (!window.AudioContext || this.context) return;
@@ -35,12 +37,63 @@ export class OceanAudio {
     this.tone(92, 54, 0.45, 0.08);
   }
 
-  harpoon(): void {
-    this.tone(180, 72, 0.16, 0.075);
+  gunshot(): void {
+    this.noise(0.11, 0.16, 680);
+    this.tone(210, 58, 0.2, 0.085);
+  }
+
+  specialShot(): void {
+    this.noise(0.28, 0.22, 1100);
+    [74, 148, 296].forEach((note, index) => this.tone(note, note * 0.45, 0.48, 0.075, index * 0.025));
+  }
+
+  knifeSwing(): void {
+    this.noise(0.13, 0.055, 1700);
+    this.tone(520, 130, 0.14, 0.035);
+  }
+
+  knifeHit(): void {
+    this.noise(0.1, 0.08, 420);
+    this.tone(105, 42, 0.18, 0.065);
+  }
+
+  weaponSwitch(): void {
+    this.tone(280, 520, 0.09, 0.035);
+    this.tone(170, 240, 0.08, 0.025, 0.07);
   }
 
   weaponHit(): void {
+    this.noise(0.08, 0.06, 360);
     this.tone(120, 48, 0.22, 0.06);
+  }
+
+  swim(now: number, boosting: boolean): void {
+    const delay = boosting ? 270 : 520;
+    if (now - this.swimAt < delay) return;
+    this.swimAt = now;
+    this.noise(0.16, boosting ? 0.04 : 0.022, boosting ? 720 : 420);
+    this.tone(boosting ? 150 : 96, 62, 0.2, boosting ? 0.025 : 0.012);
+  }
+
+  creatureAttack(boss: boolean): void {
+    this.noise(boss ? 0.34 : 0.18, boss ? 0.16 : 0.08, boss ? 190 : 310);
+    this.tone(boss ? 54 : 86, 34, boss ? 0.62 : 0.34, boss ? 0.1 : 0.06);
+  }
+
+  setBossNear(near: boolean): void {
+    if (near && !this.bossNear) {
+      this.noise(0.75, 0.12, 150);
+      this.tone(42, 31, 1.35, 0.105);
+    }
+    this.bossNear = near;
+  }
+
+  ui(): void {
+    this.tone(340, 510, 0.07, 0.022);
+  }
+
+  lights(on: boolean): void {
+    this.tone(on ? 120 : 260, on ? 640 : 90, 0.18, 0.03);
   }
 
   lowOxygen(now: number): void {
@@ -89,6 +142,22 @@ export class OceanAudio {
     oscillator.connect(gain).connect(this.master);
     oscillator.start(now);
     oscillator.stop(now + life);
+  }
+
+  private noise(life: number, level: number, frequency: number): void {
+    if (!this.context || !this.master || !this.noiseBuffer) return;
+    const source = this.context.createBufferSource();
+    const filter = this.context.createBiquadFilter();
+    const gain = this.context.createGain();
+    const now = this.context.currentTime;
+    source.buffer = this.noiseBuffer;
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(frequency, now);
+    gain.gain.setValueAtTime(level, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + life);
+    source.connect(filter).connect(gain).connect(this.master);
+    source.start(now);
+    source.stop(now + life);
   }
 
   private makeNoise(context: AudioContext): AudioBuffer {

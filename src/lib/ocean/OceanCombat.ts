@@ -37,8 +37,9 @@ export class OceanCombat {
       this.state.damage(damage);
       this.damageFlashUntil = now + 520;
       this.toast(`${creature} attack · -${Math.round(damage)} health`, 1700);
-      this.audio.danger();
+      this.audio.creatureAttack(creature === 'Abyssal Dragon');
     });
+    this.audio.setBossNear(Boolean(this.threat?.isBoss));
   }
 
   weaponReady(now: number): boolean {

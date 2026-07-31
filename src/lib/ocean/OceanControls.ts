@@ -42,6 +42,7 @@ export class OceanControls {
     }
     if (this.input.consume('KeyF') && (nextSub || this.state.crafted.includes('flashlight'))) {
       nextLights = !nextLights;
+      this.audio.lights(nextLights);
       this.toast(nextLights ? 'Lights on' : 'Lights off', 1200);
     }
     if (this.input.consume('KeyQ') && this.state.crafted.includes('scanner')) {
@@ -49,9 +50,14 @@ export class OceanControls {
       this.audio.scan();
       this.toast('Scanner pulse active', 2200);
     }
-    if (this.input.consume('KeyC')) event = 'craft';
-    if (this.input.consume('KeyJ')) event = 'pda';
+    if (this.input.consume('KeyC')) {
+      this.audio.ui();
+      event = 'craft';
+    }
+    if (this.input.consume('KeyJ')) {
+      this.audio.ui();
+      event = 'pda';
+    }
     return { inSub: nextSub, lightsOn: nextLights, event };
   }
 }
-

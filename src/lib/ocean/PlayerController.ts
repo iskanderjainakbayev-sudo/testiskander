@@ -7,6 +7,7 @@ export class PlayerController {
   readonly maxStamina = 100;
   stamina = this.maxStamina;
   accelerating = false;
+  moving = false;
   private yaw = Math.PI;
   private pitch = 0.08;
   private readonly velocity = new THREE.Vector3();
@@ -25,6 +26,7 @@ export class PlayerController {
     this.velocity.set(0, 0, 0);
     this.stamina = this.maxStamina;
     this.accelerating = false;
+    this.moving = false;
     this.staminaRecoveryDelay = 0;
     this.yaw = Math.PI;
     this.pitch = 0.08;
@@ -51,6 +53,7 @@ export class PlayerController {
     if (this.input.isDown('Space')) movement.y += 1;
     if (this.input.isDown('ControlLeft') || this.input.isDown('ControlRight')) movement.y -= 1;
     const moving = movement.lengthSq() > 0;
+    this.moving = moving;
     const wantsAcceleration = this.input.isDown('ShiftLeft') || this.input.isDown('ShiftRight');
     this.accelerating = moving && wantsAcceleration && this.stamina > 0.5;
     if (this.accelerating) {

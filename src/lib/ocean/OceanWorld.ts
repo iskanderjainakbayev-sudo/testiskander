@@ -146,6 +146,7 @@ export class OceanWorld {
 
   private update(delta: number, now: number, time: number): void {
     this.player.update(delta, this.state, this.inSub);
+    if (this.player.moving) this.audio.swim(now, this.player.accelerating);
     const depth = Math.max(0, -this.player.position.y);
     this.state.tick(delta, depth, depth < 0.8, this.inSub);
     this.content.update(now, time);
