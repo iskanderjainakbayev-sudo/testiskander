@@ -15,9 +15,10 @@ export default function App() {
       <Switch>
         <Route path="/" component={OceanGamePage} />
         <Route path="/game" component={OceanGamePage} />
+        <Route path="/signup" component={() => <LoginPage initialMode="register" />} />
+        <Route path="/login" component={() => <LoginPage initialMode="signin" />} />
         <Route path="/space" component={SpaceGamePage} />
         <Route path="/afterfall" component={HomePage} />
-        <Route path="/login" component={LoginPage} />
         <Route component={NotFoundPage} />
       </Switch>
     </Suspense>

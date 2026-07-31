@@ -9,9 +9,15 @@ import {
 } from "../lib/googleAuth";
 import { isSupabaseConfigured, supabase } from "../lib/supabase";
 
-export function LoginPage() {
+type LoginMode = "register" | "signin";
+
+type LoginPageProps = {
+  initialMode?: LoginMode;
+};
+
+export function LoginPage({ initialMode = "register" }: LoginPageProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [mode, setMode] = useState<"register" | "signin">("register");
+  const [mode, setMode] = useState<LoginMode>(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -83,7 +89,11 @@ export function LoginPage() {
               onClick={() => void google()}
             >
               <span>G</span>
-              {busy ? "CONNECTING…" : "CONTINUE WITH GOOGLE"}
+              {busy
+                ? "CONNECTING…"
+                : mode === "register"
+                  ? "REGISTER WITH GOOGLE"
+                  : "SIGN IN WITH GOOGLE"}
             </button>
             <div className="auth-divider">
               <span>OR</span>
