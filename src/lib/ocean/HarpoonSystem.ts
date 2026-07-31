@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import type { CreatureSystem, WeaponHit } from './CreatureSystem';
+import type { CreatureSystem } from './CreatureSystem';
+import type { WeaponHit } from './creatureRuntime';
 
 interface Tracer {
   line: THREE.Line<THREE.BufferGeometry, THREE.LineBasicMaterial>;
@@ -26,6 +27,7 @@ export class HarpoonSystem {
     private readonly scene: THREE.Scene,
   ) {
     this.createModel();
+    this.model.visible = false;
     camera.add(this.model);
   }
 
