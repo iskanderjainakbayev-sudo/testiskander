@@ -5,6 +5,7 @@ import { animateCreature } from './creatureMotion';
 import {
   createCreatureActor,
   hitCreature,
+  hitCreatureInCone,
   respawnCreature,
   targetForCreature,
   type CreatureActor,
@@ -102,5 +103,9 @@ export class CreatureSystem {
     this.raycaster.set(origin, direction.clone().normalize());
     this.raycaster.far = range;
     return hitCreature(this.raycaster, this.creatures, damage, time);
+  }
+
+  melee(origin: THREE.Vector3, direction: THREE.Vector3, range: number, damage: number, time: number): WeaponHit | null {
+    return hitCreatureInCone(this.creatures, origin, direction, range, damage, time);
   }
 }

@@ -12,6 +12,7 @@ export type RecipeId =
 
 export type Inventory = Record<ResourceId, number>;
 export type BiomeId = 'Safe Reef' | 'Lumen Kelp' | 'The Abyss';
+export type OceanWeapon = 'gun' | 'knife';
 
 export interface Recipe {
   id: RecipeId;
@@ -68,6 +69,7 @@ export interface OceanSnapshot {
   threatHealth: number;
   threatMaxHealth: number;
   threatIsBoss: boolean;
+  activeWeapon: OceanWeapon;
   weaponReady: boolean;
   specialWeaponReady: boolean;
 }

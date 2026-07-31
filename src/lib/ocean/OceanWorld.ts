@@ -185,6 +185,7 @@ export class OceanWorld {
       inSub: this.inSub,
       lightsOn: this.lightsOn,
       threat: this.combat.threat,
+      activeWeapon: this.combat.activeWeapon,
       damageFlash: this.combat.damageFlashing(now),
       weaponReady: this.combat.weaponReady(now),
       specialWeaponReady: this.combat.specialWeaponReady(now),

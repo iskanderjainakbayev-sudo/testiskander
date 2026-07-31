@@ -2,7 +2,7 @@ import type { OceanState } from './OceanState';
 import type { PlayerController } from './PlayerController';
 import { biomeAtDepth } from './terrain';
 import type { PredatorAlert } from './CreatureSystem';
-import type { Interactable, OceanSnapshot } from './types';
+import type { Interactable, OceanSnapshot, OceanWeapon } from './types';
 
 interface SnapshotOptions {
   interaction: Interactable | null;
@@ -14,6 +14,7 @@ interface SnapshotOptions {
   damageFlash: boolean;
   weaponReady: boolean;
   specialWeaponReady: boolean;
+  activeWeapon: OceanWeapon;
 }
 
 function promptFor(item: Interactable | null): string {
@@ -61,6 +62,7 @@ export function createSnapshot(
     threatHealth: options.threat?.health ?? 0,
     threatMaxHealth: options.threat?.maxHealth ?? 0,
     threatIsBoss: options.threat?.isBoss ?? false,
+    activeWeapon: options.activeWeapon,
     weaponReady: options.weaponReady,
     specialWeaponReady: options.specialWeaponReady,
   };

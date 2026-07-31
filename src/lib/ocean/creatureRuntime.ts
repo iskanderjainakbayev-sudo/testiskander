@@ -110,6 +110,43 @@ export function hitCreature(
   };
 }
 
+export function hitCreatureInCone(
+  creatures: CreatureActor[],
+  origin: THREE.Vector3,
+  direction: THREE.Vector3,
+  range: number,
+  damage: number,
+  time: number,
+): WeaponHit | null {
+  const facing = direction.clone().normalize();
+  const target = creatures
+    .filter((creature) => creature.mesh.visible && creature.species.temperament === 'aggressive')
+    .map((creature) => ({
+      creature,
+      offset: creature.mesh.position.clone().sub(origin),
+    }))
+    .filter(({ offset }) => offset.length() <= range && offset.normalize().dot(facing) > 0.42)
+    .sort((left, right) => left.offset.lengthSq() - right.offset.lengthSq())[0]?.creature;
+  if (!target) return null;
+  target.health = Math.max(0, target.health - damage);
+  target.provokedUntil = time + 24;
+  target.mesh.userData.hitUntil = time + 0.2;
+  target.boss?.onHit(time, target.health / target.maxHealth);
+  const killed = target.health <= 0;
+  if (killed) {
+    target.mesh.visible = false;
+    target.deadUntil = target.boss ? Infinity : time + 35;
+  }
+  return {
+    name: target.species.name,
+    point: target.mesh.position.clone(),
+    health: target.health,
+    maxHealth: target.maxHealth,
+    killed,
+    isBoss: Boolean(target.boss),
+  };
+}
+
 export function respawnCreature(creature: CreatureActor): void {
   creature.health = creature.maxHealth;
   creature.deadUntil = 0;
