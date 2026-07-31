@@ -132,7 +132,7 @@ export class ShooterWorld {
     if (this.input.firing || this.rifle.isBursting) {
       const shot = this.rifle.fire(time, this.camera, this.enemies, this.shots, this.map.breakableGlass, this.map.breakGlass, this.input.aiming);
       if (shot.fired) {
-        this.audio.shot();
+        this.audio.shot(this.input.aiming);
         this.weaponView.fire(this.rifle.definition, time);
       }
       if (shot.killed) { this.score += 100; this.audio.hit(); }
