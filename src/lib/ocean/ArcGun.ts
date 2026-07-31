@@ -1,15 +1,7 @@
 import * as THREE from 'three';
+import { BulletEffects } from './BulletEffects';
 import type { CreatureSystem } from './CreatureSystem';
 import type { WeaponHit } from './creatureRuntime';
-
-interface Bullet {
-  mesh: THREE.Mesh<THREE.SphereGeometry, THREE.MeshBasicMaterial>;
-  trail: THREE.Line<THREE.BufferGeometry, THREE.LineBasicMaterial>;
-  start: THREE.Vector3;
-  end: THREE.Vector3;
-  bornAt: number;
-  life: number;
-}
 
 export interface GunShot {
   fired: boolean;
@@ -21,7 +13,7 @@ const RANGE = 62;
 
 export class ArcGun {
   readonly model = new THREE.Group();
-  private readonly bullets: Bullet[] = [];
+  private readonly bullets: BulletEffects;
   private readonly core = new THREE.Mesh();
   private readonly rings = new THREE.Group();
   private nextShotAt = 0;
@@ -29,7 +21,8 @@ export class ArcGun {
   private recoilUntil = 0;
   private pulseUntil = 0;
 
-  constructor(private readonly scene: THREE.Scene) {
+  constructor(scene: THREE.Scene) {
+    this.bullets = new BulletEffects(scene);
     this.buildModel();
   }
 
@@ -43,7 +36,7 @@ export class ArcGun {
     const shotDirection = direction.clone().normalize();
     const hit = creatures.hit(origin, shotDirection, range, special ? 138 : 46, now / 1000);
     const end = hit?.point ?? origin.clone().addScaledVector(shotDirection, range);
-    this.spawnBullet(now, origin.clone().addScaledVector(shotDirection, 0.7), end, special);
+    this.bullets.spawn(now, origin.clone().addScaledVector(shotDirection, 0.7), end, special);
     return { fired: true, hit, special };
   }
 
@@ -55,15 +48,14 @@ export class ArcGun {
     this.rings.rotation.z = now * 0.004;
     this.rings.scale.setScalar(1 + Math.sin(now * 0.008) * 0.08 + pulse * 0.65);
     this.core.scale.setScalar(1 + pulse * 1.8);
-    this.updateBullets(now);
+    this.bullets.update(now);
   }
 
   ready(now: number): boolean { return now >= this.nextShotAt; }
   specialReady(now: number): boolean { return now >= this.nextSpecialAt; }
 
   dispose(): void {
-    this.bullets.forEach((bullet) => this.removeBullet(bullet));
-    this.bullets.splice(0);
+    this.bullets.dispose();
   }
 
   private buildModel(): void {
@@ -93,37 +85,4 @@ export class ArcGun {
     });
   }
 
-  private spawnBullet(now: number, start: THREE.Vector3, end: THREE.Vector3, special: boolean): void {
-    const material = new THREE.MeshBasicMaterial({ color: special ? 0xffa23f : 0x9ffff4 });
-    const mesh = new THREE.Mesh(new THREE.SphereGeometry(special ? 0.12 : 0.065, 8, 6), material);
-    const trail = new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints([start, start]),
-      new THREE.LineBasicMaterial({ color: material.color, transparent: true, opacity: 0.8 }),
-    );
-    mesh.position.copy(start);
-    this.scene.add(mesh, trail);
-    this.bullets.push({ mesh, trail, start, end, bornAt: now, life: special ? 340 : 230 });
-  }
-
-  private updateBullets(now: number): void {
-    for (let index = this.bullets.length - 1; index >= 0; index -= 1) {
-      const bullet = this.bullets[index];
-      const progress = Math.min(1, (now - bullet.bornAt) / bullet.life);
-      bullet.mesh.position.lerpVectors(bullet.start, bullet.end, progress);
-      const tail = bullet.mesh.position.clone().lerp(bullet.start, 0.08);
-      bullet.trail.geometry.setFromPoints([tail, bullet.mesh.position]);
-      bullet.mesh.scale.setScalar(1 + Math.sin(progress * Math.PI) * 0.8);
-      if (progress < 1) continue;
-      this.removeBullet(bullet);
-      this.bullets.splice(index, 1);
-    }
-  }
-
-  private removeBullet(bullet: Bullet): void {
-    this.scene.remove(bullet.mesh, bullet.trail);
-    bullet.mesh.geometry.dispose();
-    bullet.mesh.material.dispose();
-    bullet.trail.geometry.dispose();
-    bullet.trail.material.dispose();
-  }
 }
