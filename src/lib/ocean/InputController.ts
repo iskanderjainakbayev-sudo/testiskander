@@ -15,11 +15,14 @@ export class InputController {
     window.addEventListener('keydown', this.onKeyDown);
     window.addEventListener('keyup', this.onKeyUp);
     window.addEventListener('mousemove', this.onMouseMove);
+    window.addEventListener('mouseup', this.onMouseUp);
     window.addEventListener('blur', this.clear);
     document.addEventListener('pointerlockchange', this.handleLockChange);
     canvas.addEventListener('touchstart', this.onTouchStart, { passive: false });
     canvas.addEventListener('touchmove', this.onTouchMove, { passive: false });
     canvas.addEventListener('touchend', this.onTouchEnd);
+    canvas.addEventListener('mousedown', this.onMouseDown);
+    canvas.addEventListener('contextmenu', this.preventContextMenu);
   }
 
   isDown(code: string): boolean {
@@ -67,11 +70,14 @@ export class InputController {
     window.removeEventListener('keydown', this.onKeyDown);
     window.removeEventListener('keyup', this.onKeyUp);
     window.removeEventListener('mousemove', this.onMouseMove);
+    window.removeEventListener('mouseup', this.onMouseUp);
     window.removeEventListener('blur', this.clear);
     document.removeEventListener('pointerlockchange', this.handleLockChange);
     this.canvas.removeEventListener('touchstart', this.onTouchStart);
     this.canvas.removeEventListener('touchmove', this.onTouchMove);
     this.canvas.removeEventListener('touchend', this.onTouchEnd);
+    this.canvas.removeEventListener('mousedown', this.onMouseDown);
+    this.canvas.removeEventListener('contextmenu', this.preventContextMenu);
   }
 
   private readonly onKeyDown = (event: KeyboardEvent) => {
@@ -89,6 +95,18 @@ export class InputController {
     this.lookX += event.movementX;
     this.lookY += event.movementY;
   };
+
+  private readonly onMouseDown = (event: MouseEvent) => {
+    if (event.button !== 0 || document.pointerLockElement !== this.canvas) return;
+    if (!this.keys.has('Mouse0')) this.pressed.add('Mouse0');
+    this.keys.add('Mouse0');
+  };
+
+  private readonly onMouseUp = (event: MouseEvent) => {
+    if (event.button === 0) this.keys.delete('Mouse0');
+  };
+
+  private readonly preventContextMenu = (event: MouseEvent) => event.preventDefault();
 
   private readonly clear = () => {
     this.keys.clear();

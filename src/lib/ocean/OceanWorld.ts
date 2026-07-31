@@ -1,9 +1,9 @@
-import { CreatureSystem, type PredatorAlert } from './CreatureSystem';
 import { createSnapshot } from './createSnapshot';
 import { createDecorations } from './decorations';
 import { OceanEnvironment } from './environment';
 import { InputController } from './InputController';
 import { OceanAudio } from './OceanAudio';
+import { OceanCombat } from './OceanCombat';
 import { OceanControls } from './OceanControls';
 import { OceanInteraction } from './OceanInteraction';
 import { OceanSessionActions } from './OceanSessionActions';
@@ -19,7 +19,7 @@ export class OceanWorld {
   private readonly player: PlayerController;
   private readonly state = new OceanState();
   private readonly content: WorldContent;
-  private readonly creatures: CreatureSystem;
+  private readonly combat: OceanCombat;
   private readonly audio = new OceanAudio();
   private readonly interaction: OceanInteraction;
   private readonly controls: OceanControls;
@@ -36,8 +36,6 @@ export class OceanWorld {
   private lastSnapshot = 0;
   private lastSave = 0;
   private failed = false;
-  private threat: PredatorAlert | null = null;
-  private damageFlashUntil = 0;
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -47,11 +45,14 @@ export class OceanWorld {
     this.environment = new OceanEnvironment(canvas);
     const decor = createDecorations(this.environment.scene);
     this.content = new WorldContent(this.environment.scene, decor);
-    this.creatures = new CreatureSystem(this.environment.scene);
     this.input = new InputController(canvas, (locked) => {
       if (!locked && this.running && !this.paused) this.pauseFor('pause');
     });
     this.player = new PlayerController(this.environment.camera, this.input);
+    this.combat = new OceanCombat(
+      this.environment, this.input, this.state, this.audio,
+      (message, duration) => this.showToast(message, duration),
+    );
     this.interaction = new OceanInteraction(
       this.state, this.content, this.audio, this.player,
       (message, duration) => this.showToast(message, duration),
@@ -111,6 +112,7 @@ export class OceanWorld {
     window.removeEventListener('resize', this.environment.resize);
     this.input.dispose();
     this.audio.stop();
+    this.combat.dispose();
     this.environment.dispose();
   }
 
@@ -147,12 +149,7 @@ export class OceanWorld {
     const depth = Math.max(0, -this.player.position.y);
     this.state.tick(delta, depth, depth < 0.8, this.inSub);
     this.content.update(now, time);
-    this.threat = this.creatures.update(delta, time, this.player.position, this.inSub, (damage, creature) => {
-      this.state.damage(damage);
-      this.damageFlashUntil = now + 520;
-      this.showToast(`${creature} attack · -${Math.round(damage)} health`, 1700);
-      this.audio.danger();
-    });
+    this.combat.update(delta, now, time, this.player, this.inSub);
     this.currentInteraction = this.content.nearest(this.player.position, this.player.forward());
     const control = this.controls.update(now, this.inSub, this.lightsOn, this.currentInteraction);
     this.inSub = control.inSub;
@@ -187,8 +184,9 @@ export class OceanWorld {
       showToast: now < this.toastUntil,
       inSub: this.inSub,
       lightsOn: this.lightsOn,
-      threat: this.threat,
-      damageFlash: now < this.damageFlashUntil,
+      threat: this.combat.threat,
+      damageFlash: this.combat.damageFlashing(now),
+      weaponReady: this.combat.weaponReady(now),
     }));
   }
 }

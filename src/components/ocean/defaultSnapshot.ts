@@ -25,4 +25,8 @@ export const DEFAULT_SNAPSHOT: OceanSnapshot = {
   threatDistance: 0,
   threatAttacking: false,
   damageFlash: false,
+  threatHealth: 0,
+  threatMaxHealth: 0,
+  threatIsBoss: false,
+  weaponReady: true,
 };

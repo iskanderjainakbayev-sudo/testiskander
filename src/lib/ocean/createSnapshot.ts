@@ -12,6 +12,7 @@ interface SnapshotOptions {
   lightsOn: boolean;
   threat: PredatorAlert | null;
   damageFlash: boolean;
+  weaponReady: boolean;
 }
 
 function promptFor(item: Interactable | null): string {
@@ -53,5 +54,9 @@ export function createSnapshot(
     threatDistance: options.threat?.distance ?? 0,
     threatAttacking: options.threat?.attacking ?? false,
     damageFlash: options.damageFlash,
+    threatHealth: options.threat?.health ?? 0,
+    threatMaxHealth: options.threat?.maxHealth ?? 0,
+    threatIsBoss: options.threat?.isBoss ?? false,
+    weaponReady: options.weaponReady,
   };
 }

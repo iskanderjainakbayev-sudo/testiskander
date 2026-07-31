@@ -1,6 +1,8 @@
 import * as THREE from 'three';
+import { BossBrain } from './BossBrain';
 import { SPECIES, type Species } from './creatureCatalog';
 import { createCreatureModel } from './creatureModels';
+import { animateCreature } from './creatureMotion';
 import { floorAt, seededRandom } from './terrain';
 
 interface Creature {
@@ -10,17 +12,35 @@ interface Creature {
   species: Species;
   phase: number;
   attackCooldown: number;
+  health: number;
+  maxHealth: number;
+  deadUntil: number;
+  provokedUntil: number;
+  boss: BossBrain | null;
 }
 
 export interface PredatorAlert {
   name: string;
   distance: number;
   attacking: boolean;
+  health: number;
+  maxHealth: number;
+  isBoss: boolean;
+}
+
+export interface WeaponHit {
+  name: string;
+  point: THREE.Vector3;
+  health: number;
+  maxHealth: number;
+  killed: boolean;
+  isBoss: boolean;
 }
 
 export class CreatureSystem {
   private readonly creatures: Creature[] = [];
   private readonly random = seededRandom(8492);
+  private readonly raycaster = new THREE.Raycaster();
 
   constructor(scene: THREE.Scene) {
     SPECIES.forEach((species, speciesIndex) => {
@@ -33,12 +53,20 @@ export class CreatureSystem {
         const floor = floorAt(x, z);
         const home = new THREE.Vector3(x, floor + 3 + this.random() * Math.min(14, radius * 0.12), z);
         const mesh = createCreatureModel(species);
+        const maxHealth = species.name === 'Gloom Crown'
+          ? 420
+          : species.temperament === 'aggressive' ? Math.round(38 + species.size * 34) : 1;
         mesh.position.copy(home);
         scene.add(mesh);
         this.creatures.push({
           mesh, home, target: home.clone(), species,
           phase: speciesIndex + index * 1.7,
           attackCooldown: 0,
+          health: maxHealth,
+          maxHealth,
+          deadUntil: 0,
+          provokedUntil: 0,
+          boss: species.name === 'Gloom Crown' ? new BossBrain(home) : null,
         });
       }
     });
@@ -53,24 +81,41 @@ export class CreatureSystem {
   ): PredatorAlert | null {
     let alert: PredatorAlert | null = null;
     for (const creature of this.creatures) {
+      if (!creature.mesh.visible) {
+        if (time >= creature.deadUntil) this.respawn(creature);
+        else continue;
+      }
       creature.attackCooldown = Math.max(0, creature.attackCooldown - delta);
       const distance = creature.mesh.position.distanceTo(player);
-      const target = this.chooseTarget(creature, player, distance, time);
-      const direction = target.clone().sub(creature.mesh.position);
       const alertRadius = creature.species.alertRadius ?? 16;
-      const chase = creature.species.temperament === 'aggressive' && distance < alertRadius;
+      const chase = creature.species.temperament === 'aggressive'
+        && (distance < alertRadius || time < creature.provokedUntil);
+      const bossIntent = creature.boss && chase
+        ? creature.boss.update(time, creature.mesh.position, player, creature.health / creature.maxHealth)
+        : null;
+      const target = bossIntent?.target ?? this.chooseTarget(creature, player, distance, time, chase);
+      const direction = target.clone().sub(creature.mesh.position);
       const lunge = chase && distance < 6 ? 1.38 : 1;
-      const speed = creature.species.speed * (chase ? 2.45 : 1) * lunge;
+      const chaseSpeed = bossIntent?.speedMultiplier ?? 2.45;
+      const speed = creature.species.speed * (chase ? chaseSpeed : 1) * lunge;
       if (direction.lengthSq() > 0.05) {
         direction.normalize();
         creature.mesh.position.addScaledVector(direction, speed * delta);
         creature.mesh.lookAt(creature.mesh.position.clone().add(direction));
       }
-      this.animate(creature, time, chase);
+      animateCreature(creature.mesh, creature.phase, time, chase);
       if (chase && (!alert || distance < alert.distance)) {
-        alert = { name: creature.species.name, distance, attacking: distance < 6 };
+        alert = {
+          name: creature.species.name,
+          distance,
+          attacking: (bossIntent?.canStrike ?? true) && distance < 6,
+          health: creature.health,
+          maxHealth: creature.maxHealth,
+          isBoss: Boolean(creature.boss),
+        };
       }
-      if (chase && distance < creature.species.size * 1.4 + 1 && creature.attackCooldown === 0) {
+      const canStrike = bossIntent?.canStrike ?? true;
+      if (chase && canStrike && distance < creature.species.size * 1.4 + 1 && creature.attackCooldown === 0) {
         const damage = creature.species.damage ?? 10;
         onAttack(protectedBySub ? Math.max(3, damage * 0.34) : damage, creature.species.name);
         creature.mesh.position.addScaledVector(direction, -2.5);
@@ -80,9 +125,47 @@ export class CreatureSystem {
     return alert;
   }
 
-  private chooseTarget(creature: Creature, player: THREE.Vector3, distance: number, time: number): THREE.Vector3 {
+  hit(origin: THREE.Vector3, direction: THREE.Vector3, range: number, damage: number, time: number): WeaponHit | null {
+    this.raycaster.set(origin, direction.clone().normalize());
+    this.raycaster.far = range;
+    let closest: { creature: Creature; point: THREE.Vector3; distance: number } | null = null;
+    for (const creature of this.creatures) {
+      if (!creature.mesh.visible || creature.species.temperament !== 'aggressive') continue;
+      const contact = this.raycaster.intersectObject(creature.mesh, true)[0];
+      if (contact && (!closest || contact.distance < closest.distance)) {
+        closest = { creature, point: contact.point.clone(), distance: contact.distance };
+      }
+    }
+    if (!closest) return null;
+    const { creature, point } = closest;
+    creature.health = Math.max(0, creature.health - damage);
+    creature.provokedUntil = time + 24;
+    creature.mesh.userData.hitUntil = time + 0.16;
+    creature.boss?.onHit(time, creature.health / creature.maxHealth);
+    const killed = creature.health <= 0;
+    if (killed) {
+      creature.mesh.visible = false;
+      creature.deadUntil = creature.boss ? Infinity : time + 35;
+    }
+    return {
+      name: creature.species.name,
+      point,
+      health: creature.health,
+      maxHealth: creature.maxHealth,
+      killed,
+      isBoss: Boolean(creature.boss),
+    };
+  }
+
+  private chooseTarget(
+    creature: Creature,
+    player: THREE.Vector3,
+    distance: number,
+    time: number,
+    chasing: boolean,
+  ): THREE.Vector3 {
     const { temperament } = creature.species;
-    if (temperament === 'aggressive' && distance < (creature.species.alertRadius ?? 16)) return player;
+    if (chasing) return player;
     if (temperament === 'passive' && distance < 6) {
       return creature.mesh.position.clone().add(creature.mesh.position.clone().sub(player).normalize().multiplyScalar(8));
     }
@@ -101,19 +184,12 @@ export class CreatureSystem {
     return creature.target;
   }
 
-  private animate(creature: Creature, time: number, chasing: boolean): void {
-    const beat = time * (chasing ? 10 : 4.5) + creature.phase;
-    creature.mesh.rotation.z = Math.sin(beat * 0.48) * (chasing ? 0.16 : 0.07);
-    const tail = creature.mesh.getObjectByName('swim-tail');
-    if (tail) tail.rotation.y = Math.sin(beat) * (chasing ? 0.7 : 0.38);
-    for (const side of [-1, 1]) {
-      const fin = creature.mesh.getObjectByName(`swim-fin-${side}`);
-      if (fin) fin.rotation.y = Math.sin(beat * 0.72 + side) * 0.24;
-    }
-    creature.mesh.children
-      .filter((child) => child.name.startsWith('tentacle-'))
-      .forEach((limb, index) => {
-        limb.rotation.x = Math.sin(beat * 0.32 + index) * 0.15;
-      });
+  private respawn(creature: Creature): void {
+    creature.health = creature.maxHealth;
+    creature.deadUntil = 0;
+    creature.provokedUntil = 0;
+    creature.attackCooldown = 0;
+    creature.mesh.position.copy(creature.home);
+    creature.mesh.visible = true;
   }
 }

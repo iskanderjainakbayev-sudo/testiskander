@@ -49,6 +49,12 @@
   font-size: 16px;
 }
 
+.touch-actions .fire {
+  border-color: #ffbd7a9c;
+  color: #2d190a;
+  background: #ffb46b;
+}
+
 @media (hover: none), (pointer: coarse) {
   .ocean-touch-controls { display: block; }
   .ocean-meters { bottom: 168px; }

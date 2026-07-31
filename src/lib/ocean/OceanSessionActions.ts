@@ -35,7 +35,7 @@ export class OceanSessionActions {
       this.content.setSubPosition(this.player.position.clone().add(new THREE.Vector3(4, 0, 0)));
     }
     this.audio.start();
-    this.toast('WASD swim · SPACE rise · CTRL dive', 5200);
+    this.toast('WASD swim · LMB or R fire Arc Harpoon', 5200);
   }
 
   craft(recipeId: RecipeId): boolean {

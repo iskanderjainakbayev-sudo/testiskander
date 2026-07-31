@@ -54,15 +54,25 @@ export function OceanHud({ snapshot }: { snapshot: OceanSnapshot }) {
       {snapshot.prompt && <div className="ocean-prompt">{snapshot.prompt}</div>}
       {snapshot.toast && <div className="ocean-toast">{snapshot.toast}</div>}
       {snapshot.threatName && (
-        <div className={`predator-alert${snapshot.threatAttacking ? ' is-attacking' : ''}`}>
-          <small>{snapshot.threatAttacking ? 'PREDATOR ATTACKING' : 'PREDATOR DETECTED'}</small>
+        <div className={`predator-alert${snapshot.threatAttacking ? ' is-attacking' : ''}${snapshot.threatIsBoss ? ' is-boss' : ''}`}>
+          <small>
+            {snapshot.threatIsBoss ? 'APEX BOSS' : snapshot.threatAttacking ? 'PREDATOR ATTACKING' : 'PREDATOR DETECTED'}
+          </small>
           <b>{snapshot.threatName}</b>
           <span>{Math.max(0, Math.round(snapshot.threatDistance))}M</span>
+          {snapshot.threatIsBoss && (
+            <div className="boss-health">
+              <i style={{ width: `${snapshot.threatHealth / Math.max(1, snapshot.threatMaxHealth) * 100}%` }} />
+            </div>
+          )}
         </div>
       )}
       <div className="ocean-reticle"><i /></div>
       {snapshot.damageFlash && <div className="damage-flash" />}
-      <div className="ocean-controls">C CRAFT · J PDA · F LIGHTS · Q SCAN · ESC PAUSE · {formatTime(snapshot.elapsed)}</div>
+      <div className={`weapon-status${snapshot.weaponReady ? ' is-ready' : ''}`}>
+        ARC HARPOON <b>{snapshot.weaponReady ? 'READY' : 'CHARGING'}</b>
+      </div>
+      <div className="ocean-controls">LMB / R FIRE · C CRAFT · J PDA · F LIGHTS · Q SCAN · ESC PAUSE · {formatTime(snapshot.elapsed)}</div>
       {snapshot.inSub && <div className="sub-frame" />}
       {snapshot.oxygen < 22 && !snapshot.inSub && <div className="oxygen-warning">OXYGEN CRITICAL</div>}
     </div>

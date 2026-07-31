@@ -35,6 +35,14 @@ export class OceanAudio {
     this.tone(92, 54, 0.45, 0.08);
   }
 
+  harpoon(): void {
+    this.tone(180, 72, 0.16, 0.075);
+  }
+
+  weaponHit(): void {
+    this.tone(120, 48, 0.22, 0.06);
+  }
+
   lowOxygen(now: number): void {
     if (now - this.warningAt < 3200) return;
     this.warningAt = now;

@@ -26,6 +26,7 @@ export function TouchControls({ onKey }: TouchControlsProps) {
         <button {...bind('Space', onKey)}>RISE</button>
         <button {...bind('ControlLeft', onKey)}>DIVE</button>
         <button className="interact" {...bind('KeyE', onKey)}>E</button>
+        <button className="fire" {...bind('Mouse0', onKey)}>FIRE</button>
         <button {...bind('KeyC', onKey)}>CRAFT</button>
       </div>
     </div>

@@ -62,6 +62,10 @@ export interface OceanSnapshot {
   threatDistance: number;
   threatAttacking: boolean;
   damageFlash: boolean;
+  threatHealth: number;
+  threatMaxHealth: number;
+  threatIsBoss: boolean;
+  weaponReady: boolean;
 }
 
 export interface Interactable {
