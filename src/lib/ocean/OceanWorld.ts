@@ -153,7 +153,7 @@ export class OceanWorld {
     const depth = Math.max(0, -this.player.position.y);
     this.state.tick(delta, depth, depth < 0.8, this.inSub);
     this.content.update(now, time);
-    this.combat.update(delta, now, time, this.player, this.inSub);
+    this.combat.update(delta, now, time, this.player, this.inSub, this.lightsOn);
     this.currentInteraction = this.content.nearest(this.player.position, this.player.forward());
     const control = this.controls.update(now, this.inSub, this.lightsOn, this.currentInteraction);
     this.inSub = control.inSub;

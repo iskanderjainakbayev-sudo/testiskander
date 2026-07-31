@@ -6,12 +6,15 @@ import type { OceanAudio } from './OceanAudio';
 import type { OceanState } from './OceanState';
 import type { PlayerController } from './PlayerController';
 import type { OceanEnvironment } from './environment';
+import { getOceanClimate } from './climate';
 
 export class OceanCombat {
   private readonly creatures: CreatureSystem;
   private readonly weapons: OceanWeapons;
   private readonly camera: THREE.Camera;
   private damageFlashUntil = 0;
+  private weaponNoiseUntil = 0;
+  private explosionUntil = 0;
   threat: PredatorAlert | null = null;
 
   constructor(
@@ -26,18 +29,34 @@ export class OceanCombat {
     this.weapons = new OceanWeapons(environment.camera, environment.scene);
   }
 
-  update(delta: number, now: number, time: number, player: PlayerController, inSub: boolean): void {
+  update(
+    delta: number,
+    now: number,
+    time: number,
+    player: PlayerController,
+    inSub: boolean,
+    lightsOn: boolean,
+  ): void {
     const wantsSpecial = this.input.consume('KeyX');
     const wantsShot = this.input.consume('Mouse0') || this.input.consume('KeyR');
     if (this.input.consume('Digit1')) this.equip('gun', inSub);
     if (this.input.consume('Digit2')) this.equip('knife', inSub);
     if ((wantsSpecial || wantsShot) && !inSub) this.fire(now, player, wantsSpecial);
     this.weapons.update(now, inSub);
-    this.threat = this.creatures.update(delta, time, player.position, inSub, (damage, creature) => {
+    const climate = getOceanClimate(this.state.elapsed);
+    this.threat = this.creatures.update(delta, time, player.position, inSub, {
+      lightsOn,
+      vehicleNoise: inSub ? .9 : 0,
+      weaponNoise: now < this.weaponNoiseUntil ? 1 : 0,
+      explosion: now < this.explosionUntil ? 1 : 0,
+      movement: player.accelerating ? 1 : player.moving ? .48 : .05,
+      dayPhase: climate.phase,
+      weather: climate.weather,
+    }, (damage, creature, soundHz, attack) => {
       this.state.damage(damage);
       this.damageFlashUntil = now + 520;
       this.toast(`${creature} attack · -${Math.round(damage)} health`, 1700);
-      this.audio.creatureAttack(creature === 'Abyssal Dragon');
+      this.audio.creatureAttack(creature === 'Abyssal Dragon', soundHz, attack);
     });
     this.audio.setBossNear(Boolean(this.threat?.isBoss));
   }
@@ -63,6 +82,8 @@ export class OceanCombat {
   private fire(now: number, player: PlayerController, special: boolean): void {
     const shot = this.weapons.use(now, player.position, player.forward(), this.creatures, special);
     if (!shot.fired) return;
+    this.weaponNoiseUntil = now + (shot.weapon === 'knife' ? 500 : 2200);
+    if (shot.special) this.explosionUntil = now + 3200;
     if (shot.weapon === 'knife') this.audio.knifeSwing();
     else if (shot.special) this.audio.specialShot();
     else this.audio.gunshot();

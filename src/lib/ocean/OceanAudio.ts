@@ -64,9 +64,11 @@ export class OceanAudio {
     this.engine.tone(boosting ? 150 : 96, 62, 0.2, boosting ? 0.025 : 0.012);
   }
 
-  creatureAttack(boss: boolean): void {
-    this.engine.noise(boss ? 0.34 : 0.18, boss ? 0.16 : 0.08, boss ? 190 : 310);
-    this.engine.tone(boss ? 54 : 86, 34, boss ? 0.62 : 0.34, boss ? 0.1 : 0.06);
+  creatureAttack(boss: boolean, voiceHz: number, attack: string): void {
+    const noisy = attack === 'bite' || attack === 'ram' || attack === 'charge';
+    this.engine.noise(boss ? .34 : .18, noisy ? .12 : .07, attack === 'shock' ? 1200 : 310);
+    this.engine.tone(boss ? 42 : voiceHz, attack === 'shock' ? voiceHz * 2.4 : voiceHz * .48, boss ? .72 : .38, boss ? .1 : .055);
+    if (attack === 'shock') this.engine.tone(voiceHz * 1.5, voiceHz * .6, .22, .035, .06);
   }
 
   setBossNear(near: boolean): void {

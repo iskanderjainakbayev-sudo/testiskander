@@ -2,6 +2,11 @@ import * as THREE from 'three';
 import { BossBrain } from './BossBrain';
 import type { Species } from './creatureCatalog';
 
+export type CreatureMode =
+  | 'patrol' | 'sleep' | 'curious' | 'flee' | 'warn' | 'stalk'
+  | 'circle' | 'flank' | 'chase' | 'attack' | 'search' | 'return'
+  | 'retreat' | 'hunt' | 'feed' | 'shelter' | 'dead';
+
 export interface CreatureActor {
   mesh: THREE.Group;
   home: THREE.Vector3;
@@ -14,6 +19,14 @@ export interface CreatureActor {
   deadUntil: number;
   provokedUntil: number;
   boss: BossBrain | null;
+  mode: CreatureMode;
+  modeUntil: number;
+  territoryRadius: number;
+  lastKnownPlayer: THREE.Vector3;
+  ecosystemTarget: CreatureActor | null;
+  ecosystemThreat: CreatureActor | null;
+  ecosystemCheckAt: number;
+  corpseUntil: number;
 }
 
 export interface WeaponHit {
@@ -46,33 +59,15 @@ export function createCreatureActor(
     deadUntil: 0,
     provokedUntil: 0,
     boss: species.isBoss ? new BossBrain(home) : null,
+    mode: 'patrol',
+    modeUntil: 0,
+    territoryRadius: species.isBoss ? 48 : 14 + species.threat * 4,
+    lastKnownPlayer: new THREE.Vector3(),
+    ecosystemTarget: null,
+    ecosystemThreat: null,
+    ecosystemCheckAt: 0,
+    corpseUntil: 0,
   };
-}
-
-export function targetForCreature(
-  creature: CreatureActor,
-  player: THREE.Vector3,
-  distance: number,
-  time: number,
-  chasing: boolean,
-  random: () => number,
-): THREE.Vector3 {
-  if (chasing) return player;
-  if (creature.species.temperament === 'passive' && distance < 6) {
-    return creature.mesh.position.clone().add(creature.mesh.position.clone().sub(player).normalize().multiplyScalar(8));
-  }
-  if (creature.species.temperament === 'neutral' && distance < 2.8) {
-    return creature.mesh.position.clone().add(creature.mesh.position.clone().sub(player).normalize().multiplyScalar(4));
-  }
-  if (creature.mesh.position.distanceTo(creature.home) > 16) return creature.home;
-  if (creature.mesh.position.distanceTo(creature.target) < 1.2 || Math.sin(time * 0.2 + creature.phase) > 0.995) {
-    creature.target.copy(creature.home).add(new THREE.Vector3(
-      (random() - 0.5) * 13,
-      (random() - 0.5) * 5,
-      (random() - 0.5) * 13,
-    ));
-  }
-  return creature.target;
 }
 
 export function hitCreature(
@@ -83,7 +78,7 @@ export function hitCreature(
 ): WeaponHit | null {
   let closest: { creature: CreatureActor; point: THREE.Vector3; distance: number } | null = null;
   for (const creature of creatures) {
-    if (!creature.mesh.visible) continue;
+    if (!creature.mesh.visible || creature.health <= 0) continue;
     const contact = raycaster.intersectObject(creature.mesh, true)[0];
     if (contact && (!closest || contact.distance < closest.distance)) {
       closest = { creature, point: contact.point.clone(), distance: contact.distance };
@@ -97,7 +92,8 @@ export function hitCreature(
   creature.boss?.onHit(time, creature.health / creature.maxHealth);
   const killed = creature.health <= 0;
   if (killed) {
-    creature.mesh.visible = false;
+    creature.mode = 'dead';
+    creature.corpseUntil = time + 8;
     creature.deadUntil = creature.boss ? Infinity : time + 35;
   }
   return {
@@ -120,7 +116,7 @@ export function hitCreatureInCone(
 ): WeaponHit | null {
   const facing = direction.clone().normalize();
   const target = creatures
-    .filter((creature) => creature.mesh.visible)
+    .filter((creature) => creature.mesh.visible && creature.health > 0)
     .map((creature) => ({
       creature,
       offset: creature.mesh.position.clone().sub(origin),
@@ -135,7 +131,8 @@ export function hitCreatureInCone(
   target.boss?.onHit(time, target.health / target.maxHealth);
   const killed = target.health <= 0;
   if (killed) {
-    target.mesh.visible = false;
+    target.mode = 'dead';
+    target.corpseUntil = time + 8;
     target.deadUntil = target.boss ? Infinity : time + 35;
   }
   return {
@@ -153,6 +150,13 @@ export function respawnCreature(creature: CreatureActor): void {
   creature.deadUntil = 0;
   creature.provokedUntil = 0;
   creature.attackCooldown = 0;
+  creature.mode = 'patrol';
+  creature.modeUntil = 0;
+  creature.corpseUntil = 0;
+  creature.ecosystemTarget = null;
+  creature.ecosystemThreat = null;
   creature.mesh.position.copy(creature.home);
+  creature.mesh.rotation.z = 0;
+  creature.mesh.scale.setScalar(1);
   creature.mesh.visible = true;
 }
