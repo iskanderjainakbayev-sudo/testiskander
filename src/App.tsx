@@ -8,6 +8,7 @@ const LoginPage = lazy(() => import('./pages/LoginPage').then((module) => ({ def
 const OceanGamePage = lazy(() => import('./pages/OceanGamePage').then((module) => ({ default: module.OceanGamePage })));
 const SpaceGamePage = lazy(() => import('./pages/SpaceGamePage').then((module) => ({ default: module.SpaceGamePage })));
 const ShooterArenaPage = lazy(() => import('./components/GameArena').then((module) => ({ default: module.GameArena })));
+const AdminPage = lazy(() => import('./pages/AdminPage').then((module) => ({ default: module.AdminPage })));
 
 // Здесь живут только маршруты. Сами экраны складывай в src/pages/.
 export default function App() {
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="/login" component={() => <LoginPage initialMode="signin" />} />
         <Route path="/space" component={SpaceGamePage} />
         <Route path="/afterfall" component={HomePage} />
+        <Route path="/admin" component={AdminPage} />
         <Route component={NotFoundPage} />
       </Switch>
     </Suspense>

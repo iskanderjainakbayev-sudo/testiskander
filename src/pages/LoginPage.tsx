@@ -8,6 +8,7 @@ import {
   signUpWithEmail,
 } from "../lib/googleAuth";
 import { isSupabaseConfigured, supabase } from "../lib/supabase";
+import { AdminLink } from "../components/admin/AdminLink";
 
 type LoginMode = "register" | "signin";
 
@@ -74,6 +75,7 @@ export function LoginPage({ initialMode = "register" }: LoginPageProps) {
             <Link className="account-play" href="/game">
               RETURN TO OUTPOST
             </Link>
+            <AdminLink user={user} />
             <button onClick={() => void logout()}>SIGN OUT</button>
           </>
         ) : (
