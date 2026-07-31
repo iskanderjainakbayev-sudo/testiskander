@@ -2,3 +2,16 @@
 .briefing-grid article:nth-child(1) { border-top: 2px solid #66e0d3; }.briefing-grid article:nth-child(2) { border-top: 2px solid #ffcf6e; }.briefing-grid article:nth-child(3) { border-top: 2px solid #c38aff; }.briefing-grid article:nth-child(4) { border-top: 2px solid #ff8299; }.briefing-grid article:nth-child(2) b { color: #ffe1a0; }.briefing-grid article:nth-child(3) b { color: #dcb8ff; }.briefing-grid article:nth-child(4) b { color: #ffc0ca; }.menu-actions button:nth-child(1) { border-bottom: 3px solid #5ee5dd; }.menu-actions button:nth-child(2) { border-bottom: 3px solid #b98aff; }.menu-actions button:nth-child(3) { border-bottom: 3px solid #6fb9ff; }.menu-actions button:nth-child(4) { border-bottom: 3px solid #ffce6d; }.menu-actions button:nth-child(2):hover { background: #3a2855e8; }.menu-actions button:nth-child(3):hover { background: #16415de8; }.menu-actions button:nth-child(4):hover { background: #554020e8; }
 .map-intel { background: linear-gradient(145deg, #174b64ed, #253d23e5 56%, #6d351bdb); }.operation-grid button:nth-child(3n + 1) { box-shadow: inset 3px 0 #6de7dc; }.operation-grid button:nth-child(3n + 2) { box-shadow: inset 3px 0 #b58aff; }.operation-grid button:nth-child(3n) { box-shadow: inset 3px 0 #ffca69; }.shooter-card .operation-grid .boss-mission { background: linear-gradient(115deg, #551d3ae8, #2c1646e8); box-shadow: inset 3px 0 #ff7280; }
 .shooter-stats { border-left-color: #5fe8df; }.shooter-stats i { color: #ffcf6b; }.health-meter { border-left-color: #8ce68b; }.health-meter b { background: linear-gradient(90deg, #6ce49c, #d4f075); box-shadow: 0 0 11px #aef288; }.health-meter strong { color: #d7f379; }.ammo-meter { border-right-color: #ffb86a; }.ammo-meter b { color: #ffbf6d; text-shadow: 0 0 12px #ff9f4f77; }.map-readout { border-left-color: #b693ff; }.map-readout span { color: #c8aeff; }.level-objective { border-left-color: #ffcf6b; }.level-objective span { color: #ffcf6b; }.crosshair { border-color: #f3f8d8; box-shadow: 0 0 10px #70e8da, 0 0 22px #9c7aff77; }
+.health-meter > div,
+.stamina-meter > div {
+  position: relative;
+  height: 4px;
+  overflow: hidden;
+  background: #2b3f4f52;
+}
+.health-meter > div > b,
+.stamina-meter > div > b {
+  display: block;
+  height: 100%;
+}
+.stamina-meter { border-left-color: #e7b26c; }.stamina-meter b { background: linear-gradient(90deg, #ffd27f, #ffb33f); box-shadow: 0 0 12px #ffc56f99; }.stamina-meter strong { color: #ffd29a; }

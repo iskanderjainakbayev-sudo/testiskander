@@ -190,7 +190,7 @@ export class ShooterWorld {
     }
     if (movement.isMoving && this.audio && time > this.footstepAt) {
       this.audio.step(movement.isSprinting);
-      this.footstepAt = time + (movement.isSprinting ? 0.1 : 0.2);
+      this.footstepAt = time + (movement.isSprinting ? 100 : 180);
     }
     if (!movement.isMoving) {
       this.stamina = Math.min(maxStamina, this.stamina + staminaRecover * 0.3 * delta);
