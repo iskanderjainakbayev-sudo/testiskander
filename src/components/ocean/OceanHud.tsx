@@ -3,7 +3,7 @@ import { formatTime } from '../../lib/ocean/progression';
 import type { OceanSnapshot, ResourceId } from '../../lib/ocean/types';
 import { SurvivalMeters } from './SurvivalMeters';
 
-const QUICK_RESOURCES: ResourceId[] = ['copper', 'crystal', 'oil', 'scrap', 'gem'];
+const QUICK_RESOURCES: ResourceId[] = ['copper', 'crystal', 'oil', 'scrap', 'gem', 'meat'];
 
 function compassPoint(heading: number): string {
   const points = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];

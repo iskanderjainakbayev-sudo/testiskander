@@ -78,6 +78,18 @@ export class OceanState {
     return `Collected ${RESOURCE_NAMES[resource]}`;
   }
 
+  addMeat(amount: number): void {
+    this.inventory.meat += amount;
+  }
+
+  eatMeat(): string {
+    if (this.inventory.meat <= 0) return 'No fish meat in inventory';
+    this.inventory.meat -= 1;
+    this.hunger = Math.min(100, this.hunger + 34);
+    this.health = Math.min(100, this.health + 8);
+    return 'Fish meat eaten · food +34 · health +8';
+  }
+
   addLog(logId: string): boolean {
     if (this.logs.includes(logId)) return false;
     this.logs.push(logId);

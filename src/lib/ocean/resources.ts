@@ -14,6 +14,7 @@ const COLORS: Record<ResourceId, [number, number]> = {
   scrap: [0xb4b4a9, 0x303b42],
   cell: [0xffdf66, 0x8a5a08],
   gem: [0x3f8dff, 0x183d9d],
+  meat: [0xe6816f, 0x6f211a],
 };
 
 interface ResourceBand {

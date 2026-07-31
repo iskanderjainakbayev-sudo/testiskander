@@ -71,9 +71,13 @@ export class OceanCombat {
     if (shot.weapon === 'knife') this.audio.knifeHit();
     else this.audio.weaponHit();
     const hit = shot.hit;
-    const message = hit.killed
-      ? `${hit.name} neutralized`
-      : `${shot.special ? 'Critical pulse · ' : ''}${hit.name} · ${Math.ceil(hit.health)}/${hit.maxHealth}`;
+    if (hit.killed) {
+      const meat = hit.isBoss ? 5 : 1;
+      this.state.addMeat(meat);
+      this.toast(`${hit.name} neutralized · +${meat} fish meat`, hit.isBoss ? 2600 : 1700);
+      return;
+    }
+    const message = `${shot.special ? 'Critical pulse · ' : ''}${hit.name} · ${Math.ceil(hit.health)}/${hit.maxHealth}`;
     this.toast(message, hit.isBoss ? 2200 : 1300);
   }
 

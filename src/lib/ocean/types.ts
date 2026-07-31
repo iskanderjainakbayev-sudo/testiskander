@@ -2,7 +2,7 @@ import type * as THREE from 'three';
 
 export type ResourceId =
   | 'stone' | 'copper' | 'quartz' | 'crystal' | 'fiber'
-  | 'oil' | 'coral' | 'scrap' | 'cell' | 'gem';
+  | 'oil' | 'coral' | 'scrap' | 'cell' | 'gem' | 'meat';
 
 export type RecipeId =
   | 'tank' | 'fins' | 'flashlight' | 'scanner' | 'repair'
@@ -52,6 +52,9 @@ export interface OceanSnapshot {
   heading: number;
   biome: BiomeId;
   objective: string;
+  objectiveAngle: number;
+  objectiveDistance: number;
+  objectiveLabel: string;
   inventory: Inventory;
   crafted: RecipeId[];
   logs: string[];

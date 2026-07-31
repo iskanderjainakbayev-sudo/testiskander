@@ -50,6 +50,11 @@ export class OceanControls {
       this.audio.scan();
       this.toast('Scanner pulse active', 2200);
     }
+    if (this.input.consume('KeyH')) {
+      const message = this.state.eatMeat();
+      this.audio.collect();
+      this.toast(message, 1900);
+    }
     if (this.input.consume('KeyC')) {
       this.audio.ui();
       event = 'craft';

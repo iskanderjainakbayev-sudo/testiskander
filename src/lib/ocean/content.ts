@@ -11,11 +11,12 @@ export const RESOURCE_NAMES: Record<ResourceId, string> = {
   scrap: 'Alloy Scrap',
   cell: 'Energy Cell',
   gem: 'Abyssal Gem',
+  meat: 'Fish Meat',
 };
 
 export const EMPTY_INVENTORY: Inventory = {
   stone: 0, copper: 0, quartz: 0, crystal: 0, fiber: 0,
-  oil: 0, coral: 0, scrap: 0, cell: 0, gem: 0,
+  oil: 0, coral: 0, scrap: 0, cell: 0, gem: 0, meat: 0,
 };
 
 export const RECIPES: Recipe[] = [
