@@ -124,9 +124,10 @@ export function hitCreatureInCone(
     .map((creature) => ({
       creature,
       offset: creature.mesh.position.clone().sub(origin),
+      distance: creature.mesh.position.distanceTo(origin),
     }))
-    .filter(({ offset }) => offset.length() <= range && offset.normalize().dot(facing) > 0.42)
-    .sort((left, right) => left.offset.lengthSq() - right.offset.lengthSq())[0]?.creature;
+    .filter(({ offset, distance }) => distance <= range && offset.normalize().dot(facing) > 0.42)
+    .sort((left, right) => left.distance - right.distance)[0]?.creature;
   if (!target) return null;
   target.health = Math.max(0, target.health - damage);
   target.provokedUntil = time + 24;
