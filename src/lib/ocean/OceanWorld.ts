@@ -1,10 +1,11 @@
 import * as THREE from 'three';
 import { CreatureSystem } from './CreatureSystem';
-import { STORY_LOGS } from './content';
+import { createSnapshot } from './createSnapshot';
 import { createDecorations } from './decorations';
 import { OceanEnvironment } from './environment';
 import { InputController } from './InputController';
 import { OceanAudio } from './OceanAudio';
+import { OceanInteraction } from './OceanInteraction';
 import { OceanState } from './OceanState';
 import { PlayerController } from './PlayerController';
 import { biomeAtDepth } from './terrain';
@@ -20,6 +21,7 @@ export class OceanWorld {
   private readonly content: WorldContent;
   private readonly creatures: CreatureSystem;
   private readonly audio = new OceanAudio();
+  private readonly interaction: OceanInteraction;
   private running = false;
   private paused = true;
   private inSub = false;
@@ -45,6 +47,10 @@ export class OceanWorld {
       if (!locked && this.running && !this.paused) this.pauseFor('pause');
     });
     this.player = new PlayerController(this.environment.camera, this.input);
+    this.interaction = new OceanInteraction(
+      this.state, this.content, this.audio, this.player,
+      (message, duration) => this.showToast(message, duration),
+    );
     window.addEventListener('resize', this.environment.resize);
     this.publish(performance.now());
     this.frame = requestAnimationFrame(this.loop);
@@ -151,8 +157,14 @@ export class OceanWorld {
 
   private handleInput(now: number): void {
     if (this.input.consume('KeyE')) {
-      if (this.inSub) this.exitSub();
-      else if (this.currentInteraction) this.interact(this.currentInteraction, now);
+      if (this.inSub) {
+        this.inSub = false;
+        this.interaction.exitSub();
+      } else if (this.currentInteraction) {
+        const outcome = this.interaction.use(this.currentInteraction, now);
+        if (outcome === 'enterSub') this.inSub = true;
+        if (outcome === 'ending') this.pauseFor('ending');
+      }
     }
     if (this.input.consume('KeyF') && (this.inSub || this.state.crafted.includes('flashlight'))) {
       this.lightsOn = !this.lightsOn;
@@ -165,36 +177,6 @@ export class OceanWorld {
     }
     if (this.input.consume('KeyC')) this.pauseFor('craft');
     if (this.input.consume('KeyJ')) this.pauseFor('pda');
-  }
-
-  private interact(item: Interactable, now: number): void {
-    if (item.kind === 'resource' && item.resource) {
-      this.showToast(this.state.collect(item.resource), 1800);
-      this.content.collect(item, now);
-      this.audio.collect();
-    } else if (item.kind === 'log' && item.logId) {
-      if (this.state.addLog(item.logId)) {
-        this.showToast(`PDA: ${STORY_LOGS[item.logId]?.title ?? 'Archive recovered'}`, 3800);
-        this.content.collect(item, now);
-        this.audio.discovery();
-      }
-    } else if (item.kind === 'pod') {
-      this.state.servicePod();
-      this.showToast('Pod systems restored your vitals', 2600);
-    } else if (item.kind === 'submarine') {
-      this.inSub = true;
-      this.content.setSubVisible(false);
-      this.showToast('Nereid online · E to exit', 2600);
-    } else if (item.kind === 'rocket') {
-      this.pauseFor('ending');
-    }
-  }
-
-  private exitSub(): void {
-    this.inSub = false;
-    this.content.setSubPosition(this.player.position.clone().add(new THREE.Vector3(2.5, 0, 0)));
-    this.content.setSubVisible(true);
-    this.showToast('Exited Nereid', 1500);
   }
 
   private pauseFor(event: WorldEvent): void {
@@ -217,36 +199,12 @@ export class OceanWorld {
 
   private publish(now: number): void {
     this.lastSnapshot = now;
-    const depth = Math.max(0, -this.player.position.y);
-    const prompt = this.currentInteraction ? this.promptFor(this.currentInteraction) : '';
-    this.onSnapshot({
-      health: this.state.health,
-      oxygen: this.state.oxygen,
-      maxOxygen: this.state.maxOxygen,
-      hunger: this.state.hunger,
-      water: this.state.water,
-      depth,
-      heading: this.player.heading(),
-      biome: biomeAtDepth(depth),
-      objective: this.state.objective,
-      inventory: { ...this.state.inventory },
-      crafted: [...this.state.crafted],
-      logs: [...this.state.logs],
-      prompt,
-      toast: now < this.toastUntil ? this.toast : '',
+    this.onSnapshot(createSnapshot(this.state, this.player, {
+      interaction: this.currentInteraction,
+      toast: this.toast,
+      showToast: now < this.toastUntil,
       inSub: this.inSub,
-      subBattery: this.state.subBattery,
-      crushDepth: this.state.crushDepth,
       lightsOn: this.lightsOn,
-      elapsed: this.state.elapsed,
-    });
-  }
-
-  private promptFor(item: Interactable): string {
-    if (item.kind === 'resource') return `[ E ] Collect ${item.label}`;
-    if (item.kind === 'log') return `[ E ] Recover ${item.label}`;
-    if (item.kind === 'pod') return '[ E ] Use escape pod';
-    if (item.kind === 'submarine') return '[ E ] Enter Nereid';
-    return '[ E ] Launch the Aster';
+    }));
   }
 }

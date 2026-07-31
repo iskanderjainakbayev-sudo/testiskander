@@ -1,0 +1,19 @@
+{
+  "name": "Ocean Depths",
+  "short_name": "Ocean Depths",
+  "description": "A compact first-person survival adventure in the alien ocean of Pelagos.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "landscape-primary",
+  "background_color": "#031923",
+  "theme_color": "#031923",
+  "icons": [
+    {
+      "src": "/icons/ocean-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

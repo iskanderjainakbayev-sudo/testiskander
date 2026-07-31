@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createHabitat, type HabitatModules } from './habitat';
 import { floorAt, seededRandom } from './terrain';
 
 export interface OceanDecor {
@@ -6,6 +7,7 @@ export interface OceanDecor {
   pod: THREE.Group;
   submarine: THREE.Group;
   rocket: THREE.Group;
+  habitat: HabitatModules;
 }
 
 function material(color: number, emissive = 0): THREE.MeshStandardMaterial {
@@ -72,8 +74,9 @@ export function createDecorations(scene: THREE.Scene): OceanDecor {
   const pod = createPod();
   const submarine = createSubmarine();
   const rocket = createRocket();
+  const habitat = createHabitat(scene);
   scene.add(pod, submarine, rocket);
-  return { plants, pod, submarine, rocket };
+  return { plants, pod, submarine, rocket, habitat };
 }
 
 function createPod(): THREE.Group {

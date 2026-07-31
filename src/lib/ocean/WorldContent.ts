@@ -64,6 +64,9 @@ export class WorldContent {
     this.decor.submarine.visible = crafted.includes('submarine');
     const rocketReady = ['rocketHull', 'rocketCore', 'rocketFuel'].every((id) => crafted.includes(id as RecipeId));
     this.decor.rocket.visible = rocketReady;
+    for (const [id, module] of Object.entries(this.decor.habitat)) {
+      if (module) module.visible = crafted.includes(id as RecipeId);
+    }
     for (const item of this.interactions) {
       if (item.kind === 'log' && item.logId) item.mesh.visible = !logs.includes(item.logId);
     }

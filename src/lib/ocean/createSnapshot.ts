@@ -1,0 +1,51 @@
+import type { OceanState } from './OceanState';
+import type { PlayerController } from './PlayerController';
+import { biomeAtDepth } from './terrain';
+import type { Interactable, OceanSnapshot } from './types';
+
+interface SnapshotOptions {
+  interaction: Interactable | null;
+  toast: string;
+  showToast: boolean;
+  inSub: boolean;
+  lightsOn: boolean;
+}
+
+function promptFor(item: Interactable | null): string {
+  if (!item) return '';
+  if (item.kind === 'resource') return `[ E ] Collect ${item.label}`;
+  if (item.kind === 'log') return `[ E ] Recover ${item.label}`;
+  if (item.kind === 'pod') return '[ E ] Use escape pod';
+  if (item.kind === 'submarine') return '[ E ] Enter Nereid';
+  return '[ E ] Launch the Aster';
+}
+
+export function createSnapshot(
+  state: OceanState,
+  player: PlayerController,
+  options: SnapshotOptions,
+): OceanSnapshot {
+  const depth = Math.max(0, -player.position.y);
+  return {
+    health: state.health,
+    oxygen: state.oxygen,
+    maxOxygen: state.maxOxygen,
+    hunger: state.hunger,
+    water: state.water,
+    depth,
+    heading: player.heading(),
+    biome: biomeAtDepth(depth),
+    objective: state.objective,
+    inventory: { ...state.inventory },
+    crafted: [...state.crafted],
+    logs: [...state.logs],
+    prompt: promptFor(options.interaction),
+    toast: options.showToast ? options.toast : '',
+    inSub: options.inSub,
+    subBattery: state.subBattery,
+    crushDepth: state.crushDepth,
+    lightsOn: options.lightsOn,
+    elapsed: state.elapsed,
+  };
+}
+
