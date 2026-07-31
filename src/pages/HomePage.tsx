@@ -18,6 +18,7 @@ export function HomePage() {
           becomes a decision: search, craft, stay quiet—or run.
         </b>
         <Link href="/game">START FIELD EXPEDITION <span>→</span></Link>
+        <Link href="/shooter">ENTER TACTICAL SHOOTER <span>→</span></Link>
         <Link href="/signup" className="afterfall-home__signup">
           REGISTER WITH GOOGLE
         </Link>
