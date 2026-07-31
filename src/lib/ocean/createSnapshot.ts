@@ -15,6 +15,7 @@ interface SnapshotOptions {
   weaponReady: boolean;
   specialWeaponReady: boolean;
   activeWeapon: OceanWeapon;
+  objectiveTarget: { position: import('three').Vector3; label: string };
 }
 
 function promptFor(item: Interactable | null): string {
@@ -32,6 +33,14 @@ export function createSnapshot(
   options: SnapshotOptions,
 ): OceanSnapshot {
   const depth = Math.max(0, -player.position.y);
+  const forward = player.forward().setY(0).normalize();
+  const toObjective = options.objectiveTarget.position.clone().sub(player.position).setY(0);
+  const objectiveDistance = toObjective.length();
+  toObjective.normalize();
+  const objectiveAngle = Math.atan2(
+    forward.x * toObjective.z - forward.z * toObjective.x,
+    forward.dot(toObjective),
+  );
   return {
     health: state.health,
     stamina: player.stamina,
@@ -45,6 +54,9 @@ export function createSnapshot(
     heading: player.heading(),
     biome: biomeAtDepth(depth),
     objective: state.objective,
+    objectiveAngle,
+    objectiveDistance,
+    objectiveLabel: options.objectiveTarget.label,
     inventory: { ...state.inventory },
     crafted: [...state.crafted],
     logs: [...state.logs],

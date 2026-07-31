@@ -30,6 +30,7 @@ export function TouchControls({ onKey }: TouchControlsProps) {
         <button className="special-fire" {...bind('KeyX', onKey)}>PULSE</button>
         <button {...bind('Digit1', onKey)}>GUN</button>
         <button {...bind('Digit2', onKey)}>KNIFE</button>
+        <button {...bind('KeyH', onKey)}>EAT</button>
         <button {...bind('KeyC', onKey)}>CRAFT</button>
         <button {...bind('ShiftLeft', onKey)}>BOOST</button>
       </div>

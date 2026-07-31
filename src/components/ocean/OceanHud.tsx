@@ -2,6 +2,7 @@ import { RESOURCE_NAMES } from '../../lib/ocean/content';
 import { formatTime } from '../../lib/ocean/progression';
 import type { OceanSnapshot, ResourceId } from '../../lib/ocean/types';
 import { SurvivalMeters } from './SurvivalMeters';
+import { ObjectiveNavigator } from './ObjectiveNavigator';
 
 const QUICK_RESOURCES: ResourceId[] = ['copper', 'crystal', 'oil', 'scrap', 'gem', 'meat'];
 
@@ -18,6 +19,7 @@ export function OceanHud({ snapshot }: { snapshot: OceanSnapshot }) {
         <small>CURRENT DIVE</small>
         <b>{snapshot.objective}</b>
       </section>
+      <ObjectiveNavigator snapshot={snapshot} />
       <section className="ocean-compass">
         <i>{compassPoint(snapshot.heading)}</i>
         <div><span style={{ transform: `translateX(${-(snapshot.heading % 45) * 1.4}px)` }} /></div>
@@ -81,7 +83,7 @@ export function OceanHud({ snapshot }: { snapshot: OceanSnapshot }) {
           </small>
         )}
       </div>
-      <div className="ocean-controls">LMB / R FIRE · X DRAGONBREAKER · SHIFT ACCELERATE · C CRAFT · J PDA · ESC PAUSE · {formatTime(snapshot.elapsed)}</div>
+      <div className="ocean-controls">1 GUN · 2 KNIFE · LMB / R USE · X DRAGONBREAKER · H EAT MEAT · SHIFT ACCELERATE · {formatTime(snapshot.elapsed)}</div>
       {snapshot.inSub && <div className="sub-frame" />}
       {snapshot.oxygen < 22 && !snapshot.inSub && <div className="oxygen-warning">OXYGEN CRITICAL</div>}
     </div>

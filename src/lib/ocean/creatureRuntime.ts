@@ -83,7 +83,7 @@ export function hitCreature(
 ): WeaponHit | null {
   let closest: { creature: CreatureActor; point: THREE.Vector3; distance: number } | null = null;
   for (const creature of creatures) {
-    if (!creature.mesh.visible || creature.species.temperament !== 'aggressive') continue;
+    if (!creature.mesh.visible) continue;
     const contact = raycaster.intersectObject(creature.mesh, true)[0];
     if (contact && (!closest || contact.distance < closest.distance)) {
       closest = { creature, point: contact.point.clone(), distance: contact.distance };
@@ -120,7 +120,7 @@ export function hitCreatureInCone(
 ): WeaponHit | null {
   const facing = direction.clone().normalize();
   const target = creatures
-    .filter((creature) => creature.mesh.visible && creature.species.temperament === 'aggressive')
+    .filter((creature) => creature.mesh.visible)
     .map((creature) => ({
       creature,
       offset: creature.mesh.position.clone().sub(origin),

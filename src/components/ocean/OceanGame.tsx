@@ -16,6 +16,7 @@ import './styles/survival.css';
 import './styles/effects.css';
 import './styles/panels.css';
 import './styles/touch.css';
+import './styles/navigation.css';
 
 type Screen = 'menu' | 'playing' | 'pause' | 'craft' | 'pda' | 'ending';
 

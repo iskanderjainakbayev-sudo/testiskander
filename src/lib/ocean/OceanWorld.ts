@@ -179,6 +179,7 @@ export class OceanWorld {
 
   private publish(now: number): void {
     this.lastSnapshot = now;
+    const objectiveTarget = this.content.objectiveTarget(this.state.crafted, this.state.logs, this.player.position);
     this.onSnapshot(createSnapshot(this.state, this.player, {
       interaction: this.currentInteraction,
       toast: this.toast,
@@ -190,6 +191,7 @@ export class OceanWorld {
       damageFlash: this.combat.damageFlashing(now),
       weaponReady: this.combat.weaponReady(now),
       specialWeaponReady: this.combat.specialWeaponReady(now),
+      objectiveTarget,
     }));
   }
 }

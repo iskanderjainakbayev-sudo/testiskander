@@ -81,4 +81,36 @@ export class WorldContent {
   setSubVisible(visible: boolean): void {
     this.decor.submarine.visible = visible;
   }
+
+  objectiveTarget(
+    crafted: RecipeId[],
+    logs: string[],
+    player: THREE.Vector3,
+  ): { position: THREE.Vector3; label: string } {
+    const landmarkId = !logs.includes('pod') ? 'log-pod'
+      : !crafted.includes('tank') ? null
+        : !crafted.includes('repair') ? null
+          : !crafted.includes('submarine') ? null
+            : !logs.includes('kelp') ? 'log-kelp'
+              : !crafted.includes('depthModule') ? null
+                : !logs.includes('vault') ? 'log-vault'
+                  : !logs.includes('heart') ? 'log-heart'
+                    : ['rocketHull', 'rocketCore', 'rocketFuel'].some((id) => !crafted.includes(id as RecipeId))
+                      ? null : 'rocket';
+    if (landmarkId) {
+      const landmark = this.interactions.find((item) => item.id === landmarkId);
+      if (landmark) return { position: landmark.position, label: landmark.label };
+    }
+    const wanted = !crafted.includes('tank') ? ['copper', 'quartz', 'coral']
+      : !crafted.includes('repair') ? ['scrap', 'copper', 'crystal']
+        : !crafted.includes('submarine') ? ['scrap', 'copper', 'crystal', 'oil', 'cell']
+          : !crafted.includes('depthModule') ? ['gem', 'crystal', 'oil']
+            : ['scrap', 'oil', 'quartz', 'gem', 'crystal', 'cell', 'coral'];
+    const resource = this.interactions
+      .filter((item) => item.kind === 'resource' && item.mesh.visible && item.resource && wanted.includes(item.resource))
+      .sort((left, right) => left.position.distanceToSquared(player) - right.position.distanceToSquared(player))[0];
+    if (resource) return { position: resource.position, label: resource.label };
+    const pod = this.interactions.find((item) => item.id === 'pod');
+    return { position: pod?.position ?? new THREE.Vector3(), label: 'Escape Pod' };
+  }
 }

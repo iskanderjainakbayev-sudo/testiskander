@@ -79,7 +79,7 @@ export class PlayerController {
       this.position.z = 8 + (this.position.z - 8) * scale;
     }
     const floor = floorAt(this.position.x, this.position.z);
-    this.position.y = THREE.MathUtils.clamp(this.position.y, floor + (inSub ? 2.2 : 1.05), -0.45);
+    this.position.y = THREE.MathUtils.clamp(this.position.y, floor + (inSub ? 2.2 : 1.05), inSub ? -0.45 : 1.55);
     this.syncCamera();
   }
 

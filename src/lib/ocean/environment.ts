@@ -7,6 +7,7 @@ import { createTerrain, updateTerrainCaustics } from './terrain';
 import type { BiomeId } from './types';
 import { createGodRays, updateGodRays } from './waterEffects';
 import { WaterParticles } from './WaterParticles';
+import { createSurfaceWorld, updateSurfaceWorld } from './surfaceWorld';
 
 const SURFACE_VERTEX = `
   varying vec2 vUv;
@@ -45,6 +46,7 @@ export class OceanEnvironment {
   private readonly terrain = createTerrain();
   private readonly godRays = createGodRays();
   private readonly particles: WaterParticles;
+  private readonly surfaceWorld = createSurfaceWorld();
 
   constructor(readonly canvas: HTMLCanvasElement) {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
@@ -56,7 +58,7 @@ export class OceanEnvironment {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.scene.background = new THREE.Color(0x2c9ea7);
     this.scene.fog = new THREE.FogExp2(0x25848d, 0.016);
-    this.scene.add(this.terrain, this.godRays, this.sun, this.hemi);
+    this.scene.add(this.terrain, this.godRays, this.sun, this.hemi, this.surfaceWorld);
     this.terrain.traverse((object) => {
       if (object instanceof THREE.Mesh) object.receiveShadow = true;
     });
@@ -97,6 +99,16 @@ export class OceanEnvironment {
     }
     this.hemi.intensity = palette[2];
     this.particles.update(time, this.camera);
+    updateSurfaceWorld(this.surfaceWorld, time);
+    if (this.camera.position.y > 0.12) {
+      const surfaceSky = new THREE.Color(0x78c8dc);
+      this.scene.background = surfaceSky;
+      if (this.scene.fog instanceof THREE.FogExp2) {
+        this.scene.fog.color.copy(surfaceSky);
+        this.scene.fog.density = 0.0022;
+      }
+      this.hemi.intensity = 2.3;
+    }
   }
 
   resize = (): void => {
