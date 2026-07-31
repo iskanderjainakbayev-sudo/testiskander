@@ -135,7 +135,7 @@ export class OceanWorld {
       if (this.running && !this.paused) this.update(delta, now, time);
       const depth = Math.max(0, -this.player.position.y);
       this.environment.update(time, biomeAtDepth(depth), this.lightsOn || this.inSub);
-      this.environment.renderer.render(this.environment.scene, this.environment.camera);
+      this.environment.render();
       if (now - this.lastSnapshot > 110) this.publish(now);
     } catch {
       this.failed = true;

@@ -1,4 +1,8 @@
 import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { createTerrain, updateTerrainCaustics } from './terrain';
 import type { BiomeId } from './types';
 import { createGodRays, updateGodRays } from './waterEffects';
@@ -33,6 +37,7 @@ export class OceanEnvironment {
   readonly scene = new THREE.Scene();
   readonly camera = new THREE.PerspectiveCamera(76, 1, 0.08, 240);
   readonly renderer: THREE.WebGLRenderer;
+  private readonly composer: EffectComposer;
   readonly light = new THREE.SpotLight(0xbffcff, 0, 32, Math.PI / 5, 0.7);
   private readonly sun = new THREE.DirectionalLight(0xd9fff5, 2.7);
   private readonly hemi = new THREE.HemisphereLight(0x8dfff1, 0x08292e, 1.4);
@@ -46,11 +51,22 @@ export class OceanEnvironment {
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, 1.65));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.15;
+    this.renderer.toneMappingExposure = 1.08;
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.scene.background = new THREE.Color(0x2c9ea7);
     this.scene.fog = new THREE.FogExp2(0x25848d, 0.016);
     this.scene.add(this.terrain, this.godRays, this.sun, this.hemi);
+    this.terrain.traverse((object) => {
+      if (object instanceof THREE.Mesh) object.receiveShadow = true;
+    });
     this.sun.position.set(-35, 70, 25);
+    this.sun.castShadow = true;
+    this.sun.shadow.mapSize.set(1024, 1024);
+    this.sun.shadow.camera.left = -90;
+    this.sun.shadow.camera.right = 90;
+    this.sun.shadow.camera.top = 90;
+    this.sun.shadow.camera.bottom = -90;
     this.surface = this.createSurface();
     this.particles = new WaterParticles(this.scene);
     this.scene.add(this.surface);
@@ -59,6 +75,7 @@ export class OceanEnvironment {
     this.light.target.position.set(0, 0, -1);
     this.camera.add(this.light.target);
     this.scene.add(this.camera);
+    this.composer = this.createComposer();
     this.resize();
   }
 
@@ -86,12 +103,18 @@ export class OceanEnvironment {
     const width = this.canvas.clientWidth || innerWidth;
     const height = this.canvas.clientHeight || innerHeight;
     this.renderer.setSize(width, height, false);
+    this.composer.setSize(width, height);
     this.camera.aspect = width / Math.max(1, height);
     this.camera.updateProjectionMatrix();
   };
 
   dispose(): void {
+    this.composer.dispose();
     this.renderer.dispose();
+  }
+
+  render(): void {
+    this.composer.render();
   }
 
   private createSurface() {
@@ -109,4 +132,12 @@ export class OceanEnvironment {
     return mesh;
   }
 
+  private createComposer(): EffectComposer {
+    const composer = new EffectComposer(this.renderer);
+    composer.addPass(new RenderPass(this.scene, this.camera));
+    const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.58, 0.42, 0.78);
+    composer.addPass(bloom);
+    composer.addPass(new OutputPass());
+    return composer;
+  }
 }
