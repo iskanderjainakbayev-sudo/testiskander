@@ -31,8 +31,8 @@ export function createCreatureActor(
   home: THREE.Vector3,
   phase: number,
 ): CreatureActor {
-  const maxHealth = species.name === 'Gloom Crown'
-    ? 420
+  const maxHealth = species.isBoss
+    ? 720
     : species.temperament === 'aggressive' ? Math.round(38 + species.size * 34) : 1;
   return {
     mesh,
@@ -45,7 +45,7 @@ export function createCreatureActor(
     maxHealth,
     deadUntil: 0,
     provokedUntil: 0,
-    boss: species.name === 'Gloom Crown' ? new BossBrain(home) : null,
+    boss: species.isBoss ? new BossBrain(home) : null,
   };
 }
 

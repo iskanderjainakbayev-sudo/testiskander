@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { Species } from './creatureCatalog';
+import { createSeaDragonModel } from './SeaDragonModel';
 
 const skins = new Map<string, THREE.MeshPhysicalMaterial>();
 const markings = new Map<string, THREE.MeshBasicMaterial>();
@@ -115,21 +116,8 @@ function createRay(species: Species): THREE.Group {
   return group;
 }
 
-function createCrown(species: Species): THREE.Group {
-  const group = createFish(species);
-  const skin = skinFor(species);
-  for (let tentacle = 0; tentacle < 7; tentacle += 1) {
-    const limb = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.2, 3.7, 6), skin);
-    limb.name = `tentacle-${tentacle}`;
-    limb.position.set((tentacle - 3) * 0.48, -2.15, 0.65);
-    limb.rotation.z = (tentacle - 3) * 0.075;
-    group.add(limb);
-  }
-  return group;
-}
-
 export function createCreatureModel(species: Species): THREE.Group {
+  if (species.isBoss) return createSeaDragonModel(species);
   if (species.name === 'Sunveil Ray' || species.name === 'Night Kite') return createRay(species);
-  if (species.name === 'Gloom Crown') return createCrown(species);
   return createFish(species);
 }

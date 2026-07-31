@@ -24,8 +24,9 @@ export class OceanCombat {
   }
 
   update(delta: number, now: number, time: number, player: PlayerController, inSub: boolean): void {
+    const wantsSpecial = this.input.consume('KeyX');
     const wantsShot = this.input.consume('Mouse0') || this.input.consume('KeyR');
-    if (wantsShot && !inSub) this.fire(now, player);
+    if ((wantsSpecial || wantsShot) && !inSub) this.fire(now, player, wantsSpecial);
     this.harpoon.update(now, inSub);
     this.threat = this.creatures.update(delta, time, player.position, inSub, (damage, creature) => {
       this.state.damage(damage);
@@ -39,6 +40,10 @@ export class OceanCombat {
     return this.harpoon.ready(now);
   }
 
+  specialWeaponReady(now: number): boolean {
+    return this.harpoon.specialReady(now);
+  }
+
   damageFlashing(now: number): boolean {
     return now < this.damageFlashUntil;
   }
@@ -47,16 +52,17 @@ export class OceanCombat {
     this.harpoon.dispose();
   }
 
-  private fire(now: number, player: PlayerController): void {
-    const shot = this.harpoon.fire(now, player.position, player.forward(), this.creatures);
+  private fire(now: number, player: PlayerController, special: boolean): void {
+    const shot = this.harpoon.fire(now, player.position, player.forward(), this.creatures, special);
     if (!shot.fired) return;
     this.audio.harpoon();
+    if (shot.special) this.toast('DRAGONBREAKER PULSE', 900);
     if (!shot.hit) return;
     this.audio.weaponHit();
     const hit = shot.hit;
     const message = hit.killed
       ? `${hit.name} neutralized`
-      : `${hit.name} hit · ${Math.ceil(hit.health)}/${hit.maxHealth}`;
+      : `${shot.special ? 'Critical pulse · ' : ''}${hit.name} · ${Math.ceil(hit.health)}/${hit.maxHealth}`;
     this.toast(message, hit.isBoss ? 2200 : 1300);
   }
 }

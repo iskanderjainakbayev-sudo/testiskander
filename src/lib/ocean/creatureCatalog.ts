@@ -10,6 +10,7 @@ export interface Species {
   band: [number, number];
   damage?: number;
   alertRadius?: number;
+  isBoss?: boolean;
 }
 
 export const SPECIES: Species[] = [
@@ -25,5 +26,5 @@ export const SPECIES: Species[] = [
   { name: 'Rift Stalker', color: 0xf05f54, glow: 0x6f130e, size: 1.35, speed: 2.0, temperament: 'aggressive', band: [52, 88], damage: 11, alertRadius: 23 },
   { name: 'Ink Maw', color: 0x7532a5, glow: 0x341050, size: 1.65, speed: 1.55, temperament: 'aggressive', band: [84, 120], damage: 14, alertRadius: 25 },
   { name: 'Glassjaw', color: 0x8bc5d2, glow: 0x2b6877, size: 1.8, speed: 2.1, temperament: 'aggressive', band: [98, 134], damage: 16, alertRadius: 27 },
-  { name: 'Gloom Crown', color: 0x17223f, glow: 0x2f76ff, size: 3.6, speed: 1.3, temperament: 'aggressive', band: [118, 140], damage: 24, alertRadius: 34 },
+  { name: 'Abyssal Dragon', color: 0x07142f, glow: 0x1569df, size: 4.2, speed: 1.35, temperament: 'aggressive', band: [128, 140], damage: 30, alertRadius: 42, isBoss: true },
 ];

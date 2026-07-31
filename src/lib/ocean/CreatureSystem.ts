@@ -28,7 +28,7 @@ export class CreatureSystem {
 
   constructor(scene: THREE.Scene) {
     SPECIES.forEach((species, speciesIndex) => {
-      const count = species.name === 'Gloom Crown' ? 1 : species.name === 'Reef Fang' ? 4 : 3;
+      const count = species.isBoss ? 1 : species.name === 'Reef Fang' ? 4 : 3;
       for (let index = 0; index < count; index += 1) {
         const radius = species.band[0] + this.random() * (species.band[1] - species.band[0]);
         const angle = this.random() * Math.PI * 2;

@@ -187,6 +187,7 @@ export class OceanWorld {
       threat: this.combat.threat,
       damageFlash: this.combat.damageFlashing(now),
       weaponReady: this.combat.weaponReady(now),
+      specialWeaponReady: this.combat.specialWeaponReady(now),
     }));
   }
 }

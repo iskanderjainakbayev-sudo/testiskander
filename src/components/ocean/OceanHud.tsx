@@ -30,6 +30,9 @@ export function OceanHud({ snapshot }: { snapshot: OceanSnapshot }) {
       </section>
       <SurvivalMeters
         health={snapshot.health}
+        stamina={snapshot.stamina}
+        maxStamina={snapshot.maxStamina}
+        accelerating={snapshot.accelerating}
         oxygen={snapshot.oxygen}
         maxOxygen={snapshot.maxOxygen}
         hunger={snapshot.hunger}
@@ -70,9 +73,12 @@ export function OceanHud({ snapshot }: { snapshot: OceanSnapshot }) {
       <div className="ocean-reticle"><i /></div>
       {snapshot.damageFlash && <div className="damage-flash" />}
       <div className={`weapon-status${snapshot.weaponReady ? ' is-ready' : ''}`}>
-        ARC HARPOON <b>{snapshot.weaponReady ? 'READY' : 'CHARGING'}</b>
+        ABYSS ARC CANNON <b>{snapshot.weaponReady ? 'READY' : 'CYCLING'}</b>
+        <small className={snapshot.specialWeaponReady ? 'is-ready' : ''}>
+          [ X ] DRAGONBREAKER {snapshot.specialWeaponReady ? 'CHARGED' : 'RECHARGING'}
+        </small>
       </div>
-      <div className="ocean-controls">LMB / R FIRE · C CRAFT · J PDA · F LIGHTS · Q SCAN · ESC PAUSE · {formatTime(snapshot.elapsed)}</div>
+      <div className="ocean-controls">LMB / R FIRE · X DRAGONBREAKER · SHIFT ACCELERATE · C CRAFT · J PDA · ESC PAUSE · {formatTime(snapshot.elapsed)}</div>
       {snapshot.inSub && <div className="sub-frame" />}
       {snapshot.oxygen < 22 && !snapshot.inSub && <div className="oxygen-warning">OXYGEN CRITICAL</div>}
     </div>

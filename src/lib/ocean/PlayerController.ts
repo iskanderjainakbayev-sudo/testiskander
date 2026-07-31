@@ -4,9 +4,13 @@ import type { OceanState } from './OceanState';
 import { floorAt } from './terrain';
 
 export class PlayerController {
+  readonly maxStamina = 100;
+  stamina = this.maxStamina;
+  accelerating = false;
   private yaw = Math.PI;
   private pitch = 0.08;
   private readonly velocity = new THREE.Vector3();
+  private staminaRecoveryDelay = 0;
   readonly position = new THREE.Vector3(0, -1.2, 2);
 
   constructor(
@@ -19,6 +23,9 @@ export class PlayerController {
   reset(position: [number, number, number] = [0, -1.2, 2]): void {
     this.position.fromArray(position);
     this.velocity.set(0, 0, 0);
+    this.stamina = this.maxStamina;
+    this.accelerating = false;
+    this.staminaRecoveryDelay = 0;
     this.yaw = Math.PI;
     this.pitch = 0.08;
     this.syncCamera();
@@ -43,11 +50,23 @@ export class PlayerController {
     if (this.input.isDown('KeyA')) movement.sub(right);
     if (this.input.isDown('Space')) movement.y += 1;
     if (this.input.isDown('ControlLeft') || this.input.isDown('ControlRight')) movement.y -= 1;
+    const moving = movement.lengthSq() > 0;
+    const wantsAcceleration = this.input.isDown('ShiftLeft') || this.input.isDown('ShiftRight');
+    this.accelerating = moving && wantsAcceleration && this.stamina > 0.5;
+    if (this.accelerating) {
+      this.stamina = Math.max(0, this.stamina - delta * (inSub ? 17 : 24));
+      this.staminaRecoveryDelay = 0.72;
+    } else {
+      this.staminaRecoveryDelay = Math.max(0, this.staminaRecoveryDelay - delta);
+      if (this.staminaRecoveryDelay === 0) {
+        this.stamina = Math.min(this.maxStamina, this.stamina + delta * (inSub ? 22 : 16));
+      }
+    }
     const fins = state.crafted.includes('fins') ? 1.35 : 1;
-    const sprint = this.input.isDown('ShiftLeft') ? 1.45 : 1;
+    const sprint = this.accelerating ? (inSub ? 1.55 : 1.72) : 1;
     const battery = inSub && state.subBattery <= 0 ? 0.24 : 1;
     const speed = (inSub ? 11.5 : 5.1 * fins) * sprint * battery;
-    if (movement.lengthSq() > 0) movement.normalize().multiplyScalar(speed);
+    if (moving) movement.normalize().multiplyScalar(speed);
     this.velocity.lerp(movement, 1 - Math.exp(-delta * (inSub ? 3.8 : 5.5)));
     this.position.addScaledVector(this.velocity, delta);
     const radius = Math.hypot(this.position.x, this.position.z - 8);

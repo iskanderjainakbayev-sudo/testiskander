@@ -55,6 +55,13 @@
   background: #ffb46b;
 }
 
+.touch-actions .special-fire {
+  border-color: #ff873f;
+  color: #fff4da;
+  background: #8e321dcc;
+  box-shadow: 0 0 12px #ff682c4f;
+}
+
 @media (hover: none), (pointer: coarse) {
   .ocean-touch-controls { display: block; }
   .ocean-meters { bottom: 168px; }

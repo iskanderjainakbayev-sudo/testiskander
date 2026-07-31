@@ -13,6 +13,7 @@ interface SnapshotOptions {
   threat: PredatorAlert | null;
   damageFlash: boolean;
   weaponReady: boolean;
+  specialWeaponReady: boolean;
 }
 
 function promptFor(item: Interactable | null): string {
@@ -32,6 +33,9 @@ export function createSnapshot(
   const depth = Math.max(0, -player.position.y);
   return {
     health: state.health,
+    stamina: player.stamina,
+    maxStamina: player.maxStamina,
+    accelerating: player.accelerating,
     oxygen: state.oxygen,
     maxOxygen: state.maxOxygen,
     hunger: state.hunger,
@@ -58,5 +62,6 @@ export function createSnapshot(
     threatMaxHealth: options.threat?.maxHealth ?? 0,
     threatIsBoss: options.threat?.isBoss ?? false,
     weaponReady: options.weaponReady,
+    specialWeaponReady: options.specialWeaponReady,
   };
 }

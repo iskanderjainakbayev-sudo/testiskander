@@ -40,6 +40,9 @@ export interface OceanSave {
 
 export interface OceanSnapshot {
   health: number;
+  stamina: number;
+  maxStamina: number;
+  accelerating: boolean;
   oxygen: number;
   maxOxygen: number;
   hunger: number;
@@ -66,6 +69,7 @@ export interface OceanSnapshot {
   threatMaxHealth: number;
   threatIsBoss: boolean;
   weaponReady: boolean;
+  specialWeaponReady: boolean;
 }
 
 export interface Interactable {

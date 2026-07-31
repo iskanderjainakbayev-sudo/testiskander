@@ -14,6 +14,16 @@ export function animateCreature(mesh: THREE.Group, phase: number, time: number, 
     .forEach((limb, index) => {
       limb.rotation.x = Math.sin(beat * 0.32 + index) * 0.15;
     });
+  mesh.traverse((child) => {
+    if (!child.name.startsWith('dragon-segment-')) return;
+    const index = Number(child.name.slice(-2));
+    const restX = child.userData.restX as number | undefined ?? 0;
+    const restY = child.userData.restY as number | undefined ?? 0;
+    const wave = time * (chasing ? 4.4 : 2.2) - index * 0.48 + phase;
+    child.position.x = restX + Math.sin(wave) * Math.min(1.45, index * 0.085);
+    child.position.y = restY + Math.cos(wave * 0.72) * Math.min(0.55, index * 0.035);
+    child.rotation.y = Math.sin(wave) * 0.16;
+  });
   const hitScale = time < (mesh.userData.hitUntil as number | undefined ?? 0) ? 1.14 : 1;
   mesh.scale.lerp(new THREE.Vector3(hitScale, hitScale, hitScale), 0.22);
 }
