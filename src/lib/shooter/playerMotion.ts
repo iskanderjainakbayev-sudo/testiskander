@@ -46,17 +46,17 @@ export function movePlayer(
     .add(
       sideways.multiplyScalar(Number(keys.has("d")) - Number(keys.has("a"))),
     );
-  if (direction.lengthSq()) {
+  const isMoving = Boolean(direction.lengthSq());
+  const isSprinting = isMoving && canSprint && keys.has("shift");
   const moveSpeed = canSprint && keys.has("shift") ? sprintSpeed : walkSpeed;
-  const movement = direction.normalize().multiplyScalar(moveSpeed * delta);
-  const isSprinting = direction.lengthSq() > 0 && canSprint && keys.has("shift");
-  const isMoving = direction.lengthSq() > 0;
-  const previousX = camera.position.x;
-  camera.position.x += movement.x;
-  if (insideCollision(camera.position, collision)) camera.position.x = previousX;
-  const previousZ = camera.position.z;
-  camera.position.z += movement.z;
-  if (insideCollision(camera.position, collision)) camera.position.z = previousZ;
+  if (isMoving) {
+    const movement = direction.normalize().multiplyScalar(moveSpeed * delta);
+    const previousX = camera.position.x;
+    camera.position.x += movement.x;
+    if (insideCollision(camera.position, collision)) camera.position.x = previousX;
+    const previousZ = camera.position.z;
+    camera.position.z += movement.z;
+    if (insideCollision(camera.position, collision)) camera.position.z = previousZ;
   }
   camera.position.x = THREE.MathUtils.clamp(camera.position.x, -bounds, bounds);
   camera.position.z = THREE.MathUtils.clamp(camera.position.z, -bounds, bounds);
