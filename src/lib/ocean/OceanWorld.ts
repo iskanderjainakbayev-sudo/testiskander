@@ -1,4 +1,4 @@
-import { CreatureSystem } from './CreatureSystem';
+import { CreatureSystem, type PredatorAlert } from './CreatureSystem';
 import { createSnapshot } from './createSnapshot';
 import { createDecorations } from './decorations';
 import { OceanEnvironment } from './environment';
@@ -36,6 +36,8 @@ export class OceanWorld {
   private lastSnapshot = 0;
   private lastSave = 0;
   private failed = false;
+  private threat: PredatorAlert | null = null;
+  private damageFlashUntil = 0;
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -145,9 +147,10 @@ export class OceanWorld {
     const depth = Math.max(0, -this.player.position.y);
     this.state.tick(delta, depth, depth < 0.8, this.inSub);
     this.content.update(now, time);
-    this.creatures.update(delta, time, this.player.position, this.inSub, (damage, creature) => {
+    this.threat = this.creatures.update(delta, time, this.player.position, this.inSub, (damage, creature) => {
       this.state.damage(damage);
-      this.showToast(`${creature} struck the hull`, 1700);
+      this.damageFlashUntil = now + 520;
+      this.showToast(`${creature} attack · -${Math.round(damage)} health`, 1700);
       this.audio.danger();
     });
     this.currentInteraction = this.content.nearest(this.player.position, this.player.forward());
@@ -184,6 +187,8 @@ export class OceanWorld {
       showToast: now < this.toastUntil,
       inSub: this.inSub,
       lightsOn: this.lightsOn,
+      threat: this.threat,
+      damageFlash: now < this.damageFlashUntil,
     }));
   }
 }

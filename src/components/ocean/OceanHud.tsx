@@ -13,6 +13,7 @@ function compassPoint(heading: number): string {
 export function OceanHud({ snapshot }: { snapshot: OceanSnapshot }) {
   return (
     <div className="ocean-hud" aria-live="polite">
+      <div className="ocean-lens" />
       <section className="ocean-objective">
         <small>CURRENT DIVE</small>
         <b>{snapshot.objective}</b>
@@ -52,11 +53,18 @@ export function OceanHud({ snapshot }: { snapshot: OceanSnapshot }) {
       )}
       {snapshot.prompt && <div className="ocean-prompt">{snapshot.prompt}</div>}
       {snapshot.toast && <div className="ocean-toast">{snapshot.toast}</div>}
+      {snapshot.threatName && (
+        <div className={`predator-alert${snapshot.threatAttacking ? ' is-attacking' : ''}`}>
+          <small>{snapshot.threatAttacking ? 'PREDATOR ATTACKING' : 'PREDATOR DETECTED'}</small>
+          <b>{snapshot.threatName}</b>
+          <span>{Math.max(0, Math.round(snapshot.threatDistance))}M</span>
+        </div>
+      )}
       <div className="ocean-reticle"><i /></div>
+      {snapshot.damageFlash && <div className="damage-flash" />}
       <div className="ocean-controls">C CRAFT · J PDA · F LIGHTS · Q SCAN · ESC PAUSE · {formatTime(snapshot.elapsed)}</div>
       {snapshot.inSub && <div className="sub-frame" />}
       {snapshot.oxygen < 22 && !snapshot.inSub && <div className="oxygen-warning">OXYGEN CRITICAL</div>}
     </div>
   );
 }
-

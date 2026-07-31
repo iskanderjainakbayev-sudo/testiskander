@@ -1,6 +1,7 @@
 import type { OceanState } from './OceanState';
 import type { PlayerController } from './PlayerController';
 import { biomeAtDepth } from './terrain';
+import type { PredatorAlert } from './CreatureSystem';
 import type { Interactable, OceanSnapshot } from './types';
 
 interface SnapshotOptions {
@@ -9,6 +10,8 @@ interface SnapshotOptions {
   showToast: boolean;
   inSub: boolean;
   lightsOn: boolean;
+  threat: PredatorAlert | null;
+  damageFlash: boolean;
 }
 
 function promptFor(item: Interactable | null): string {
@@ -46,6 +49,9 @@ export function createSnapshot(
     crushDepth: state.crushDepth,
     lightsOn: options.lightsOn,
     elapsed: state.elapsed,
+    threatName: options.threat?.name ?? '',
+    threatDistance: options.threat?.distance ?? 0,
+    threatAttacking: options.threat?.attacking ?? false,
+    damageFlash: options.damageFlash,
   };
 }
-

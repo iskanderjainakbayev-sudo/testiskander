@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { createTerrain, updateTerrainCaustics } from './terrain';
 import type { BiomeId } from './types';
 import { createGodRays, updateGodRays } from './waterEffects';
+import { WaterParticles } from './WaterParticles';
 
 const SURFACE_VERTEX = `
   varying vec2 vUv;
@@ -18,8 +19,13 @@ const SURFACE_FRAGMENT = `
   varying vec2 vUv;
   uniform float uTime;
   void main() {
-    float glint = pow(max(0., sin((vUv.x + vUv.y) * 90. + uTime * 3.)), 14.);
-    gl_FragColor = vec4(vec3(.12, .72, .78) + glint * .35, .42);
+    float waveA = sin(vUv.x * 92. + uTime * 2.7);
+    float waveB = cos(vUv.y * 76. - uTime * 2.1);
+    float glint = pow(max(0., waveA * waveB), 10.);
+    float horizon = smoothstep(0., .85, distance(vUv, vec2(.5)));
+    vec3 water = mix(vec3(.07, .55, .62), vec3(.22, .86, .82), glint);
+    water = mix(water, vec3(.03, .25, .34), horizon * .55);
+    gl_FragColor = vec4(water, .48);
   }
 `;
 
@@ -33,8 +39,7 @@ export class OceanEnvironment {
   private readonly surface: THREE.Mesh<THREE.PlaneGeometry, THREE.ShaderMaterial>;
   private readonly terrain = createTerrain();
   private readonly godRays = createGodRays();
-  private readonly bubbles: THREE.Points;
-  private readonly bubblePositions: Float32Array;
+  private readonly particles: WaterParticles;
 
   constructor(readonly canvas: HTMLCanvasElement) {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
@@ -47,9 +52,8 @@ export class OceanEnvironment {
     this.scene.add(this.terrain, this.godRays, this.sun, this.hemi);
     this.sun.position.set(-35, 70, 25);
     this.surface = this.createSurface();
-    this.bubblePositions = new Float32Array(360);
-    this.bubbles = this.createBubbles();
-    this.scene.add(this.surface, this.bubbles);
+    this.particles = new WaterParticles(this.scene);
+    this.scene.add(this.surface);
     this.camera.add(this.light);
     this.light.position.set(0, 0, 0);
     this.light.target.position.set(0, 0, -1);
@@ -75,7 +79,7 @@ export class OceanEnvironment {
       this.scene.fog.density = palette[1];
     }
     this.hemi.intensity = palette[2];
-    this.updateBubbles();
+    this.particles.update(time, this.camera);
   }
 
   resize = (): void => {
@@ -105,25 +109,4 @@ export class OceanEnvironment {
     return mesh;
   }
 
-  private createBubbles(): THREE.Points {
-    for (let index = 0; index < this.bubblePositions.length; index += 3) {
-      this.bubblePositions[index] = (Math.random() - 0.5) * 120;
-      this.bubblePositions[index + 1] = -Math.random() * 120;
-      this.bubblePositions[index + 2] = (Math.random() - 0.5) * 120;
-    }
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(this.bubblePositions, 3));
-    return new THREE.Points(geometry, new THREE.PointsMaterial({
-      color: 0xc8ffff, size: 0.16, transparent: true, opacity: 0.46, depthWrite: false,
-    }));
-  }
-
-  private updateBubbles(): void {
-    for (let index = 1; index < this.bubblePositions.length; index += 3) {
-      this.bubblePositions[index] += 0.035;
-      if (this.bubblePositions[index] > 0) this.bubblePositions[index] = -120;
-    }
-    this.bubbles.geometry.attributes.position.needsUpdate = true;
-    this.bubbles.position.copy(this.camera.position).multiplyScalar(0.45);
-  }
 }

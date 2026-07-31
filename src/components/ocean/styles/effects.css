@@ -1,0 +1,51 @@
+.ocean-lens {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 44%, transparent 0 45%, #001c2b26 72%, #000c17a8 110%),
+    linear-gradient(112deg, transparent 0 44%, #bafff908 50%, transparent 56%);
+  box-shadow: inset 0 0 80px #00243038;
+  mix-blend-mode: multiply;
+}
+
+.damage-flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, transparent 28%, #b7191670 100%);
+  box-shadow: inset 0 0 70px #ff332d80;
+  animation: ocean-hit .52s ease-out;
+}
+
+.predator-alert {
+  position: absolute;
+  top: 96px;
+  right: 28px;
+  display: grid;
+  grid-template-columns: auto auto;
+  min-width: 175px;
+  padding: 10px 12px;
+  border-right: 2px solid #ff8a67;
+  background: linear-gradient(90deg, transparent, #3216169c);
+  text-align: right;
+  animation: predator-in .22s ease-out;
+}
+
+.predator-alert small {
+  grid-column: 1 / -1;
+  color: #ff9f84;
+  font-size: 7px;
+  font-weight: 850;
+  letter-spacing: .18em;
+}
+
+.predator-alert b { margin-top: 4px; font-size: 11px; letter-spacing: .08em; }
+.predator-alert span { align-self: end; color: #ffc1ae; font-size: 9px; }
+.predator-alert.is-attacking { border-color: #ff493b; animation: predator-pulse .55s infinite alternate; }
+
+@keyframes ocean-hit { from { opacity: 1; } to { opacity: 0; } }
+@keyframes predator-in { from { opacity: 0; transform: translateX(12px); } }
+@keyframes predator-pulse { to { filter: brightness(1.55); transform: scale(1.025); } }
+
+@media (max-width: 700px) {
+  .predator-alert { top: 112px; right: 16px; }
+}

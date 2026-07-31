@@ -86,50 +86,6 @@
   letter-spacing: .13em;
 }
 
-.ocean-meters {
-  position: absolute;
-  bottom: 32px;
-  left: 28px;
-  display: grid;
-  gap: 6px;
-  width: 188px;
-}
-
-.ocean-meter {
-  display: grid;
-  grid-template-columns: 45px 1fr 25px;
-  align-items: center;
-  gap: 7px;
-}
-
-.ocean-meter span { color: #b7dcda; font-size: 7px; letter-spacing: .12em; }
-.ocean-meter > div { height: 4px; background: #00151c9c; }
-.ocean-meter i { display: block; height: 100%; box-shadow: 0 0 7px currentColor; transition: width .2s; }
-.ocean-meter b { font-size: 8px; font-weight: 700; }
-
-.ocean-quickbar {
-  position: absolute;
-  bottom: 27px;
-  left: 50%;
-  display: flex;
-  gap: 5px;
-  transform: translateX(-50%);
-}
-
-.ocean-quickbar > div {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 46px;
-  border: 1px solid #b7eee83d;
-  background: linear-gradient(#06313c9c, #031c27c9);
-}
-
-.ocean-quickbar small { position: absolute; top: 3px; left: 5px; color: #79c5c0; font-size: 7px; }
-.ocean-quickbar span { color: #78e8dd; font-size: 9px; letter-spacing: .08em; }
-.ocean-quickbar b { position: absolute; right: 4px; bottom: 3px; font-size: 8px; }
-
 .ocean-reticle {
   position: absolute;
   top: 50%;
@@ -188,8 +144,6 @@
   .ocean-objective b { font-size: 10px; }
   .ocean-compass { top: 78px; }
   .ocean-depth { top: 17px; right: 16px; }
-  .ocean-meters { left: 16px; bottom: 18px; width: 155px; }
-  .ocean-quickbar { bottom: 84px; }
   .ocean-controls { display: none; }
   .sub-readout { right: 16px; bottom: 18px; }
 }

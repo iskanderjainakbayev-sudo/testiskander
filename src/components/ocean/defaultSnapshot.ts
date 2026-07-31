@@ -3,8 +3,8 @@ import type { OceanSnapshot } from '../../lib/ocean/types';
 
 export const DEFAULT_SNAPSHOT: OceanSnapshot = {
   health: 100,
-  oxygen: 90,
-  maxOxygen: 90,
+  oxygen: 105,
+  maxOxygen: 105,
   hunger: 100,
   water: 100,
   depth: 0,
@@ -21,5 +21,8 @@ export const DEFAULT_SNAPSHOT: OceanSnapshot = {
   crushDepth: 85,
   lightsOn: false,
   elapsed: 0,
+  threatName: '',
+  threatDistance: 0,
+  threatAttacking: false,
+  damageFlash: false,
 };
-

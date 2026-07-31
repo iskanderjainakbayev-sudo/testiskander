@@ -19,7 +19,7 @@ export const EMPTY_INVENTORY: Inventory = {
 };
 
 export const RECIPES: Recipe[] = [
-  { id: 'tank', name: 'High-Capacity Tank', detail: '+65 maximum oxygen', category: 'Gear', cost: { copper: 2, quartz: 2, coral: 1 } },
+  { id: 'tank', name: 'High-Capacity Tank', detail: '220 oxygen · over 2× capacity', category: 'Gear', cost: { copper: 2, quartz: 2, coral: 1 } },
   { id: 'fins', name: 'Flex Fins', detail: '+35% swim speed', category: 'Gear', cost: { fiber: 2, coral: 1 } },
   { id: 'flashlight', name: 'Lumen Torch', detail: 'Toggle with F', category: 'Gear', cost: { copper: 1, quartz: 1 } },
   { id: 'scanner', name: 'Pulse Scanner', detail: 'Reveal nearby finds with Q', category: 'Gear', cost: { copper: 1, crystal: 2 } },
@@ -55,4 +55,3 @@ export const STORY_LOGS: Record<string, { title: string; body: string }> = {
     body: 'The makers left no bodies. They launched seed worlds from this trench, then turned their final reactor into the warm current that still feeds Pelagos.',
   },
 };
-

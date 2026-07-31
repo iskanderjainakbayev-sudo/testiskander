@@ -12,6 +12,8 @@ import { PdaPanel } from './PdaPanel';
 import { TouchControls } from './TouchControls';
 import './styles/foundation.css';
 import './styles/hud.css';
+import './styles/survival.css';
+import './styles/effects.css';
 import './styles/panels.css';
 import './styles/touch.css';
 

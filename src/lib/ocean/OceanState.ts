@@ -2,6 +2,10 @@ import { EMPTY_INVENTORY, RECIPES, RESOURCE_NAMES } from './content';
 import { getObjective } from './progression';
 import type { Inventory, OceanSave, RecipeId, ResourceId } from './types';
 
+const STANDARD_OXYGEN = 105;
+const HIGH_CAPACITY_OXYGEN = 220;
+const OXYGEN_DRAIN_RATE = 0.72;
+
 export interface CraftResult {
   ok: boolean;
   message: string;
@@ -9,7 +13,7 @@ export interface CraftResult {
 
 export class OceanState {
   health = 100;
-  oxygen = 90;
+  oxygen = STANDARD_OXYGEN;
   hunger = 100;
   water = 100;
   subBattery = 100;
@@ -19,7 +23,7 @@ export class OceanState {
   readonly logs: string[] = [];
 
   get maxOxygen(): number {
-    return this.crafted.includes('tank') ? 155 : 90;
+    return this.crafted.includes('tank') ? HIGH_CAPACITY_OXYGEN : STANDARD_OXYGEN;
   }
 
   get crushDepth(): number {
@@ -32,7 +36,7 @@ export class OceanState {
 
   reset(): void {
     this.health = 100;
-    this.oxygen = 90;
+    this.oxygen = STANDARD_OXYGEN;
     this.hunger = 100;
     this.water = 100;
     this.subBattery = 100;
@@ -59,7 +63,10 @@ export class OceanState {
     this.hunger = Math.max(0, this.hunger - delta * 0.026);
     this.water = Math.max(0, this.water - delta * 0.043);
     if (surfaced) this.oxygen = this.maxOxygen;
-    else if (!inSub) this.oxygen = Math.max(0, this.oxygen - delta * (1 + depth / 115));
+    else if (!inSub) {
+      const depthPressure = 1 + depth / 180;
+      this.oxygen = Math.max(0, this.oxygen - delta * OXYGEN_DRAIN_RATE * depthPressure);
+    }
     if (inSub) this.subBattery = Math.max(0, this.subBattery - delta * 0.11);
     if (this.oxygen <= 0 || this.water <= 0 || this.hunger <= 0) this.damage(delta * 4.5);
     if (!inSub && depth > 78) this.damage(delta * (depth - 78) * 0.055);

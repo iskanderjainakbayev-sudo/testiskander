@@ -58,6 +58,10 @@ export interface OceanSnapshot {
   crushDepth: number;
   lightsOn: boolean;
   elapsed: number;
+  threatName: string;
+  threatDistance: number;
+  threatAttacking: boolean;
+  damageFlash: boolean;
 }
 
 export interface Interactable {
