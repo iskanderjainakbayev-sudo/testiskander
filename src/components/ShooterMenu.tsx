@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { missions } from "../lib/shooter/levels";
+import { missionCount, missions } from "../lib/shooter/levels";
 import { tacticalMaps } from "../lib/shooter/maps/mapRegistry";
 import { ShooterMapSelector } from "./ShooterMapSelector";
 import { ShooterMissionBriefing } from "./ShooterMissionBriefing";
@@ -36,7 +36,7 @@ function MainMenu({ onStart, onScreen, selectedMission, campaign, mapId }: MenuP
     <button className="shooter-primary deploy-button" onClick={() => onStart(selectedMission)}>DEPLOY TO {mission.name} <span>→</span></button>
     <nav className="menu-actions">
       <button onClick={() => onScreen("maps")}><span>01</span><b>MAPS</b><small>{map.name}</small></button>
-      <button onClick={() => onScreen("missions")}><span>02</span><b>OPERATIONS</b><small>{campaign.unlockedMission}/10 unlocked</small></button>
+      <button onClick={() => onScreen("missions")}><span>02</span><b>OPERATIONS</b><small>{campaign.unlockedMission}/{missionCount} unlocked</small></button>
       <button onClick={() => onScreen("settings")}><span>03</span><b>SETTINGS</b><small>{campaign.quality} graphics</small></button>
       <button onClick={() => onScreen("armory")}><span>04</span><b>ARMORY</b><small>{campaign.crateTokens} free crates</small></button>
     </nav>

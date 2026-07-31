@@ -96,6 +96,7 @@ export class Rifle {
   private fireRound(camera: THREE.Camera, enemies: Enemy[], shots: ProjectileSystem, glass: THREE.Object3D[], breakGlass: (object: THREE.Object3D) => void, aiming: boolean): FireResult {
     this.ammo -= 1;
     const stats = this.weapon.stats;
+    const shotDamage = aiming ? stats.damage * 1.2 : stats.damage;
     let killed = false;
     for (let pellet = 0; pellet < stats.pellets; pellet += 1) {
       this.raycaster.setFromCamera(new THREE.Vector2(), camera);
@@ -103,13 +104,13 @@ export class Rifle {
       this.raycaster.ray.direction.copy(direction);
       shots.add(camera.position.clone().add(direction.clone().multiplyScalar(0.75)), direction, false);
       const impacts = this.raycaster.intersectObjects([...enemies.filter((enemy) => enemy.model.group.visible).map((enemy) => enemy.model.group), ...glass], true);
-      killed = this.resolveImpacts(impacts, enemies, stats, breakGlass) || killed;
+      killed = this.resolveImpacts(impacts, enemies, shotDamage, breakGlass) || killed;
     }
     return { fired: true, killed };
   }
 
-  private resolveImpacts(impacts: THREE.Intersection<THREE.Object3D>[], enemies: Enemy[], stats: WeaponStats, breakGlass: (object: THREE.Object3D) => void) {
-    const relevant = stats.fireMode === "PIERCE" ? impacts : impacts.slice(0, 1);
+  private resolveImpacts(impacts: THREE.Intersection<THREE.Object3D>[], enemies: Enemy[], damage: number, breakGlass: (object: THREE.Object3D) => void) {
+    const relevant = this.weapon.stats.fireMode === "PIERCE" ? impacts : impacts.slice(0, 1);
     const hitEnemies = new Set<Enemy>();
     return relevant.reduce((killed, impact) => {
       if (isBreakable(impact.object)) {
@@ -119,7 +120,7 @@ export class Rifle {
       const enemy = enemies.find((item) => contains(item.model.group, impact.object));
       if (!enemy || hitEnemies.has(enemy)) return killed;
       hitEnemies.add(enemy);
-      return hitEnemy(enemies, impact.object, stats.damage) || killed;
+      return hitEnemy(enemies, impact.object, damage) || killed;
     }, false);
   }
 }

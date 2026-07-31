@@ -3,6 +3,7 @@ import { loadCampaign, saveCampaign, type CampaignSave } from "../lib/shooter/sa
 import { getWeaponFinish, type WeaponFinish } from "../lib/shooter/armory";
 import { ShooterWorld } from "../lib/shooter/ShooterWorld";
 import type { ShooterSnapshot } from "../lib/shooter/types";
+import { missions } from "../lib/shooter/levels";
 import { ShooterHud } from "./ShooterHud";
 import { ShooterMenu, type Screen } from "./ShooterMenu";
 import "../styles/shooter-ui.css";
@@ -32,7 +33,7 @@ export function GameArena() {
   const completeMission = (missionId: number, score: number) => setCampaign((saved) => ({
     ...saved,
     bestScore: Math.max(saved.bestScore, score),
-    unlockedMission: Math.min(10, Math.max(saved.unlockedMission, missionId + 1)),
+    unlockedMission: Math.min(missions.length, Math.max(saved.unlockedMission, missionId + 1)),
     completed: saved.completed.includes(missionId) ? saved.completed : [...saved.completed, missionId],
   }));
   const addCrateReward = (finish: WeaponFinish) => setCampaign((saved) => ({

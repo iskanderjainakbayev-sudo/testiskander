@@ -40,4 +40,10 @@ export const missions: Mission[] = [
   { id: 8, name: "DEEP VAULT", location: "Boreal Bunker", briefing: "Infiltrate before they seal the blast doors.", objective: "Clear the bunker defense grid.", reward: "Sniper rifle", enemies: 9, tint: 0x94d4ff, weather: "snow", platforms: course(-7, 1.25) },
   { id: 9, name: "ZERO HOUR", location: "Arclight Silo", briefing: "The launch sequence has begun.", objective: "Stop the missile launch guard.", reward: "Recon visor", enemies: 9, tint: 0xffcf65, weather: "clear", platforms: course(3, 1.35) },
   { id: 10, name: "SHADOW KING", location: "Enemy Citadel", briefing: "End the war at its source.", objective: "Defeat Commander Voss and his elite guard.", reward: "Campaign complete", enemies: 9, tint: 0xff526f, weather: "rain", boss: true, platforms: course(0, 1.5) },
+  { id: 11, name: "PHANTOM TRACE", location: "Glassline Tunnels", briefing: "A lost convoy carries stolen optics blueprints.", objective: "Disable the tunnel sentries and recover all data drives.", reward: "Smart optic", enemies: 6, tint: 0x82e0ff, weather: "shiny", platforms: course(-4, 1.12) },
+  { id: 12, name: "MIRAGE RAIL", location: "Crystal Yard", briefing: "Saboteurs planted false signals across the yard.", objective: "Recover both signal decoys and secure the rail key.", reward: "High-velocity mag", enemies: 7, tint: 0xcda7ff, weather: "clear", platforms: course(6, 1.18) },
+  { id: 13, name: "NIGHTFALL GATE", location: "Obsidian Causeway", briefing: "An ambush team is holding the east causeway alive.", objective: "Hold the causeway while reinforcements pass.", reward: "Tactical suppressor", enemies: 8, tint: 0x8a95f1, weather: "clear", platforms: course(-9, 1.08) },
+  { id: 14, name: "TEMPERATE REQUIEM", location: "Volta Foundry", briefing: "The war's final engine core is still online.", objective: "Protect the reactor and finish the command team.", reward: "Corebreaker rounds", enemies: 9, tint: 0xff6b6b, weather: "snow", boss: true, platforms: course(2, 1.42) },
 ];
+
+export const missionCount = missions.length;

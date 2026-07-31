@@ -1,5 +1,6 @@
 import type { Mission } from "../lib/shooter/levels";
 import type { TacticalMapDefinition } from "../lib/shooter/maps/types";
+import { missionCount } from "../lib/shooter/levels";
 
 type MissionBriefingProps = { mission: Mission; map: TacticalMapDefinition; unlockedMission: number };
 
@@ -14,7 +15,7 @@ export function ShooterMissionBriefing({ mission, map, unlockedMission }: Missio
       <article><span>OBJECTIVE</span><b>{mission.objective}</b></article>
       <article><span>DEPLOYMENT</span><b>{map.name}</b><small>{map.subtitle}</small></article>
       <article><span>REWARD</span><b>{mission.reward}</b></article>
-      <article><span>CAMPAIGN</span><b>{unlockedMission}/10 OPS OPEN</b></article>
+      <article><span>CAMPAIGN</span><b>{unlockedMission}/{missionCount} OPS OPEN</b></article>
     </div>
   </section>;
 }
