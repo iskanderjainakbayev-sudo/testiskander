@@ -60,7 +60,8 @@ export class HarpoonSystem {
       special ? SPECIAL_DAMAGE : STANDARD_DAMAGE,
       now / 1000,
     );
-    const end = hit?.point ?? origin.clone().addScaledVector(shotDirection, RANGE);
+    const shotRange = special ? RANGE * 1.45 : RANGE;
+    const end = hit?.point ?? origin.clone().addScaledVector(shotDirection, shotRange);
     this.addTracer(now, origin.clone().addScaledVector(shotDirection, 0.7), end, special);
     return { fired: true, hit, special };
   }
