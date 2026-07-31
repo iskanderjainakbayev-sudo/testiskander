@@ -3,6 +3,16 @@ import type { Climbable, CollisionBox, WalkableSurface } from "./maps/types";
 
 const up = new THREE.Vector3(0, 1, 0);
 const eyeHeight = 1.75;
+const walkSpeed = 6;
+const sprintSpeed = 10;
+
+export type PlayerMoveState = {
+  isMoving: boolean;
+  isSprinting: boolean;
+  didJump: boolean;
+  didLand: boolean;
+};
+
 export type JumpState = { velocity: number; grounded: boolean };
 export const createJumpState = (): JumpState => ({
   velocity: 0,
@@ -18,8 +28,11 @@ export function movePlayer(
   collision: CollisionBox[],
   climbables: Climbable[],
   bounds: number,
-) {
-  if (moveOnLadder(camera, keys, delta, jump, climbables)) return;
+  canSprint: boolean,
+): PlayerMoveState {
+  if (moveOnLadder(camera, keys, delta, jump, climbables)) {
+    return { isMoving: false, isSprinting: false, didJump: false, didLand: false };
+  }
   const forward = new THREE.Vector3(0, 0, -1).applyAxisAngle(
     up,
     camera.rotation.y,
@@ -34,17 +47,21 @@ export function movePlayer(
       sideways.multiplyScalar(Number(keys.has("d")) - Number(keys.has("a"))),
     );
   if (direction.lengthSq()) {
-    const movement = direction.normalize().multiplyScalar((keys.has("shift") ? 10 : 6) * delta);
-    const previousX = camera.position.x;
-    camera.position.x += movement.x;
-    if (insideCollision(camera.position, collision)) camera.position.x = previousX;
-    const previousZ = camera.position.z;
-    camera.position.z += movement.z;
-    if (insideCollision(camera.position, collision)) camera.position.z = previousZ;
+  const moveSpeed = canSprint && keys.has("shift") ? sprintSpeed : walkSpeed;
+  const movement = direction.normalize().multiplyScalar(moveSpeed * delta);
+  const isSprinting = direction.lengthSq() > 0 && canSprint && keys.has("shift");
+  const isMoving = direction.lengthSq() > 0;
+  const previousX = camera.position.x;
+  camera.position.x += movement.x;
+  if (insideCollision(camera.position, collision)) camera.position.x = previousX;
+  const previousZ = camera.position.z;
+  camera.position.z += movement.z;
+  if (insideCollision(camera.position, collision)) camera.position.z = previousZ;
   }
   camera.position.x = THREE.MathUtils.clamp(camera.position.x, -bounds, bounds);
   camera.position.z = THREE.MathUtils.clamp(camera.position.z, -bounds, bounds);
-  if (keys.has(" ") && jump.grounded) {
+  const didJump = keys.has(" ") && jump.grounded;
+  if (didJump) {
     jump.velocity = 8.6;
     jump.grounded = false;
     keys.delete(" ");
@@ -58,15 +75,19 @@ export function movePlayer(
     nextFeet,
     surfaces,
   );
+  const wasInAir = !jump.grounded;
   if (landing !== undefined) {
     camera.position.y = landing + eyeHeight;
     jump.velocity = 0;
     jump.grounded = true;
+    const didLand = wasInAir;
+    if (didLand) return { isMoving, isSprinting, didJump, didLand };
   } else {
     camera.position.y = Math.max(eyeHeight, nextFeet + eyeHeight);
     jump.grounded = camera.position.y === eyeHeight;
     if (jump.grounded) jump.velocity = 0;
   }
+  return { isMoving, isSprinting, didJump, didLand: false };
 }
 
 function moveOnLadder(camera: THREE.Camera, keys: Set<string>, delta: number, jump: JumpState, climbables: Climbable[]) {

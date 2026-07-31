@@ -2,6 +2,8 @@ export type ShooterSnapshot = {
   score: number;
   health: number;
   maxHealth: number;
+  stamina: number;
+  maxStamina: number;
   enemies: number;
   ammo: number;
   reserveAmmo: number;

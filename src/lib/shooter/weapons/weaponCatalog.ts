@@ -30,6 +30,7 @@ export const weaponCatalog: WeaponDefinition[] = [
   weapon("m9-pistol", "M9 PISTOL", auto(12, 72, 180, 900, 1), ["muzzle", "magazine"]),
   weapon("ranger-br3", "RANGER BR-3", burst(27, 108, 360, 1450, 1.25), ["optic", "muzzle", "underbarrel", "magazine"]),
   weapon("ember-6", "EMBER-6", scatter(6, 36, 760, 1800, 1.25, 12, 0.14), ["muzzle", "underbarrel", "magazine"]),
+  weapon("spectre-11", "SPECTER-11", auto(20, 120, 70, 1300, 1.2), ["optic", "muzzle", "underbarrel", "magazine"]),
   weapon("lancer-1", "LANCER-1", pierce(4, 24, 950, 2050, 4), ["optic", "muzzle", "magazine"]),
   weapon("falcon-9", "FALCON-9", double(18, 90, 280, 1300, 1.6), ["optic", "muzzle", "magazine"]),
   weapon("vector-0", "VECTOR-0", pierce(7, 35, 540, 1850, 2.4), ["optic", "muzzle", "magazine"]),

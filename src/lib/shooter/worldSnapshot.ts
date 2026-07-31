@@ -10,6 +10,8 @@ type SnapshotSource = {
   enemies: Enemy[];
   rifle: Rifle;
   levelManager: LevelManager;
+  stamina: number;
+  maxStamina: number;
 };
 
 export function createWorldSnapshot(source: SnapshotSource): Omit<ShooterSnapshot, "isAiming" | "mapName" | "mapSubtitle"> {
@@ -17,6 +19,8 @@ export function createWorldSnapshot(source: SnapshotSource): Omit<ShooterSnapsho
     score: source.score,
     health: source.health,
     maxHealth: source.maxHealth,
+    stamina: source.stamina,
+    maxStamina: source.maxStamina,
     enemies: source.enemies.filter((enemy) => enemy.model.group.visible).length,
     ...source.rifle.snapshot(),
     ...source.levelManager.snapshot(),
