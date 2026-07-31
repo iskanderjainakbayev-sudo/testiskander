@@ -60,7 +60,6 @@ export class OdysseyWorld {
       this.expedition,
       this.cinematics,
       () => this.placeMenuCamera(),
-      this.exterior.ready,
     );
     this.placeMenuCamera();
     this.frameLoop = new OdysseyFrameLoop(

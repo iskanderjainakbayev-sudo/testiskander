@@ -39,17 +39,9 @@ function isSaveData(value: unknown): value is SaveData {
 }
 
 export function storeSave(data: SaveData) {
-  try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
-  } catch {
-    // The voyage remains playable when storage is unavailable.
-  }
+  localStorage.setItem(SAVE_KEY, JSON.stringify(data));
 }
 
 export function clearSave() {
-  try {
-    localStorage.removeItem(SAVE_KEY);
-  } catch {
-    // Private browsing may disable storage.
-  }
+  localStorage.removeItem(SAVE_KEY);
 }

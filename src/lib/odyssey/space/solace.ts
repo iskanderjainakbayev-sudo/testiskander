@@ -58,14 +58,14 @@ export function createSolace(): SolaceVisual {
   root.name = 'Solace ocean world';
 
   const oceanMaterial = shaderMaterial(OCEAN_FRAGMENT);
-  const ocean = new THREE.Mesh(new THREE.SphereGeometry(66, 96, 64), oceanMaterial);
+  const ocean = new THREE.Mesh(new THREE.SphereGeometry(66, 64, 48), oceanMaterial);
   root.add(ocean);
 
   const cloudMaterial = shaderMaterial(CLOUD_FRAGMENT, {
     transparent: true,
     depthWrite: false,
   });
-  const clouds = new THREE.Mesh(new THREE.SphereGeometry(67.0, 96, 64), cloudMaterial);
+  const clouds = new THREE.Mesh(new THREE.SphereGeometry(67.0, 56, 40), cloudMaterial);
   clouds.renderOrder = 3;
   root.add(clouds);
 
@@ -77,7 +77,7 @@ export function createSolace(): SolaceVisual {
     toneMapped: false,
   });
   const atmosphere = new THREE.Mesh(
-    new THREE.SphereGeometry(71.5, 80, 56),
+    new THREE.SphereGeometry(71.5, 48, 32),
     atmosphereMaterial,
   );
   atmosphere.renderOrder = 4;

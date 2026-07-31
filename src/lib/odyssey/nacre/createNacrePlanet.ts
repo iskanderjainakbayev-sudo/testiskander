@@ -35,7 +35,7 @@ export function createNacrePlanet(): NacrePlanet {
 
   const surfaceMaterial = createMaterial(NACRE_SURFACE_FRAGMENT);
   const surface = new THREE.Mesh(
-    new THREE.SphereGeometry(64, 96, 64),
+    new THREE.SphereGeometry(64, 72, 52),
     surfaceMaterial,
   );
 
@@ -43,7 +43,7 @@ export function createNacrePlanet(): NacrePlanet {
     transparent: true,
     depthWrite: false,
   });
-  const dust = new THREE.Mesh(new THREE.SphereGeometry(65.15, 88, 60), dustMaterial);
+  const dust = new THREE.Mesh(new THREE.SphereGeometry(65.15, 64, 44), dustMaterial);
   dust.renderOrder = 2;
 
   const atmosphereMaterial = createMaterial(NACRE_ATMOSPHERE_FRAGMENT, {
@@ -54,7 +54,7 @@ export function createNacrePlanet(): NacrePlanet {
     toneMapped: false,
   });
   const atmosphere = new THREE.Mesh(
-    new THREE.SphereGeometry(69.8, 80, 56),
+    new THREE.SphereGeometry(69.8, 56, 36),
     atmosphereMaterial,
   );
   atmosphere.renderOrder = 3;

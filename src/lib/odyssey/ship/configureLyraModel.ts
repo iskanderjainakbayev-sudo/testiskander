@@ -48,11 +48,7 @@ function configureMaterial(material: THREE.Material, anisotropy: number) {
     value.anisotropy = anisotropy;
     value.needsUpdate = true;
   }
-  if (material instanceof THREE.MeshStandardMaterial) {
-    material.envMapIntensity = 0.78;
-  }
-  if (material.transparent) {
-    material.depthWrite = false;
-    material.side = THREE.FrontSide;
+  if (material instanceof THREE.MeshPhysicalMaterial) {
+    material.envMapIntensity = 0.9;
   }
 }

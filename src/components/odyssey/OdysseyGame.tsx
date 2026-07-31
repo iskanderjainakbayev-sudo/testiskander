@@ -11,7 +11,6 @@ export function OdysseyGame() {
   const [snapshot, setSnapshot] = useState<GameSnapshot>(INITIAL_SNAPSHOT);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [hasSave, setHasSave] = useState(false);
-  const isCaptureMode = new URLSearchParams(window.location.search).has('capture');
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -40,7 +39,6 @@ export function OdysseyGame() {
         snapshot={snapshot}
         hasSave={hasSave}
         pointerLocked={pointerLocked}
-        suppressFocusPrompt={isCaptureMode}
         onStart={() => worldRef.current?.start()}
         onResume={() => worldRef.current?.resume()}
         onNewGame={() => {
