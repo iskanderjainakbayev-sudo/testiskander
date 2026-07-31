@@ -71,7 +71,7 @@ export function FlightHud({ snapshot, onInteract, onScan, onCycleTarget, onLand 
         </button>
       )}
       {snapshot.nearbyInteraction && (
-        <button className="odx-helm-exit" onClick={onInteract}><kbd>E</kbd> LEAVE HELM</button>
+        <button className="odx-helm-exit" onClick={onInteract}>LEAVE HELM</button>
       )}
       <Transmission message={snapshot.transmission} />
       <TouchActions

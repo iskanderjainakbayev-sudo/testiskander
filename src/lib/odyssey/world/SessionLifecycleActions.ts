@@ -4,8 +4,6 @@ import type { InputController } from './InputController';
 import type { OdysseySession } from './OdysseySession';
 import type { VoyageProgress } from './VoyageProgress';
 
-const LOCKED_MODES = ['walking', 'flight', 'cinematic', 'surface', 'landing', 'takeoff'];
-
 export function startVoyage(
   session: OdysseySession,
   progress: VoyageProgress,
@@ -47,9 +45,7 @@ export function resumeVoyage(session: OdysseySession, input: InputController) {
 }
 
 export function handleVoyagePointerLock(session: OdysseySession, locked: boolean) {
-  if (locked || !LOCKED_MODES.includes(session.mode)) return;
-  session.pausedFrom = session.mode;
-  session.mode = 'paused';
+  if (locked) return;
   session.flight.boost = false;
-  session.audio.setFlight(0, false);
+  session.audio.setFlight(session.flight.throttle, false);
 }

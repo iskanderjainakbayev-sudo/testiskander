@@ -84,6 +84,8 @@ try {
   const session = new OdysseySession();
   session.start(false, { clear() {}, requestLock() {} });
   assert(session.mode === 'flight', 'A new voyage must begin at the helm');
+  session.handlePointerLock(false);
+  assert(session.mode === 'flight', 'Losing pointer lock must not kick the player out of flight');
 
   for (let x = -420; x <= 420; x += 35) {
     for (let z = -420; z <= 420; z += 35) {

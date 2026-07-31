@@ -122,7 +122,7 @@ export class OdysseySession {
       const nearby = this.walking.nearbyStation();
       return nearby ? `E  ·  ${nearby.label}` : null;
     }
-    return this.mode === 'flight' && this.flight.speed < 3 ? 'E  ·  LEAVE HELM' : null;
+    return this.mode === 'flight' && this.flight.speed < 3 ? 'LEAVE HELM' : null;
   }
 
   get surfaceSamples() {

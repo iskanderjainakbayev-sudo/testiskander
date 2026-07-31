@@ -45,7 +45,6 @@ export function updateFlight(
   camera.rotation.set(shake * 0.2, 0, shake * 0.3);
   if (input.consume('KeyT')) session.cycleTarget();
   if (input.consume('KeyL')) onLand();
-  if (input.consume('KeyE') && flight.speed < 3) session.interact(camera);
   const scanning = input.isDown('KeyQ') || performance.now() < session.manualScanUntil;
   const alignment = flight.directionTo(mission.target).dot(
     currentForward.copy(FORWARD).applyQuaternion(flight.quaternion),
