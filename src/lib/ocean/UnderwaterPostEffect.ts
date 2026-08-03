@@ -9,6 +9,7 @@ const shader = {
     uDepth: { value: 0 },
     uStrength: { value: 1 },
     uImmersion: { value: 1 },
+    uWaterTint: { value: new THREE.Color(0x25848d) },
   },
   vertexShader: `
     varying vec2 vUv;
@@ -23,6 +24,7 @@ const shader = {
     uniform float uDepth;
     uniform float uStrength;
     uniform float uImmersion;
+    uniform vec3 uWaterTint;
     varying vec2 vUv;
 
     float hash(vec2 p) {
@@ -39,8 +41,13 @@ const shader = {
       float blue = texture2D(tDiffuse, vUv - centered * aberration).b;
       vec3 color = vec3(red, green, blue);
       float depthMix = smoothstep(25., 230., uDepth);
-      color *= mix(vec3(.96, 1.025, 1.035), vec3(.68, .82, 1.14), depthMix * .48 * strength);
-      color += vec3(.01, .032, .037) * (1. - edge) * strength;
+      vec3 absorption = exp(-vec3(.78, .27, .105) * depthMix * 1.15 * strength);
+      color *= mix(vec3(.97, 1.018, 1.03), absorption, depthMix * .72);
+      float horizon = smoothstep(.08, .82, vUv.y) * (1. - edge * .45);
+      float volumeNoise = hash(floor(vUv * vec2(120., 68.)) + floor(uTime * 1.5));
+      float backscatter = (.025 + depthMix * .13) * horizon * strength;
+      color += normalize(uWaterTint + vec3(.035)) * backscatter * (.94 + volumeNoise * .06);
+      color += vec3(.008, .026, .031) * (1. - edge) * strength;
       color *= 1. - edge * .24 * strength;
       float grainA = hash(gl_FragCoord.xy);
       float grainB = hash(gl_FragCoord.yx + vec2(19.19, 73.73));
@@ -55,10 +62,11 @@ export class UnderwaterPostEffect {
   readonly pass = new ShaderPass(shader);
   private qualityEnabled = true;
 
-  update(time: number, depth: number): void {
+  update(time: number, depth: number, waterTint: THREE.Color): void {
     this.pass.uniforms.uTime.value = time;
     this.pass.uniforms.uDepth.value = Math.max(0, depth);
     this.pass.uniforms.uImmersion.value = THREE.MathUtils.smoothstep(depth, -0.35, 0.45);
+    (this.pass.uniforms.uWaterTint.value as THREE.Color).copy(waterTint);
     this.pass.enabled = this.qualityEnabled;
   }
 

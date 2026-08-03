@@ -15,6 +15,7 @@ import { OceanMoments } from './OceanMoments';
 import { PausePanel } from './PausePanel';
 import { PdaPanel } from './PdaPanel';
 import { TouchControls } from './TouchControls';
+import { savedOceanQuality, type OceanScreen } from './oceanUiState';
 import './styles/foundation.css';
 import './styles/hud.css';
 import './styles/survival.css';
@@ -25,22 +26,14 @@ import './styles/touch.css';
 import './styles/mobile.css';
 import './styles/moments.css';
 
-type Screen = 'menu' | 'playing' | 'pause' | 'craft' | 'pda' | 'settings' | 'ending' | 'death';
-
-function savedQuality(): GraphicsQuality {
-  const value = localStorage.getItem('ocean-graphics-quality');
-  if (value === 'Low' || value === 'Medium' || value === 'High' || value === 'Ultra') return value;
-  return matchMedia('(pointer: coarse)').matches ? 'Medium' : 'High';
-}
-
 export function OceanGame() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const worldRef = useRef<OceanWorldType | null>(null);
-  const [screen, setScreen] = useState<Screen>('menu');
+  const [screen, setScreen] = useState<OceanScreen>('menu');
   const [snapshot, setSnapshot] = useState(DEFAULT_SNAPSHOT);
   const [bootAttempt, setBootAttempt] = useState(0);
   const [bootState, setBootState] = useState<'loading' | 'ready' | 'failed'>('loading');
-  const [quality, setQuality] = useState<GraphicsQuality>(savedQuality);
+  const [quality, setQuality] = useState<GraphicsQuality>(savedOceanQuality);
   const [showDiveCinematic, setShowDiveCinematic] = useState(false);
   const cinematicTimer = useRef<number | null>(null);
 
@@ -92,7 +85,7 @@ export function OceanGame() {
     worldRef.current?.setPaused(false);
   };
 
-  const open = (next: Screen) => {
+  const open = (next: OceanScreen) => {
     worldRef.current?.setPaused(true);
     setScreen(next);
   };
