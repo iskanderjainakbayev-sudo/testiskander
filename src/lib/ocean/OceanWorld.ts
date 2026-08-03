@@ -1,4 +1,5 @@
 import { createSnapshot } from './createSnapshot';
+import * as THREE from 'three';
 import { createDecorations } from './decorations';
 import { biomeAt } from './biomes';
 import { OceanEnvironment } from './environment';
@@ -37,6 +38,7 @@ export class OceanWorld {
   private lastTime = performance.now();
   private lastSnapshot = 0;
   private lastSave = 0;
+  private smoothedFps = 60;
   private failed = false;
 
   constructor(
@@ -145,6 +147,10 @@ export class OceanWorld {
     try {
       const delta = Math.min(0.05, (now - this.lastTime) / 1000);
       this.lastTime = now;
+      if (delta > 0.001) {
+        const blend = 1 - Math.exp(-delta * 1.8);
+        this.smoothedFps = THREE.MathUtils.lerp(this.smoothedFps, 1 / delta, blend);
+      }
       const time = now / 1000;
       if (!this.running) this.cinematic.updateMenu(time, this.environment.camera);
       else if (!this.paused) this.update(delta, now, time);
@@ -199,6 +205,7 @@ export class OceanWorld {
     this.lastSnapshot = now;
     const objectiveTarget = this.content.objectiveTarget(this.state.crafted, this.state.logs, this.player.position);
     this.onSnapshot(createSnapshot(this.state, this.player, {
+      fps: this.smoothedFps,
       interaction: this.currentInteraction,
       toast: this.toast,
       showToast: now < this.toastUntil,

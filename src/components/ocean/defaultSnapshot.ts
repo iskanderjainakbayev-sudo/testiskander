@@ -2,6 +2,7 @@ import { EMPTY_INVENTORY } from '../../lib/ocean/content';
 import type { OceanSnapshot } from '../../lib/ocean/types';
 
 export const DEFAULT_SNAPSHOT: OceanSnapshot = {
+  fps: 60,
   health: 100,
   stamina: 100,
   maxStamina: 100,

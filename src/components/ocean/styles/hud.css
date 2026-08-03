@@ -98,6 +98,8 @@
 .ocean-climate small,
 .ocean-site small { color: #77d9d1; font-size: 7px; letter-spacing: .18em; }
 .ocean-climate b { margin-top: 3px; color: #dffdfa; font-size: 9px; letter-spacing: .12em; }
+.ocean-climate i { margin-top: 5px; color: #73bdb8; font-size: 7px; font-style: normal; letter-spacing: .14em; }
+.ocean-climate i.is-slow { color: #ffb46b; }
 .ocean-site {
   position: absolute;
   top: 120px;

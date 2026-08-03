@@ -33,6 +33,7 @@ export function OceanHud({ snapshot }: { snapshot: OceanSnapshot }) {
       <section className="ocean-climate">
         <small>{snapshot.dayPhase}</small>
         <b>{snapshot.weather}</b>
+        <i className={snapshot.fps < 50 ? 'is-slow' : ''}>{Math.round(snapshot.fps)} FPS</i>
       </section>
       {snapshot.nearbySiteDistance < 70 && (
         <section className="ocean-site">

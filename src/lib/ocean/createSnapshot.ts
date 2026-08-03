@@ -6,6 +6,7 @@ import type { PredatorAlert } from './CreatureSystem';
 import type { Interactable, OceanSnapshot, OceanWeapon } from './types';
 
 interface SnapshotOptions {
+  fps: number;
   interaction: Interactable | null;
   toast: string;
   showToast: boolean;
@@ -45,6 +46,7 @@ export function createSnapshot(
     forward.dot(toObjective),
   );
   return {
+    fps: options.fps,
     health: state.health,
     stamina: player.stamina,
     maxStamina: player.maxStamina,

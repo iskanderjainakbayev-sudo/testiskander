@@ -44,6 +44,7 @@ export interface OceanSave {
 }
 
 export interface OceanSnapshot {
+  fps: number;
   health: number;
   stamina: number;
   maxStamina: number;
