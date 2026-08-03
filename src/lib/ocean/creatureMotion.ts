@@ -46,8 +46,11 @@ export function animateCreature(
     child.position.x = restX + Math.sin(beat * 0.55 - index * 0.7) * index * 0.025;
     child.position.y = restY + Math.cos(beat * 0.42 - index * 0.55) * index * 0.012;
   });
-  mesh.children.filter((child) => child.name.startsWith('leg-')).forEach((leg, index) => {
-    leg.rotation.x = Math.sin(beat * .72 + index) * (fast ? .42 : .18);
+  let legIndex = 0;
+  mesh.traverse((child) => {
+    if (!child.name.startsWith('leg-')) return;
+    child.rotation.x = Math.sin(beat * .72 + legIndex) * (fast ? .42 : .18);
+    legIndex += 1;
   });
   if (mode === 'warn') visual.scale.setScalar(1 + Math.sin(time * 9) * .045);
   const hitScale = time < (mesh.userData.hitUntil as number | undefined ?? 0) ? 1.14 : 1;

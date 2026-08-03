@@ -10,6 +10,7 @@ def fish(root, mats, rng, plan="fish"):
         long, deep = 1.8, .76
     parent(uv("body", (0, 0, 0), (.66, long, deep), skin, 28, 14), root)
     parent(uv("head", (0, -long * .72, .02), (.58, .62, deep * .88), skin, 24, 12), root)
+    parent(uv("mouth", (0, -long * 1.13, -.11), (.28 if plan != "whale" else .4, .035, .1), pupil, 16, 8), root)
     eyes(root, eye, pupil, .43, -long * 1.05, .16, .11 if plan != "whale" else .085)
     tail(root, skin, (0, long * 1.03, 0), .9 if plan != "whale" else 1.3)
     for side in (-1, 1):
@@ -20,6 +21,10 @@ def fish(root, mats, rng, plan="fish"):
             parent(cone(f"gill-{side}-{gill}", (side * .54, -.72 + gill * .08, .02),
                         (.018, .16, .025), (pi / 2, 0, 0), glow, 8), root)
     glowing_spots(root, glow, 6, long * 1.3, .58)
+    if root.get("hostile"):
+        for tooth_index in range(-3, 4):
+            parent(cone(f"fang-{tooth_index}", (tooth_index * .075, -long * 1.17, -.07),
+                        (.025, .12, .025), (pi / 2, 0, 0), eye, 7), root)
 
 
 def ray(root, mats, rng):

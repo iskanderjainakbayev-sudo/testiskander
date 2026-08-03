@@ -13,6 +13,7 @@ from ocean_creature_utils import empty, material
 
 ROOT = SCRIPT_DIR.parents[1]
 OUTPUT = ROOT / "assets" / "models" / "ocean" / "fish"
+bpy.context.preferences.filepaths.save_version = 0
 BUILDERS = {
     "fish": fish, "whale": fish, "ray": ray, "eel": eel, "serpent": eel,
     "puffer": puffer, "turtle": turtle, "jelly": jelly, "squid": squid,
@@ -25,6 +26,7 @@ def build(creature):
     bpy.ops.object.delete(use_global=False)
     asset_id = creature["asset_id"]
     root = empty(asset_id)
+    root["hostile"] = creature["hostile"]
     skin = material(f"{asset_id}-skin", creature["color"], creature["glow"], .16, .03, .32)
     glow = material(f"{asset_id}-biolight", creature["glow"], creature["glow"], 3.2, 0, .24)
     eye_color = 0xFF543D if creature["hostile"] else 0xDFFFFF
