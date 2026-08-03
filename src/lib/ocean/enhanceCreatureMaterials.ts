@@ -32,6 +32,21 @@ function enhance(material: THREE.MeshStandardMaterial, species: Species): THREE.
         '#include <roughnessmap_fragment>\nroughnessFactor *= .82 + creatureSpeckle * .2;',
       )
       .replace(
+        '#include <normal_fragment_maps>',
+        `#include <normal_fragment_maps>
+        float creatureMicroHeight = sin(vCreatureLocal.x * 54.0 + sin(vCreatureLocal.z * 31.0) * 1.4)
+          * cos(vCreatureLocal.y * 47.0 - vCreatureLocal.z * 23.0);
+        vec2 creatureHeightDerivative = vec2(dFdx(creatureMicroHeight), dFdy(creatureMicroHeight)) * .035;
+        vec3 creatureSigmaX = normalize(dFdx(-vViewPosition));
+        vec3 creatureSigmaY = normalize(dFdy(-vViewPosition));
+        vec3 creatureR1 = cross(creatureSigmaY, normal);
+        vec3 creatureR2 = cross(normal, creatureSigmaX);
+        float creatureDet = dot(creatureSigmaX, creatureR1) * faceDirection;
+        vec3 creatureGradient = sign(creatureDet)
+          * (creatureHeightDerivative.x * creatureR1 + creatureHeightDerivative.y * creatureR2);
+        normal = normalize(abs(creatureDet) * normal - creatureGradient);`,
+      )
+      .replace(
         '#include <emissivemap_fragment>',
         `#include <emissivemap_fragment>
         totalEmissiveRadiance += ${glow} * pow(creatureScale, 5.0) * .12;`,

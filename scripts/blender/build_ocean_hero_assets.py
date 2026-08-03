@@ -4,10 +4,12 @@ import bpy
 from math import pi
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from ocean_hero_utils import reset, mat, uv, cube, cylinder, torus, curve, fin_mesh, parent_all
+from ocean_lifepod_damage import add_lifepod_damage
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "assets" / "models" / "ocean" / "hero"
 OUT.mkdir(parents=True, exist_ok=True)
+bpy.context.preferences.filepaths.save_version = 0
 
 def palette():
     return (
@@ -52,7 +54,7 @@ def build_lifepod():
     ivory, edge, coral, glass, cyan, red = palette()
     root = bpy.data.objects.new("damaged-lifepod", None)
     bpy.context.collection.objects.link(root)
-    uv("pressure-shell", (0, 0, 0), (3.25, 1.95, 3.05), ivory, 48, 24)
+    shell = uv("pressure-shell", (0, 0, 0), (3.25, 1.95, 3.05), ivory, 48, 24)
     uv("lower-heat-shield", (0, -1.08, .2), (3.12, .92, 2.82), edge, 40, 16)
     torus("equatorial-rescue-band", (0, 0, 0), 3.0, .22, coral, (pi / 2, 0, 0))
     torus("forward-hatch-frame", (0, .22, -2.82), 1.08, .17, edge)
@@ -68,6 +70,7 @@ def build_lifepod():
     uv("distress-beacon", (1.72, 3.43, .82), (.18, .18, .18), red, 20, 10)
     for x in (-1.35, 0, 1.35):
         cube(f"shell-rib-{x}", (x, 1.71, .52), (.09, .15, 1.35), coral, .045, (0, 0, -.12*x))
+    add_lifepod_damage(shell)
     parent_all(root)
     export(root, "damaged-lifepod")
 

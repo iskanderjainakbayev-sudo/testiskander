@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { seededRandom } from './terrain';
+import { createShorelineFoam, updateShorelineFoam } from './shorelineFoam';
 
 const ISLANDS: Array<[number, number, number]> = [
   [-58, -26, 1.15], [67, 32, 1.4], [-35, 74, 0.85], [43, -72, 1.05],
@@ -62,13 +63,7 @@ function createIsland(x: number, z: number, scale: number, seed: number): THREE.
   }
   addPalm(group, -1.5 * scale, .5 * scale, .7 * scale, random() * 4);
   if (scale > 1) addPalm(group, 1.4 * scale, -.7 * scale, .55 * scale, random() * 4);
-  const foam = new THREE.Mesh(new THREE.RingGeometry(5.2 * scale, 7.2 * scale, 64), new THREE.MeshBasicMaterial({
-    color: 0xd8fff9, transparent: true, opacity: .28, side: THREE.DoubleSide, depthWrite: false,
-  }));
-  foam.rotation.x = -Math.PI / 2;
-  foam.position.y = .24;
-  foam.name = 'surface-foam';
-  foam.renderOrder = 2;
+  const foam = createShorelineFoam(4.7 * scale, 7.4 * scale);
   group.add(foam);
   group.position.set(x, 0, z);
   return group;
@@ -99,6 +94,6 @@ export function createSurfaceWorld(): THREE.Group {
 export function updateSurfaceWorld(group: THREE.Group, time: number): void {
   group.traverse((child) => {
     if (child.name === 'surface-cloud') child.position.x = (child.userData.baseX as number) + time * .16;
-    if (child.name === 'surface-foam') child.scale.setScalar(1 + Math.sin(time * 1.2 + child.parent!.position.x) * .025);
+    if (child.name === 'surface-foam') updateShorelineFoam(child, time);
   });
 }

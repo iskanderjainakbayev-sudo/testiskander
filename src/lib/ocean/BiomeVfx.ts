@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { seededRandom } from './terrain';
+import { floorAt, seededRandom } from './terrain';
 import type { BiomeId, GraphicsQuality } from './types';
 
 interface VfxLayer {
@@ -87,11 +87,17 @@ function createLayer(
   return { points, targetOpacity: 0 };
 }
 
+function seabedPoint(x: number, z: number, lift: number): [number, number, number] {
+  return [x, floorAt(x, z) + lift, z];
+}
+
 const VENTS: Array<[number, number, number]> = [
-  [82, -116, 94], [124, -151, 112], [-190, -173, -52], [218, -187, 34],
+  seabedPoint(82, 94, 7), seabedPoint(124, 112, 7),
+  seabedPoint(-190, -52, 7), seabedPoint(218, 34, 7),
 ];
 const ABYSS_GROVES: Array<[number, number, number]> = [
-  [184, -145, 58], [-190, -160, -52], [126, -174, -176], [-142, -174, 176], [218, -184, 34],
+  seabedPoint(184, 58, 2), seabedPoint(-190, -52, 2), seabedPoint(126, -176, 2),
+  seabedPoint(-142, 176, 2), seabedPoint(218, 34, 2),
 ];
 
 export class BiomeVfx {

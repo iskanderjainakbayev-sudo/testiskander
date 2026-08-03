@@ -19,8 +19,8 @@ export const SURFACE_VERTEX = `
     float frequency = 6.2831853 / wavelength;
     float phase = frequency * (dot(direction, point) + speed * uTime);
     return vec3(-direction.x * direction.x * steepness * sin(phase),
-      direction.x * steepness * cos(phase),
-      -direction.x * direction.y * steepness * sin(phase));
+      -direction.x * direction.y * steepness * sin(phase),
+      direction.x * steepness * cos(phase));
   }
 
   vec3 waveBinormal(vec2 direction, float steepness, float wavelength, float speed, vec2 point) {
@@ -28,8 +28,8 @@ export const SURFACE_VERTEX = `
     float frequency = 6.2831853 / wavelength;
     float phase = frequency * (dot(direction, point) + speed * uTime);
     return vec3(-direction.x * direction.y * steepness * sin(phase),
-      direction.y * steepness * cos(phase),
-      -direction.y * direction.y * steepness * sin(phase));
+      -direction.y * direction.y * steepness * sin(phase),
+      direction.y * steepness * cos(phase));
   }
 
   void main() {
@@ -37,7 +37,7 @@ export const SURFACE_VERTEX = `
     float energy = mix(.42, 1., clamp(uWave, 0., 1.5));
     vec3 offset = vec3(0.);
     vec3 tangent = vec3(1., 0., 0.);
-    vec3 binormal = vec3(0., 0., 1.);
+    vec3 binormal = vec3(0., 1., 0.);
     #define ADD_WAVE(D, S, L, V) offset += wave(D, S * energy, L, V, point); \
       tangent += waveTangent(D, S * energy, L, V, point); \
       binormal += waveBinormal(D, S * energy, L, V, point);
@@ -48,7 +48,7 @@ export const SURFACE_VERTEX = `
     ADD_WAVE(vec2(.18, .98), .028, 2.4, 1.15)
     vec3 displaced = vec3(position.x + offset.x, position.y + offset.z, position.z + offset.y);
     vWorldPosition = (modelMatrix * vec4(displaced, 1.)).xyz;
-    vWorldNormal = normalize(mat3(modelMatrix) * normalize(cross(binormal, tangent)));
+    vWorldNormal = normalize(mat3(modelMatrix) * normalize(cross(tangent, binormal)));
     vCrest = smoothstep(.32, 1.18, offset.y) * energy;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(displaced, 1.);
   }

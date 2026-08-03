@@ -11,6 +11,7 @@ import { OceanControls } from './OceanControls';
 import { OceanInteraction } from './OceanInteraction';
 import { OceanSessionActions } from './OceanSessionActions';
 import { OceanState } from './OceanState';
+import { OceanVisualQa, type OceanQaStats, type OceanQaViewId } from './OceanVisualQa';
 import { PlayerController } from './PlayerController';
 import type { GraphicsQuality, Interactable, OceanSnapshot, RecipeId, WorldEvent } from './types';
 import { WorldContent } from './WorldContent';
@@ -40,11 +41,13 @@ export class OceanWorld {
   private lastSave = 0;
   private smoothedFps = 60;
   private failed = false;
+  private readonly visualQa: OceanVisualQa | null;
 
   constructor(
     canvas: HTMLCanvasElement,
     private readonly onSnapshot: (snapshot: OceanSnapshot) => void,
     private readonly onEvent: (event: WorldEvent) => void,
+    onQaSnapshot?: (stats: OceanQaStats) => void,
   ) {
     this.environment = new OceanEnvironment(canvas);
     const decor = createDecorations(this.environment.scene);
@@ -69,6 +72,9 @@ export class OceanWorld {
       this.state, this.player, this.content, this.audio,
       (message, duration) => this.showToast(message, duration),
     );
+    this.visualQa = onQaSnapshot
+      ? new OceanVisualQa(this.environment.camera, this.environment.renderer, onQaSnapshot)
+      : null;
     window.addEventListener('resize', this.environment.resize);
     this.publish(performance.now());
     this.frame = requestAnimationFrame(this.loop);
@@ -129,6 +135,14 @@ export class OceanWorld {
     this.environment.setQuality(quality);
   }
 
+  selectQaView(view: OceanQaViewId): void {
+    this.visualQa?.select(view);
+  }
+
+  profileQaView(): void {
+    this.visualQa?.startProfile();
+  }
+
   dispose(): void {
     cancelAnimationFrame(this.frame);
     window.removeEventListener('resize', this.environment.resize);
@@ -152,7 +166,8 @@ export class OceanWorld {
     if (this.failed) return;
     this.frame = requestAnimationFrame(this.loop);
     try {
-      const delta = Math.min(0.05, (now - this.lastTime) / 1000);
+      const rawFrameMs = now - this.lastTime;
+      const delta = Math.min(0.05, rawFrameMs / 1000);
       this.lastTime = now;
       if (delta > 0.001) {
         const blend = 1 - Math.exp(-delta * 1.8);
@@ -162,7 +177,8 @@ export class OceanWorld {
       const time = now / 1000;
       if (!this.running) this.cinematic.updateMenu(time, this.environment.camera);
       else if (!this.paused) this.update(delta, now, time);
-      this.environment.update(time, this.state.elapsed, biomeAt(this.player.position), this.lightsOn || this.inSub);
+      const visualPosition = this.visualQa?.update(now, rawFrameMs) ?? this.player.position;
+      this.environment.update(time, this.state.elapsed, biomeAt(visualPosition), this.lightsOn || this.inSub);
       this.environment.render();
       if (now - this.lastSnapshot > 110) this.publish(now);
     } catch {

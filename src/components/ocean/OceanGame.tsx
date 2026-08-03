@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { hasOceanSave } from '../../lib/ocean/save';
 import type { OceanWorld as OceanWorldType } from '../../lib/ocean/OceanWorld';
 import type { GraphicsQuality, RecipeId, WorldEvent } from '../../lib/ocean/types';
+import type { OceanQaStats } from '../../lib/ocean/OceanVisualQa';
 import { CraftingPanel } from './CraftingPanel';
 import { DeathCinematic } from './DeathCinematic';
 import { DiveCinematicOverlay } from './DiveCinematicOverlay';
@@ -12,6 +13,7 @@ import { OceanHud } from './OceanHud';
 import { OceanCanvas } from './OceanCanvas';
 import { OceanMenu } from './OceanMenu';
 import { OceanMoments } from './OceanMoments';
+import { OceanQaPanel } from './OceanQaPanel';
 import { PausePanel } from './PausePanel';
 import { PdaPanel } from './PdaPanel';
 import { TouchControls } from './TouchControls';
@@ -25,6 +27,14 @@ import './styles/navigation.css';
 import './styles/touch.css';
 import './styles/mobile.css';
 import './styles/moments.css';
+import './styles/qa.css';
+
+const QA_ENABLED = new URLSearchParams(window.location.search).get('oceanQa') === '1';
+const EMPTY_QA_STATS: OceanQaStats = {
+  view: 'menu', phase: 'idle', secondsLeft: 0, sampleCount: 0,
+  p50Ms: 0, p95Ms: 0, p99Ms: 0, averageFps: 0, onePercentLowFps: 0,
+  droppedFramePercent: 0, drawCalls: 0, triangles: 0,
+};
 
 export function OceanGame() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -36,6 +46,8 @@ export function OceanGame() {
   const [quality, setQuality] = useState<GraphicsQuality>(savedOceanQuality);
   const [showDiveCinematic, setShowDiveCinematic] = useState(false);
   const cinematicTimer = useRef<number | null>(null);
+  const [qaStats, setQaStats] = useState(EMPTY_QA_STATS);
+  const [cleanQaFrame, setCleanQaFrame] = useState(false);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -55,6 +67,7 @@ export function OceanGame() {
               setScreen(event);
             }
           },
+          QA_ENABLED ? setQaStats : undefined,
         );
         worldRef.current.setQuality(quality);
         setBootState('ready');
@@ -106,7 +119,7 @@ export function OceanGame() {
   }, []);
 
   return (
-    <div className="ocean-game">
+    <div className={`ocean-game${cleanQaFrame ? ' ocean-qa-clean' : ''}`}>
       <OceanCanvas canvasRef={canvasRef} onRequestInput={() => worldRef.current?.requestInput()} />
       {screen !== 'menu' && <OceanHud snapshot={snapshot} />}
       <DiveCinematicOverlay visible={showDiveCinematic && screen === 'playing'} />
@@ -146,6 +159,15 @@ export function OceanGame() {
       )}
       {screen === 'ending' && <EndingScreen elapsed={snapshot.elapsed} onRestart={() => play(false)} />}
       {screen === 'death' && <DeathCinematic onRecovered={recover} />}
+      {QA_ENABLED && (
+        <OceanQaPanel
+          stats={qaStats}
+          cleanFrame={cleanQaFrame}
+          onCleanFrame={setCleanQaFrame}
+          onSelect={(view) => worldRef.current?.selectQaView(view)}
+          onProfile={() => worldRef.current?.profileQaView()}
+        />
+      )}
     </div>
   );
 }
