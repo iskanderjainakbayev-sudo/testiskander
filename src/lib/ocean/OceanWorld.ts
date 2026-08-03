@@ -83,7 +83,10 @@ export class OceanWorld {
 
   setPaused(paused: boolean): void {
     this.paused = paused;
-    if (paused) this.input.releaseLock();
+    if (paused) {
+      this.input.clearVirtualInput();
+      this.input.releaseLock();
+    }
     else if (this.running) this.input.requestLock();
   }
 

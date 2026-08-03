@@ -77,6 +77,12 @@ export class InputController {
     this.virtualMoveForward = Math.max(-1, Math.min(1, forward));
   }
 
+  clearVirtualInput(): void {
+    this.virtualKeys.clear();
+    this.virtualMoveX = 0;
+    this.virtualMoveForward = 0;
+  }
+
   dispose(): void {
     window.removeEventListener('keydown', this.onKeyDown);
     window.removeEventListener('keyup', this.onKeyUp);
@@ -121,10 +127,8 @@ export class InputController {
 
   private readonly clear = () => {
     this.keys.clear();
-    this.virtualKeys.clear();
     this.pressed.clear();
-    this.virtualMoveX = 0;
-    this.virtualMoveForward = 0;
+    this.clearVirtualInput();
   };
 
   private readonly handleLockChange = () => {
