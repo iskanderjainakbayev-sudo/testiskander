@@ -97,4 +97,4 @@ export interface Interactable {
   collectedAt?: number;
 }
 
-export type WorldEvent = 'pause' | 'craft' | 'pda' | 'ending' | 'fatal';
+export type WorldEvent = 'pause' | 'craft' | 'pda' | 'ending' | 'death' | 'fatal';

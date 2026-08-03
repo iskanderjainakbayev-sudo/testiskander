@@ -118,6 +118,13 @@ export class OceanWorld {
     this.publish(performance.now());
   }
 
+  recover(): void {
+    this.inSub = false;
+    this.actions.respawn();
+    this.cinematic.beginIntro(this.player.position);
+    this.setPaused(false);
+  }
+
   setQuality(quality: GraphicsQuality): void {
     this.environment.setQuality(quality);
   }
@@ -182,7 +189,7 @@ export class OceanWorld {
     this.lightsOn = control.lightsOn;
     if (control.event) this.pauseFor(control.event);
     if (this.state.oxygen < 22 && !this.inSub) this.audio.lowOxygen(now);
-    if (this.state.health <= 0) this.respawn();
+    if (this.state.health <= 0) this.pauseFor('death');
     if (now - this.lastSave > 120_000) this.save();
   }
 
@@ -190,11 +197,6 @@ export class OceanWorld {
     this.paused = true;
     this.input.releaseLock();
     this.onEvent(event);
-  }
-
-  private respawn(): void {
-    this.inSub = false;
-    this.actions.respawn();
   }
 
   private showToast(message: string, duration: number): void {

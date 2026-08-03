@@ -1,14 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { hasOceanSave } from '../../lib/ocean/save';
 import type { OceanWorld as OceanWorldType } from '../../lib/ocean/OceanWorld';
 import type { GraphicsQuality, RecipeId, WorldEvent } from '../../lib/ocean/types';
 import { CraftingPanel } from './CraftingPanel';
+import { DeathCinematic } from './DeathCinematic';
 import { DiveCinematicOverlay } from './DiveCinematicOverlay';
 import { DEFAULT_SNAPSHOT } from './defaultSnapshot';
 import { EndingScreen } from './EndingScreen';
 import { GraphicsSettings } from './GraphicsSettings';
 import { OceanHud } from './OceanHud';
+import { OceanCanvas } from './OceanCanvas';
 import { OceanMenu } from './OceanMenu';
+import { OceanMoments } from './OceanMoments';
 import { PausePanel } from './PausePanel';
 import { PdaPanel } from './PdaPanel';
 import { TouchControls } from './TouchControls';
@@ -20,8 +23,9 @@ import './styles/panels.css';
 import './styles/navigation.css';
 import './styles/touch.css';
 import './styles/mobile.css';
+import './styles/moments.css';
 
-type Screen = 'menu' | 'playing' | 'pause' | 'craft' | 'pda' | 'settings' | 'ending';
+type Screen = 'menu' | 'playing' | 'pause' | 'craft' | 'pda' | 'settings' | 'ending' | 'death';
 
 function savedQuality(): GraphicsQuality {
   const value = localStorage.getItem('ocean-graphics-quality');
@@ -103,17 +107,17 @@ export function OceanGame() {
     worldRef.current?.setQuality(next);
   };
 
+  const recover = useCallback(() => {
+    worldRef.current?.recover();
+    setScreen('playing');
+  }, []);
+
   return (
     <div className="ocean-game">
-      <canvas
-        ref={canvasRef}
-        className="ocean-canvas"
-        tabIndex={0}
-        onClick={() => worldRef.current?.requestInput()}
-        aria-label="First-person underwater game"
-      />
+      <OceanCanvas canvasRef={canvasRef} onRequestInput={() => worldRef.current?.requestInput()} />
       {screen !== 'menu' && <OceanHud snapshot={snapshot} />}
       <DiveCinematicOverlay visible={showDiveCinematic && screen === 'playing'} />
+      <OceanMoments snapshot={snapshot} active={screen === 'playing' && !showDiveCinematic} />
       {screen === 'playing' && (
         <TouchControls
           activeWeapon={snapshot.activeWeapon}
@@ -148,6 +152,7 @@ export function OceanGame() {
         <GraphicsSettings quality={quality} onChange={changeQuality} onClose={resume} />
       )}
       {screen === 'ending' && <EndingScreen elapsed={snapshot.elapsed} onRestart={() => play(false)} />}
+      {screen === 'death' && <DeathCinematic onRecovered={recover} />}
     </div>
   );
 }

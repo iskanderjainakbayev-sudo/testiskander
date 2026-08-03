@@ -14,6 +14,7 @@ import { createSurfaceWorld, updateSurfaceWorld } from './surfaceWorld';
 import { UnderwaterPostEffect } from './UnderwaterPostEffect';
 import { SURFACE_FRAGMENT, SURFACE_VERTEX } from './oceanSurface';
 import { OceanResolutionScaler } from './OceanResolutionScaler';
+import { BiomeVfx } from './BiomeVfx';
 
 export class OceanEnvironment {
   readonly scene = new THREE.Scene();
@@ -32,6 +33,7 @@ export class OceanEnvironment {
   private readonly surfaceWorld = createSurfaceWorld();
   private readonly underwaterPost = new UnderwaterPostEffect();
   private readonly resolutionScaler: OceanResolutionScaler;
+  private readonly biomeVfx: BiomeVfx;
   private readonly visualColor = new THREE.Color(0x2c9ea7);
   private lastVisualTime = 0;
 
@@ -62,6 +64,7 @@ export class OceanEnvironment {
     this.sun.shadow.camera.bottom = -90;
     this.surface = this.createSurface();
     this.particles = new WaterParticles(this.scene);
+    this.biomeVfx = new BiomeVfx(this.scene);
     this.scene.add(this.surface);
     this.camera.add(this.light);
     this.light.position.set(0, 0, 0);
@@ -107,6 +110,7 @@ export class OceanEnvironment {
       this.scene.fog.density = THREE.MathUtils.lerp(this.scene.fog.density, targetDensity, blend);
     }
     this.particles.update(time, this.camera);
+    this.biomeVfx.update(time, biome, visualDelta);
     updateSurfaceWorld(this.surfaceWorld, time);
     this.underwaterPost.update(time, -this.camera.position.y);
     const underwaterLight = palette.light * (0.38 + climate.daylight * 0.62);
@@ -120,6 +124,7 @@ export class OceanEnvironment {
     this.bloom.enabled = quality !== 'Low';
     this.bloom.strength = quality === 'Medium' ? 0.42 : quality === 'High' ? 0.55 : 0.64;
     this.underwaterPost.setQuality(quality);
+    this.biomeVfx.setQuality(quality);
     this.resize();
   }
 
@@ -154,7 +159,7 @@ export class OceanEnvironment {
       side: THREE.DoubleSide,
       depthWrite: false,
     });
-    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(620, 620, 48, 48), material);
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(620, 620, 112, 112), material);
     mesh.rotateX(-Math.PI / 2);
     mesh.position.y = 0.15;
     mesh.renderOrder = 1;
