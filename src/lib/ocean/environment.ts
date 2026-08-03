@@ -14,27 +14,40 @@ import { UnderwaterPostEffect } from './UnderwaterPostEffect';
 
 const SURFACE_VERTEX = `
   varying vec2 vUv;
+  varying vec3 vWorldPosition;
+  varying vec3 vWorldNormal;
   uniform float uTime;
   uniform float uWave;
   void main() {
     vUv = uv;
     vec3 p = position;
-    p.z += (sin(p.x * .09 + uTime) * .55 + cos(p.y * .07 - uTime * .8) * .38) * uWave;
+    float waveA = sin(p.x * .075 + uTime * 1.15);
+    float waveB = cos(p.y * .055 - uTime * .82);
+    float ripple = sin((p.x + p.y) * .16 + uTime * 1.7) * .18;
+    p.z += (waveA * .62 + waveB * .4 + ripple) * uWave;
+    vWorldPosition = (modelMatrix * vec4(p, 1.)).xyz;
+    vWorldNormal = normalize(mat3(modelMatrix) * vec3(-waveA * .055, -waveB * .045, 1.));
     gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
   }
 `;
 
 const SURFACE_FRAGMENT = `
   varying vec2 vUv;
+  varying vec3 vWorldPosition;
+  varying vec3 vWorldNormal;
   uniform float uTime;
   void main() {
     float waveA = sin(vUv.x * 92. + uTime * 2.7);
     float waveB = cos(vUv.y * 76. - uTime * 2.1);
-    float glint = pow(max(0., waveA * waveB), 10.);
+    float microWave = sin((vUv.x + vUv.y) * 170. + uTime * 3.4);
+    float glint = pow(max(0., waveA * waveB * .7 + microWave * .3), 12.);
     float horizon = smoothstep(0., .85, distance(vUv, vec2(.5)));
-    vec3 water = mix(vec3(.07, .55, .62), vec3(.22, .86, .82), glint);
+    vec3 viewDirection = normalize(cameraPosition - vWorldPosition);
+    float fresnel = pow(1. - abs(dot(viewDirection, normalize(vWorldNormal))), 3.);
+    vec3 water = mix(vec3(.035, .38, .48), vec3(.24, .88, .83), glint);
+    water = mix(water, vec3(.12, .57, .72), fresnel * .72);
     water = mix(water, vec3(.03, .25, .34), horizon * .55);
-    gl_FragColor = vec4(water, .48);
+    gl_FragColor = vec4(water, .5 + fresnel * .22);
   }
 `;
 
@@ -92,6 +105,7 @@ export class OceanEnvironment {
     this.surface.material.uniforms.uWave.value = climate.waveStrength;
     updateTerrainCaustics(this.terrain, time);
     updateGodRays(this.godRays, time, Math.max(0, -this.camera.position.y));
+    this.godRays.position.set(this.camera.position.x, 0, this.camera.position.z);
     this.sun.position.x = Math.sin(time * 0.025) * 55;
     this.sun.intensity = (1.65 + climate.daylight * 1.2) * (climate.weather === 'Storm' ? 0.48 : 1);
     this.light.intensity = lightsOn ? 48 : 0;

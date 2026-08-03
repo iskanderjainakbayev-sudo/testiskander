@@ -18,6 +18,11 @@ function skinFor(species: Species): THREE.MeshPhysicalMaterial {
     metalness: 0.05,
     clearcoat: 0.48,
     clearcoatRoughness: 0.28,
+    iridescence: species.bodyPlan === 'fish' || species.bodyPlan === 'ray' ? .28 : .08,
+    iridescenceIOR: 1.3,
+    sheen: .18,
+    sheenRoughness: .5,
+    sheenColor: new THREE.Color(species.glow),
   });
   skins.set(species.name, material);
   return material;

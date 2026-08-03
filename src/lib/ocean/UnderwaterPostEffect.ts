@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import type { GraphicsQuality } from './types';
 
@@ -48,15 +47,17 @@ const shader = {
 
 export class UnderwaterPostEffect {
   readonly pass = new ShaderPass(shader);
+  private qualityEnabled = true;
 
   update(time: number, depth: number): void {
     this.pass.uniforms.uTime.value = time;
     this.pass.uniforms.uDepth.value = depth;
-    this.pass.enabled = depth > .15;
+    this.pass.enabled = this.qualityEnabled && depth > .15;
   }
 
   setQuality(quality: GraphicsQuality): void {
+    this.qualityEnabled = quality !== 'Low';
     this.pass.uniforms.uStrength.value = quality === 'Low' ? 0 : quality === 'Medium' ? .45 : quality === 'High' ? .78 : 1;
-    this.pass.enabled = quality !== 'Low';
+    this.pass.enabled = this.qualityEnabled;
   }
 }
