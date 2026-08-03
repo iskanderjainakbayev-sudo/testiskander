@@ -5,6 +5,7 @@ import { OceanEnvironment } from './environment';
 import { InputController } from './InputController';
 import { OceanAudio } from './OceanAudio';
 import { OceanCombat } from './OceanCombat';
+import { OceanCinematicRig } from './OceanCinematicRig';
 import { OceanControls } from './OceanControls';
 import { OceanInteraction } from './OceanInteraction';
 import { OceanSessionActions } from './OceanSessionActions';
@@ -20,6 +21,7 @@ export class OceanWorld {
   private readonly state = new OceanState();
   private readonly content: WorldContent;
   private readonly combat: OceanCombat;
+  private readonly cinematic = new OceanCinematicRig();
   private readonly audio = new OceanAudio();
   private readonly interaction: OceanInteraction;
   private readonly controls: OceanControls;
@@ -132,6 +134,7 @@ export class OceanWorld {
     this.inSub = inSub;
     this.lightsOn = false;
     this.actions.prepare();
+    this.cinematic.beginIntro(this.player.position);
     if (inSub) this.content.setSubVisible(false);
     this.setPaused(false);
   }
@@ -143,7 +146,8 @@ export class OceanWorld {
       const delta = Math.min(0.05, (now - this.lastTime) / 1000);
       this.lastTime = now;
       const time = now / 1000;
-      if (this.running && !this.paused) this.update(delta, now, time);
+      if (!this.running) this.cinematic.updateMenu(time, this.environment.camera);
+      else if (!this.paused) this.update(delta, now, time);
       this.environment.update(time, this.state.elapsed, biomeAt(this.player.position), this.lightsOn || this.inSub);
       this.environment.render();
       if (now - this.lastSnapshot > 110) this.publish(now);
@@ -155,6 +159,10 @@ export class OceanWorld {
   };
 
   private update(delta: number, now: number, time: number): void {
+    if (this.cinematic.updateIntro(delta, this.environment.camera)) {
+      this.content.update(now, time);
+      return;
+    }
     this.player.update(delta, this.state, this.inSub);
     if (this.player.moving) this.audio.swim(now, this.player.accelerating);
     const depth = Math.max(0, -this.player.position.y);

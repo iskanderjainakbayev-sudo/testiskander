@@ -37,7 +37,7 @@ camera.data.lens = 58
 bpy.context.scene.camera = camera
 
 scene = bpy.context.scene
-scene.render.engine = 'BLENDER_EEVEE_NEXT'
+scene.render.engine = 'BLENDER_EEVEE'
 scene.render.resolution_x, scene.render.resolution_y, scene.render.resolution_percentage = 900, 650, 100
 scene.render.image_settings.file_format = 'PNG'
 scene.render.filepath = str(output)

@@ -3,6 +3,7 @@ import { hasOceanSave } from '../../lib/ocean/save';
 import type { OceanWorld as OceanWorldType } from '../../lib/ocean/OceanWorld';
 import type { GraphicsQuality, RecipeId, WorldEvent } from '../../lib/ocean/types';
 import { CraftingPanel } from './CraftingPanel';
+import { DiveCinematicOverlay } from './DiveCinematicOverlay';
 import { DEFAULT_SNAPSHOT } from './defaultSnapshot';
 import { EndingScreen } from './EndingScreen';
 import { GraphicsSettings } from './GraphicsSettings';
@@ -36,6 +37,8 @@ export function OceanGame() {
   const [bootAttempt, setBootAttempt] = useState(0);
   const [bootState, setBootState] = useState<'loading' | 'ready' | 'failed'>('loading');
   const [quality, setQuality] = useState<GraphicsQuality>(savedQuality);
+  const [showDiveCinematic, setShowDiveCinematic] = useState(false);
+  const cinematicTimer = useRef<number | null>(null);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -64,6 +67,7 @@ export function OceanGame() {
       });
     return () => {
       active = false;
+      if (cinematicTimer.current !== null) window.clearTimeout(cinematicTimer.current);
       worldRef.current?.dispose();
       worldRef.current = null;
     };
@@ -73,6 +77,9 @@ export function OceanGame() {
     if (!worldRef.current || bootState !== 'ready') return;
     if (continued) worldRef.current?.continue();
     else worldRef.current?.startNew();
+    setShowDiveCinematic(true);
+    if (cinematicTimer.current !== null) window.clearTimeout(cinematicTimer.current);
+    cinematicTimer.current = window.setTimeout(() => setShowDiveCinematic(false), 6200);
     setScreen('playing');
   };
 
@@ -106,6 +113,7 @@ export function OceanGame() {
         aria-label="First-person underwater game"
       />
       {screen !== 'menu' && <OceanHud snapshot={snapshot} />}
+      <DiveCinematicOverlay visible={showDiveCinematic && screen === 'playing'} />
       {screen === 'playing' && (
         <TouchControls
           activeWeapon={snapshot.activeWeapon}

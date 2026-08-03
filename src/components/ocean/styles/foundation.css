@@ -152,6 +152,87 @@
   to { opacity: 1; transform: none; }
 }
 
+.dive-cinematic {
+  position: absolute;
+  z-index: 30;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: #021018;
+  animation: cinematic-clear 6.2s cubic-bezier(.65,0,.25,1) forwards;
+}
+
+.dive-cinematic section {
+  position: absolute;
+  top: 50%;
+  left: clamp(24px, 6vw, 96px);
+  transform: translateY(-50%);
+  animation: cinematic-title 5.4s cubic-bezier(.2,.8,.2,1) forwards;
+}
+
+.dive-cinematic small,
+.dive-cinematic p {
+  color: #a7d7d4;
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+}
+
+.dive-cinematic h2 {
+  margin: 10px 0;
+  color: #effffc;
+  font-size: clamp(54px, 9vw, 112px);
+  line-height: .82;
+  letter-spacing: -.07em;
+  text-shadow: 0 10px 40px #00131d;
+}
+
+.cinematic-letterbox {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  width: 100%;
+  height: clamp(28px, 7vh, 84px);
+  background: #01080d;
+  animation: letterbox-open 6.2s ease-in-out forwards;
+}
+
+.cinematic-letterbox-top { top: 0; }
+.cinematic-letterbox-bottom { bottom: 0; }
+.cinematic-depth-line {
+  position: absolute;
+  right: clamp(20px, 5vw, 72px);
+  bottom: clamp(46px, 11vh, 118px);
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: #9ee3dc;
+  font-size: 8px;
+  letter-spacing: .21em;
+}
+.cinematic-depth-line i { width: 50px; height: 1px; background: #65f1dd; box-shadow: 0 0 9px #65f1dd; }
+
+@keyframes cinematic-clear {
+  0%, 12% { background: #021018; }
+  26%, 88% { background: transparent; }
+  100% { opacity: 0; visibility: hidden; }
+}
+@keyframes cinematic-title {
+  0% { opacity: 0; transform: translateY(calc(-50% + 22px)); }
+  16%, 62% { opacity: 1; transform: translateY(-50%); }
+  85%, 100% { opacity: 0; transform: translateY(calc(-50% - 12px)); }
+}
+@keyframes letterbox-open {
+  0%, 76% { transform: scaleY(1); }
+  100% { transform: scaleY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dive-cinematic { animation-duration: 1.2s; }
+  .dive-cinematic section, .cinematic-letterbox { animation: none; }
+}
+
 @media (max-width: 650px) {
   .ocean-menu { align-items: end; padding: 28px 22px 60px; }
   .menu-actions { flex-direction: column; }
