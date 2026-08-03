@@ -91,9 +91,9 @@ export function createSurfaceWorld(): THREE.Group {
   return group;
 }
 
-export function updateSurfaceWorld(group: THREE.Group, time: number): void {
+export function updateSurfaceWorld(group: THREE.Group, time: number, wave: number): void {
   group.traverse((child) => {
     if (child.name === 'surface-cloud') child.position.x = (child.userData.baseX as number) + time * .16;
-    if (child.name === 'surface-foam') updateShorelineFoam(child, time);
+    if (child.name === 'surface-foam') updateShorelineFoam(child, time, wave);
   });
 }

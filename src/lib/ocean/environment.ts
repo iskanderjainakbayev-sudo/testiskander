@@ -111,7 +111,7 @@ export class OceanEnvironment {
     }
     this.particles.update(time, this.camera);
     this.biomeVfx.update(time, biome, visualDelta);
-    updateSurfaceWorld(this.surfaceWorld, time);
+    updateSurfaceWorld(this.surfaceWorld, time, climate.waveStrength);
     this.underwaterPost.update(time, -this.camera.position.y, this.visualColor);
     const underwaterLight = palette.light * (0.38 + climate.daylight * 0.62);
     const surfaceLight = 0.45 + climate.daylight * 1.85;

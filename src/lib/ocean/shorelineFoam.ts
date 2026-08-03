@@ -2,6 +2,7 @@ import * as THREE from 'three';
 
 const VERTEX = `
   uniform float uTime;
+  uniform float uWave;
   varying vec2 vLocal;
   varying vec3 vWorld;
 
@@ -13,12 +14,13 @@ const VERTEX = `
   void main() {
     vLocal = position.xy;
     vec4 world = modelMatrix * vec4(position, 1.);
-    world.y = .18
-      + waveHeight(world.xz, vec2(1., .22), .19, 31., 4.4)
+    float energy = mix(.42, 1., clamp(uWave, 0., 1.5));
+    world.y = .18 + energy * (
+      waveHeight(world.xz, vec2(1., .22), .19, 31., 4.4)
       + waveHeight(world.xz, vec2(-.34, 1.), .13, 18., 3.2)
       + waveHeight(world.xz, vec2(.66, -.72), .095, 10.5, 2.6)
       + waveHeight(world.xz, vec2(-.92, -.38), .055, 5.2, 1.7)
-      + waveHeight(world.xz, vec2(.18, .98), .028, 2.4, 1.15);
+      + waveHeight(world.xz, vec2(.18, .98), .028, 2.4, 1.15));
     world.y += .025;
     vWorld = world.xyz;
     gl_Position = projectionMatrix * viewMatrix * world;
@@ -53,7 +55,10 @@ const FRAGMENT = `
 
 export function createShorelineFoam(inner: number, outer: number): THREE.Mesh {
   const material = new THREE.ShaderMaterial({
-    uniforms: { uTime: { value: 0 }, uInner: { value: inner }, uOuter: { value: outer } },
+    uniforms: {
+      uTime: { value: 0 }, uWave: { value: 1 },
+      uInner: { value: inner }, uOuter: { value: outer },
+    },
     vertexShader: VERTEX,
     fragmentShader: FRAGMENT,
     transparent: true,
@@ -67,7 +72,8 @@ export function createShorelineFoam(inner: number, outer: number): THREE.Mesh {
   return foam;
 }
 
-export function updateShorelineFoam(foam: THREE.Object3D, time: number): void {
+export function updateShorelineFoam(foam: THREE.Object3D, time: number, wave: number): void {
   if (!(foam instanceof THREE.Mesh) || !(foam.material instanceof THREE.ShaderMaterial)) return;
   foam.material.uniforms.uTime.value = time;
+  foam.material.uniforms.uWave.value = wave;
 }
