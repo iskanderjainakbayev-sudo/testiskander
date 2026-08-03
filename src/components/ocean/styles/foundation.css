@@ -35,6 +35,7 @@
     linear-gradient(110deg, #01131bd9, #042b3591),
     repeating-linear-gradient(90deg, transparent 0 70px, #87fff806 71px 72px);
   backdrop-filter: blur(8px);
+  animation: ocean-overlay-in .42s cubic-bezier(.2,.8,.2,1);
 }
 
 .ocean-menu {
@@ -150,6 +151,11 @@
 @keyframes ocean-rise {
   from { opacity: 0; transform: translateY(18px); }
   to { opacity: 1; transform: none; }
+}
+
+@keyframes ocean-overlay-in {
+  from { opacity: 0; backdrop-filter: blur(0); }
+  to { opacity: 1; }
 }
 
 .dive-cinematic {
