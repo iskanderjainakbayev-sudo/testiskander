@@ -7,64 +7,115 @@
 }
 
 .ocean-touch-controls button {
+  min-width: 44px;
+  min-height: 44px;
   pointer-events: auto;
   touch-action: none;
-  border: 1px solid #aaf8ed63;
-  color: #dffffa;
-  background: #052d38b8;
-  font-size: 10px;
-  font-weight: 800;
+  border: 1px solid #b9fff56e;
+  border-radius: 16px;
+  color: #eafffc;
+  background: #052d38c9;
+  box-shadow: inset 0 1px #dffffa1f, 0 5px 18px #00101852;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .06em;
   user-select: none;
+  -webkit-tap-highlight-color: transparent;
   -webkit-user-select: none;
 }
 
-.touch-move {
-  position: absolute;
-  bottom: 25px;
-  left: 20px;
-  display: grid;
-  grid-template: repeat(3, 44px) / repeat(3, 44px);
-  gap: 4px;
+.ocean-touch-controls button:active {
+  border-color: #b9fff5;
+  background: #16717be8;
+  transform: scale(.94);
 }
 
+.touch-look-hint {
+  position: absolute;
+  top: 47%;
+  left: 50%;
+  padding: 6px 9px;
+  transform: translate(-50%, -50%);
+  color: #c9f9f58c;
+  font-size: 7px;
+  font-weight: 750;
+  letter-spacing: .16em;
+  animation: touch-hint 4s forwards;
+}
+
+.ocean-touch-controls .touch-menu {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  width: 46px;
+  border-radius: 50%;
+  font-size: 17px;
+}
+
+.touch-utility {
+  position: absolute;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: calc(170px + env(safe-area-inset-bottom));
+  display: flex;
+  gap: 7px;
+}
+
+.touch-utility button { padding: 0 11px; border-radius: 22px; }
+
+.touch-move {
+  position: absolute;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  left: max(16px, env(safe-area-inset-left));
+  display: grid;
+  grid-template: repeat(3, 52px) / repeat(3, 52px);
+  place-items: center;
+}
+
+.touch-move button { width: 50px; height: 50px; border-radius: 18px; font-size: 15px; }
 .touch-move .up { grid-area: 1 / 2; }
 .touch-move .left { grid-area: 2 / 1; }
-.touch-move .down { grid-area: 2 / 2; }
+.touch-move i { grid-area: 2 / 2; width: 24px; height: 24px; border: 1px solid #9ff5e95c; border-radius: 50%; }
 .touch-move .right { grid-area: 2 / 3; }
+.touch-move .down { grid-area: 3 / 2; }
+
+.touch-depth {
+  position: absolute;
+  bottom: calc(25px + env(safe-area-inset-bottom));
+  left: max(184px, calc(env(safe-area-inset-left) + 184px));
+  display: grid;
+  gap: 8px;
+}
+
+.touch-depth button { width: 52px; height: 58px; padding: 0; }
+.touch-depth span { display: block; margin-bottom: 3px; color: var(--aqua); font-size: 13px; }
 
 .touch-actions {
   position: absolute;
-  right: 20px;
-  bottom: 25px;
-  display: grid;
-  grid-template-columns: repeat(2, 56px);
-  gap: 6px;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  width: 178px;
+  height: 142px;
 }
 
-.touch-actions button { height: 42px; border-radius: 50%; font-size: 8px; }
-.touch-actions .interact {
-  height: 56px;
-  color: #05242b;
-  background: #65f1dd;
-  font-size: 16px;
-}
+.touch-actions button { position: absolute; border-radius: 50%; }
+.touch-actions .boost { top: 1px; left: 0; width: 52px; height: 52px; }
+.touch-actions .special-fire { top: 0; right: 26px; width: 54px; height: 54px; border-color: #ff873f; color: #ffe4c8; background: #7b2b1fd9; }
+.touch-actions .interact { bottom: 0; left: 38px; width: 64px; height: 64px; color: #05242b; background: #65f1dd; font-size: 11px; }
+.touch-actions .fire { right: 0; bottom: 0; width: 78px; height: 78px; border-color: #ffd0a1; color: #2d190a; background: #ffb46b; font-size: 12px; }
 
-.touch-actions .fire {
-  border-color: #ffbd7a9c;
-  color: #2d190a;
-  background: #ffb46b;
-}
-
-.touch-actions .special-fire {
-  border-color: #ff873f;
-  color: #fff4da;
-  background: #8e321dcc;
-  box-shadow: 0 0 12px #ff682c4f;
+@keyframes touch-hint {
+  0%, 65% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 @media (hover: none), (pointer: coarse) {
   .ocean-touch-controls { display: block; }
-  .ocean-meters { bottom: 168px; }
-  .ocean-quickbar { display: none; }
-  .sub-readout { bottom: 168px; }
+}
+
+@media (max-width: 540px) and (orientation: portrait) {
+  .touch-move { left: 10px; grid-template: repeat(3, 46px) / repeat(3, 46px); }
+  .touch-move button { width: 44px; height: 44px; }
+  .touch-depth { left: 153px; }
+  .touch-actions { right: 9px; width: 172px; }
+  .touch-utility { right: 10px; }
 }

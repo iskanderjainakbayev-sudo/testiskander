@@ -1,0 +1,62 @@
+@media (hover: none), (pointer: coarse) {
+  .ocean-game { height: 100dvh; min-height: 100dvh; overscroll-behavior: none; }
+  .ocean-overlay { padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)); }
+  .ocean-game button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
+  .ocean-objective { top: max(13px, env(safe-area-inset-top)); left: max(13px, env(safe-area-inset-left)); max-width: 180px; }
+  .ocean-objective b { max-height: 30px; overflow: hidden; font-size: 9px; }
+  .ocean-depth { top: max(10px, env(safe-area-inset-top)); right: calc(max(12px, env(safe-area-inset-right)) + 52px); }
+  .ocean-depth b { font-size: 22px; }
+  .ocean-depth i { max-width: 130px; overflow: hidden; font-size: 7px; text-overflow: ellipsis; white-space: nowrap; }
+  .ocean-climate, .ocean-site, .ocean-controls, .ocean-quickbar, .ocean-sonar { display: none; }
+  .ocean-compass { top: max(68px, calc(env(safe-area-inset-top) + 54px)); }
+  .objective-arrow { top: max(96px, calc(env(safe-area-inset-top) + 82px)); }
+  .ocean-meters { bottom: calc(180px + env(safe-area-inset-bottom)); left: max(14px, env(safe-area-inset-left)); width: 145px; gap: 4px; }
+  .ocean-meter { grid-template-columns: 40px 1fr 22px; gap: 5px; }
+  .ocean-prompt { top: calc(50% + 28px); max-width: 66vw; text-align: center; }
+  .ocean-toast { top: 120px; max-width: 76vw; text-align: center; }
+  .oxygen-warning { bottom: calc(180px + env(safe-area-inset-bottom)); }
+  .weapon-status { right: max(14px, env(safe-area-inset-right)); bottom: calc(220px + env(safe-area-inset-bottom)); max-width: 175px; text-align: right; }
+  .predator-alert { top: 105px; right: max(13px, env(safe-area-inset-right)); transform: scale(.88); transform-origin: top right; }
+  .sub-readout { right: max(14px, env(safe-area-inset-right)); bottom: calc(220px + env(safe-area-inset-bottom)); }
+
+  .ocean-menu { align-items: center; padding: max(22px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left)); overflow-y: auto; }
+  .ocean-menu section { width: 100%; }
+  .ocean-menu h1 { margin: 18px 0; font-size: clamp(54px, 18vw, 88px); }
+  .ocean-menu p { margin-bottom: 20px; font-size: 13px; line-height: 1.55; }
+  .menu-actions { gap: 9px; margin-bottom: 18px; }
+  .menu-actions button, .menu-actions .menu-auth { width: 100%; min-height: 50px; padding: 15px 16px; text-align: center; }
+
+  .ocean-panel { width: 100%; max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 20px); }
+  .ocean-panel header { padding: 14px 15px 12px; }
+  .ocean-panel h2 { font-size: 22px; }
+  .ocean-panel header > button { width: 46px; height: 46px; flex: 0 0 auto; }
+  .craft-panel nav, .pda-tabs, .fauna-filters { padding-right: 15px; padding-left: 15px; overflow-x: auto; scrollbar-width: none; }
+  .craft-panel nav button, .pda-tabs button, .fauna-filters button { min-height: 44px; flex: 0 0 auto; }
+  .recipe-list, .creature-list { padding: 12px 15px 16px; }
+  .recipe-list article { min-height: 116px; padding: 13px; }
+  .recipe-list article > button { min-width: 62px; min-height: 48px; }
+  .pda-log-list { padding: 14px 15px; }
+  .ocean-panel footer { padding: 10px 15px; }
+  .quality-options { padding: 15px; }
+  .quality-options button { min-height: 62px; }
+  .pause-panel { overflow-y: auto; }
+  .pause-panel section { width: min(100%, 380px); padding: 22px; }
+  .pause-panel h2 { margin-bottom: 14px; }
+  .pause-panel button { min-height: 48px; }
+}
+
+@media (pointer: coarse) and (max-height: 520px) {
+  .ocean-objective { max-width: 150px; }
+  .ocean-objective small, .ocean-objective b, .weapon-status small { display: none; }
+  .ocean-compass { top: max(14px, env(safe-area-inset-top)); }
+  .objective-arrow { top: 56px; }
+  .ocean-meters { bottom: calc(166px + env(safe-area-inset-bottom)); }
+  .weapon-status { bottom: calc(174px + env(safe-area-inset-bottom)); }
+  .predator-alert { top: 58px; }
+  .ocean-menu { align-items: start; }
+  .ocean-menu h1 { font-size: 54px; }
+  .ocean-menu p, .ocean-menu > section > small { display: none; }
+  .menu-actions { flex-direction: row; flex-wrap: wrap; }
+  .menu-actions button, .menu-actions .menu-auth { width: auto; }
+}

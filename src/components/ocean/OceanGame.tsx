@@ -16,14 +16,16 @@ import './styles/hud.css';
 import './styles/survival.css';
 import './styles/effects.css';
 import './styles/panels.css';
-import './styles/touch.css';
 import './styles/navigation.css';
+import './styles/touch.css';
+import './styles/mobile.css';
 
 type Screen = 'menu' | 'playing' | 'pause' | 'craft' | 'pda' | 'settings' | 'ending';
 
 function savedQuality(): GraphicsQuality {
   const value = localStorage.getItem('ocean-graphics-quality');
-  return value === 'Low' || value === 'Medium' || value === 'High' || value === 'Ultra' ? value : 'High';
+  if (value === 'Low' || value === 'Medium' || value === 'High' || value === 'Ultra') return value;
+  return matchMedia('(pointer: coarse)').matches ? 'Medium' : 'High';
 }
 
 export function OceanGame() {
@@ -105,7 +107,11 @@ export function OceanGame() {
       />
       {screen !== 'menu' && <OceanHud snapshot={snapshot} />}
       {screen === 'playing' && (
-        <TouchControls onKey={(code, active) => worldRef.current?.setVirtualKey(code, active)} />
+        <TouchControls
+          activeWeapon={snapshot.activeWeapon}
+          onKey={(code, active) => worldRef.current?.setVirtualKey(code, active)}
+          onPause={() => open('pause')}
+        />
       )}
       {screen === 'menu' && (
         <OceanMenu
