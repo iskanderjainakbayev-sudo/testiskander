@@ -7,6 +7,7 @@ const shader = {
     uTime: { value: 0 },
     uDepth: { value: 0 },
     uStrength: { value: 1 },
+    uImmersion: { value: 1 },
   },
   vertexShader: `
     varying vec2 vUv;
@@ -20,6 +21,7 @@ const shader = {
     uniform float uTime;
     uniform float uDepth;
     uniform float uStrength;
+    uniform float uImmersion;
     varying vec2 vUv;
 
     float hash(vec2 p) {
@@ -29,17 +31,20 @@ const shader = {
     void main() {
       vec2 centered = vUv - .5;
       float edge = smoothstep(.28, .82, length(centered));
-      float aberration = .0008 * edge * uStrength;
+      float strength = uStrength * uImmersion;
+      float aberration = .00065 * edge * strength;
       float red = texture2D(tDiffuse, vUv + centered * aberration).r;
       float green = texture2D(tDiffuse, vUv).g;
       float blue = texture2D(tDiffuse, vUv - centered * aberration).b;
       vec3 color = vec3(red, green, blue);
       float depthMix = smoothstep(25., 230., uDepth);
-      color *= mix(vec3(.96, 1.03, 1.04), vec3(.68, .82, 1.14), depthMix * .48);
-      color += vec3(.01, .035, .04) * (1. - edge);
-      color *= 1. - edge * .28 * uStrength;
-      float grain = hash(vUv * vec2(1733., 947.) + floor(uTime * 24.)) - .5;
-      color += grain * .018 * uStrength;
+      color *= mix(vec3(.96, 1.025, 1.035), vec3(.68, .82, 1.14), depthMix * .48 * strength);
+      color += vec3(.01, .032, .037) * (1. - edge) * strength;
+      color *= 1. - edge * .24 * strength;
+      float grainA = hash(gl_FragCoord.xy);
+      float grainB = hash(gl_FragCoord.yx + vec2(19.19, 73.73));
+      float dither = (grainA + grainB - 1.) * .0045;
+      color += dither * strength;
       gl_FragColor = vec4(color, 1.0);
     }
   `,
@@ -52,7 +57,8 @@ export class UnderwaterPostEffect {
   update(time: number, depth: number): void {
     this.pass.uniforms.uTime.value = time;
     this.pass.uniforms.uDepth.value = depth;
-    this.pass.enabled = this.qualityEnabled && depth > .15;
+    this.pass.uniforms.uImmersion.value = THREE.MathUtils.smoothstep(depth, -0.35, 0.45);
+    this.pass.enabled = this.qualityEnabled;
   }
 
   setQuality(quality: GraphicsQuality): void {

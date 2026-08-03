@@ -11,18 +11,34 @@ export interface OceanClimate {
 
 const WEATHER: OceanWeather[] = ['Calm', 'Cloudy', 'Rain', 'Storm', 'Heavy Fog', 'High Swell'];
 
+const WEATHER_VALUES: Record<OceanWeather, { fog: number; waves: number }> = {
+  Calm: { fog: 1, waves: 0.85 },
+  Cloudy: { fog: 1.18, waves: 0.85 },
+  Rain: { fog: 1.42, waves: 1.35 },
+  Storm: { fog: 1.42, waves: 2.5 },
+  'Heavy Fog': { fog: 2.25, waves: 0.85 },
+  'High Swell': { fog: 1, waves: 1.9 },
+};
+
+function smootherstep(value: number): number {
+  const t = Math.max(0, Math.min(1, value));
+  return t * t * t * (t * (t * 6 - 15) + 10);
+}
+
 export function getOceanClimate(elapsed: number): OceanClimate {
   const dayProgress = (elapsed % 240) / 240;
   const daylight = Math.max(0.08, Math.sin(dayProgress * Math.PI * 2 - Math.PI / 2) * 0.5 + 0.5);
   const phase: DayPhase = dayProgress < 0.12 ? 'Dawn'
     : dayProgress < 0.56 ? 'Day'
       : dayProgress < 0.69 ? 'Sunset' : 'Night';
-  const weather = WEATHER[Math.floor(elapsed / 48) % WEATHER.length];
-  const fogMultiplier = weather === 'Heavy Fog' ? 2.25
-    : weather === 'Storm' || weather === 'Rain' ? 1.42
-      : weather === 'Cloudy' ? 1.18 : 1;
-  const waveStrength = weather === 'Storm' ? 2.5
-    : weather === 'High Swell' ? 1.9
-      : weather === 'Rain' ? 1.35 : 0.85;
+  const weatherProgress = Math.max(0, elapsed) / 48;
+  const weatherIndex = Math.floor(weatherProgress) % WEATHER.length;
+  const weather = WEATHER[weatherIndex];
+  const previous = WEATHER[(weatherIndex + WEATHER.length - 1) % WEATHER.length];
+  const transition = smootherstep(Math.min(1, (weatherProgress % 1) * 4));
+  const fogMultiplier = WEATHER_VALUES[previous].fog
+    + (WEATHER_VALUES[weather].fog - WEATHER_VALUES[previous].fog) * transition;
+  const waveStrength = WEATHER_VALUES[previous].waves
+    + (WEATHER_VALUES[weather].waves - WEATHER_VALUES[previous].waves) * transition;
   return { weather, phase, daylight, fogMultiplier, waveStrength };
 }
