@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import type { Species } from './creatureCatalog';
+import { enhanceCreatureMaterials } from './enhanceCreatureMaterials';
 
 const models = import.meta.glob('../../../../assets/models/ocean/abyssal-dragon.glb', {
   eager: true,
@@ -52,6 +53,7 @@ export function createSeaDragonModel(species: Species): THREE.Group {
   new GLTFLoader().load(url, (gltf) => {
     group.clear();
     const model = gltf.scene;
+    enhanceCreatureMaterials(model, species);
     prepareModel(model);
     group.add(model);
   });

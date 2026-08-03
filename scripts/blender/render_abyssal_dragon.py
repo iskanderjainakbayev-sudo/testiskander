@@ -16,7 +16,7 @@ scene.render.image_settings.file_format = "PNG"
 scene.render.filepath = str(PREVIEW)
 scene.world.color = (0.003, 0.008, 0.02)
 
-bpy.ops.object.camera_add(location=(37, -28, -6))
+bpy.ops.object.camera_add(location=(46, -35, -7))
 camera = bpy.context.object
 camera.name = "Preview Camera"
 scene.camera = camera
@@ -50,6 +50,13 @@ bpy.ops.object.light_add(type="POINT", location=(0, -3, -15))
 bpy.context.object.data.energy = 260
 bpy.context.object.data.color = (0.02, 0.25, 1.0)
 
+bpy.ops.object.light_add(type="AREA", location=(16, -18, 9))
+front = bpy.context.object
+front.data.energy = 900
+front.data.color = (0.22, 0.72, 1.0)
+front.data.size = 10
+track(front, Vector((0, 0, -7)))
+
 root = bpy.data.objects.get("Abyssal Dragon")
 if root:
     root.rotation_euler[2] = math.radians(-16)
@@ -61,4 +68,10 @@ for obj in bpy.data.objects:
     obj.rotation_euler[1] = math.sin(index * 0.62) * 0.18
 
 PREVIEW.parent.mkdir(parents=True, exist_ok=True)
+bpy.ops.render.render(write_still=True)
+
+camera.location = (10, -15, 12)
+camera.data.lens = 62
+track(camera, Vector((0, 0, .5)))
+scene.render.filepath = str(PREVIEW.with_name("abyssal-dragon-head-preview.png"))
 bpy.ops.render.render(write_still=True)

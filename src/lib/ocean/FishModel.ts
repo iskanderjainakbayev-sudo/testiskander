@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import type { Species } from './creatureCatalog';
+import { enhanceCreatureMaterials } from './enhanceCreatureMaterials';
 
 const urls = import.meta.glob('../../../../assets/models/ocean/fish/*.glb', {
   eager: true,
@@ -29,6 +30,7 @@ export function replaceWithBlenderFish(group: THREE.Group, species: Species): vo
   if (!pending) return;
   void pending.then((source) => {
     const model = source.clone(true);
+    enhanceCreatureMaterials(model, species);
     model.scale.setScalar(species.size);
     model.traverse((child) => {
       child.frustumCulled = false;
