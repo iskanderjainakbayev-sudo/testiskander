@@ -67,8 +67,9 @@ def fin(name, location, scale, rotation, mat, root):
 
 def eyes(root, eye_mat, pupil_mat, wide=.46, forward=-1.12, height=.16, size=.12):
     for side in (-1, 1):
-        eye = parent(uv(f"weak-point-eye-{side}", (side * wide, forward, height), (size, .075, size), eye_mat, 16, 8), root)
-        parent(uv(f"pupil-{side}", (0, -.98, 0), (size * .48, .14, size * .56), pupil_mat, 12, 6), eye)
+        parent(uv(f"weak-point-eye-{side}", (side * wide, forward, height), (size, .075, size), eye_mat, 16, 8), root)
+        parent(uv(f"pupil-{side}", (side * wide, forward - .073, height),
+                  (size * .48, .014, size * .56), pupil_mat, 12, 6), root)
 
 
 def tail(root, skin, location=(0, 1.42, 0), size=1.0):
