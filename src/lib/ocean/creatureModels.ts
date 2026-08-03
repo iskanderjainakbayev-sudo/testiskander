@@ -48,12 +48,15 @@ function addMarkings(group: THREE.Group, species: Species): void {
 }
 
 export function createCreatureModel(species: Species): THREE.Group {
-  if (species.isBoss) return createSeaDragonModel(species);
   const root = new THREE.Group();
-  const visual = createProceduralBody(species, skinFor(species));
+  const visual = species.isBoss
+    ? createSeaDragonModel(species)
+    : createProceduralBody(species, skinFor(species));
   visual.name = 'creature-visual';
-  addMarkings(visual, species);
-  replaceWithBlenderFish(visual, species);
+  if (!species.isBoss) {
+    addMarkings(visual, species);
+    replaceWithBlenderFish(visual, species);
+  }
   root.add(visual);
   return root;
 }
