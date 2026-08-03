@@ -1,4 +1,5 @@
 import type { BiomeId } from './types';
+import { createCreatureTraits } from './creatureTraits';
 
 export type Temperament = 'passive' | 'neutral' | 'aggressive';
 export type BodyPlan =
@@ -36,6 +37,14 @@ export interface Species extends SpeciesSeed {
   damage: number;
   alertRadius: number;
   length: string;
+  averageSize: string;
+  depthRange: string;
+  preferredBiome: BiomeId;
+  personality: string;
+  ecosystemRole: string;
+  specialAbility: string;
+  loreDescription: string;
+  originalSounds: string[];
   weaknesses: string[];
   strengths: string[];
   scannerEntry: string;
@@ -74,6 +83,13 @@ export function defineSpecies(seed: SpeciesSeed): Species {
   const attack = seed.attack ?? 'bite';
   const pack = seed.pack ?? (temperament === 'passive' ? 3 : 1);
   const isBoss = seed.boss ?? false;
+  const length = `${Math.max(0.2, seed.size * (isBoss ? 15 : 2.4)).toFixed(1)} m`;
+  const callHz = 70 + (hash % 620);
+  const warningHz = 45 + ((hash >> 8) % 310);
+  const traits = createCreatureTraits(
+    seed.name, seed.scientificName, seed.bodyPlan, temperament, attack,
+    seed.behavior, seed.signature, hash, callHz, warningHz,
+  );
   return {
     ...seed,
     temperament,
@@ -83,18 +99,23 @@ export function defineSpecies(seed: SpeciesSeed): Species {
     isBoss,
     damage: isBoss ? 30 : 5 + threat * 4,
     alertRadius: 12 + threat * 4 + ((hash >> 4) % 6),
-    length: `${Math.max(0.2, seed.size * (isBoss ? 15 : 2.4)).toFixed(1)} m`,
+    length,
+    averageSize: length,
+    depthRange: `${seed.band[0]}–${seed.band[1]} m`,
+    preferredBiome: seed.habitat,
+    ...traits,
     weaknesses: [bodyWeakness[seed.bodyPlan], attack === 'shock' ? 'Insulated attacks' : 'Sudden sonic bursts'],
     strengths: [bodyStrength[seed.bodyPlan], seed.signature],
     scannerEntry: `${seed.signature}. ${seed.behavior}`,
     animations: [
-      'idle swim', 'fast swim', 'turn', 'feed', 'sleep', 'look', 'flee', 'injured', 'death',
+      'idle', 'slow swim', 'fast swim', 'turn', 'feed', 'sleep', 'look around',
+      'hunt', 'escape', 'injured', 'death', 'mouth and eye movement', 'fin and tail movement',
       seed.bodyPlan === 'ray' ? 'wing breach' : seed.bodyPlan === 'whale' ? 'surface breach' : `${attack} display`,
     ],
     soundSet: {
       family: `${seed.assetId}-${seed.bodyPlan}`,
-      callHz: 70 + (hash % 620),
-      warningHz: 45 + ((hash >> 8) % 310),
+      callHz,
+      warningHz,
     },
     palette: [seed.color, seed.glow, (seed.color ^ (hash & 0xffffff)) >>> 0],
     silhouette: {
