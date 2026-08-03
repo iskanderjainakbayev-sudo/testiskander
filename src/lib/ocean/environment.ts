@@ -4,6 +4,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { createTerrain, updateTerrainCaustics } from './terrain';
+import { createSeabedDetails } from './seabedDetails';
 import { BIOME_PALETTES } from './biomes';
 import { getOceanClimate } from './climate';
 import type { BiomeId, GraphicsQuality } from './types';
@@ -61,6 +62,7 @@ export class OceanEnvironment {
   private readonly hemi = new THREE.HemisphereLight(0x8dfff1, 0x08292e, 1.4);
   private readonly surface: THREE.Mesh<THREE.PlaneGeometry, THREE.ShaderMaterial>;
   private readonly terrain = createTerrain();
+  private readonly seabedDetails = createSeabedDetails();
   private readonly godRays = createGodRays();
   private readonly particles: WaterParticles;
   private readonly surfaceWorld = createSurfaceWorld();
@@ -76,7 +78,7 @@ export class OceanEnvironment {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.scene.background = new THREE.Color(0x2c9ea7);
     this.scene.fog = new THREE.FogExp2(0x25848d, 0.016);
-    this.scene.add(this.terrain, this.godRays, this.sun, this.hemi, this.surfaceWorld);
+    this.scene.add(this.terrain, this.seabedDetails, this.godRays, this.sun, this.hemi, this.surfaceWorld);
     this.terrain.traverse((object) => {
       if (object instanceof THREE.Mesh) object.receiveShadow = true;
     });
