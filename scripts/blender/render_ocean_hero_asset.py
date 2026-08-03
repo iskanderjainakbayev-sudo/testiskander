@@ -55,3 +55,16 @@ if name == "damaged-lifepod":
     scene.render.filepath = str(closeup)
     bpy.ops.render.render(write_still=True)
     print(f"DAMAGE_PREVIEW {closeup}")
+if name == "nereid-micro-sub":
+    views = [
+        ("side", (10.5,2.2,0), (0,0,0), 62),
+        ("rear", (7.5,3.6,10), (0,0,.55), 64),
+        ("cockpit-detail", (5.2,3.2,-7.4), (0,.2,-1.65), 74),
+    ]
+    for label, location, target, lens in views:
+        camera.location, camera.data.lens = location, lens
+        camera.rotation_euler = (Vector(target)-camera.location).to_track_quat('-Z','Y').to_euler()
+        detail_output = Path('/tmp') / f"nereid-micro-sub-{label}-preview.png"
+        scene.render.filepath = str(detail_output)
+        bpy.ops.render.render(write_still=True)
+        print(f"NEREID_VIEW {detail_output}")

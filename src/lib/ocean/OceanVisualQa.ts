@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import type { GraphicsQuality } from './types';
 
 export const OCEAN_QA_VIEWS = [
   { id: 'menu', label: 'Menu vista', position: [30, -4, 39], target: [0, -7, 8], fov: 69 },
@@ -25,13 +26,28 @@ export interface OceanQaStats {
   droppedFramePercent: number;
   drawCalls: number;
   triangles: number;
+  quality: GraphicsQuality;
+  pixelRatio: number;
+  pixelRatioRange: string;
+  resolution: string;
+  renderer: string;
+  browser: string;
 }
 
 const EMPTY_STATS: OceanQaStats = {
   view: 'menu', phase: 'idle', secondsLeft: 0, sampleCount: 0,
   p50Ms: 0, p95Ms: 0, p99Ms: 0, averageFps: 0, onePercentLowFps: 0,
   droppedFramePercent: 0, drawCalls: 0, triangles: 0,
+  quality: 'High', pixelRatio: 1, pixelRatioRange: '1.00', resolution: '—',
+  renderer: 'WebGL', browser: navigator.userAgent,
 };
+
+function rendererName(renderer: THREE.WebGLRenderer): string {
+  const context = renderer.getContext();
+  const extension = context.getExtension('WEBGL_debug_renderer_info');
+  if (!extension) return renderer.capabilities.isWebGL2 ? 'WebGL 2' : 'WebGL 1';
+  return String(context.getParameter(extension.UNMASKED_RENDERER_WEBGL));
+}
 
 function percentile(sorted: number[], fraction: number): number {
   if (sorted.length === 0) return 0;
@@ -44,13 +60,22 @@ export class OceanVisualQa {
   private phaseStarted = 0;
   private samples: number[] = [];
   private lastPublish = 0;
+  private quality: GraphicsQuality = 'High';
+  private ratioMin = Infinity;
+  private ratioMax = 0;
+  private readonly rendererLabel: string;
 
   constructor(
     private readonly camera: THREE.PerspectiveCamera,
     private readonly renderer: THREE.WebGLRenderer,
     private readonly publish: (stats: OceanQaStats) => void,
   ) {
+    this.rendererLabel = rendererName(renderer);
     this.publish({ ...EMPTY_STATS });
+  }
+
+  setQuality(quality: GraphicsQuality): void {
+    this.quality = quality;
   }
 
   select(viewId: OceanQaViewId): void {
@@ -64,6 +89,8 @@ export class OceanVisualQa {
     this.samples = [];
     this.phase = 'warmup';
     this.phaseStarted = now;
+    this.ratioMin = Infinity;
+    this.ratioMax = 0;
     this.publishStats(now);
   }
 
@@ -80,6 +107,9 @@ export class OceanVisualQa {
       this.phaseStarted = now;
     } else if (this.phase === 'sampling') {
       this.samples.push(rawFrameMs);
+      const ratio = this.renderer.getPixelRatio();
+      this.ratioMin = Math.min(this.ratioMin, ratio);
+      this.ratioMax = Math.max(this.ratioMax, ratio);
       if (now - this.phaseStarted >= 10_000) this.phase = 'complete';
     }
     if (now - this.lastPublish >= 120) this.publishStats(now);
@@ -94,6 +124,10 @@ export class OceanVisualQa {
     const activeDuration = this.phase === 'warmup' ? 2_000 : 10_000;
     const secondsLeft = ['warmup', 'sampling'].includes(this.phase)
       ? Math.max(0, (activeDuration - (now - this.phaseStarted)) / 1000) : 0;
+    const bufferSize = this.renderer.getDrawingBufferSize(new THREE.Vector2());
+    const pixelRatio = this.renderer.getPixelRatio();
+    const minRatio = Number.isFinite(this.ratioMin) ? this.ratioMin : pixelRatio;
+    const maxRatio = this.ratioMax > 0 ? this.ratioMax : pixelRatio;
     this.publish({
       view: this.view.id, phase: this.phase, secondsLeft, sampleCount: this.samples.length,
       p50Ms: percentile(sorted, 0.5), p95Ms: percentile(sorted, 0.95), p99Ms,
@@ -103,6 +137,13 @@ export class OceanVisualQa {
         ? sorted.filter((value) => value > 16.667).length / sorted.length * 100 : 0,
       drawCalls: this.renderer.info.render.calls,
       triangles: this.renderer.info.render.triangles,
+      quality: this.quality,
+      pixelRatio,
+      pixelRatioRange: Math.abs(maxRatio - minRatio) < .01
+        ? `${pixelRatio.toFixed(2)} stable` : `${minRatio.toFixed(2)}–${maxRatio.toFixed(2)} adaptive`,
+      resolution: `${Math.round(bufferSize.x)}×${Math.round(bufferSize.y)}`,
+      renderer: this.rendererLabel,
+      browser: navigator.userAgent,
     });
   }
 }

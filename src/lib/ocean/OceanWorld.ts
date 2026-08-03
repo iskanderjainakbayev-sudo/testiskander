@@ -133,6 +133,7 @@ export class OceanWorld {
 
   setQuality(quality: GraphicsQuality): void {
     this.environment.setQuality(quality);
+    this.visualQa?.setQuality(quality);
   }
 
   dispose(): void {

@@ -55,6 +55,11 @@ export function OceanQaPanel({ stats, cleanFrame, onCleanFrame, onSelect, onProf
           </div>
           <p>{busy ? `${stats.phase} · ${stats.secondsLeft.toFixed(1)}s · ${stats.sampleCount} frames`
             : stats.phase === 'complete' ? `${stats.sampleCount} measured frames` : '2s warmup + 10s sample'}</p>
+          <div className="ocean-qa-runtime">
+            <b>{stats.quality} · {stats.resolution} · DPR {stats.pixelRatioRange}</b>
+            <span>{stats.renderer}</span>
+            <small title={stats.browser}>{stats.browser}</small>
+          </div>
           <footer>
             <button type="button" disabled={busy} onClick={onProfile}>PROFILE VIEW</button>
             <label>

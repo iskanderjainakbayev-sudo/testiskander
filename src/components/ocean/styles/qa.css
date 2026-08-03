@@ -22,6 +22,9 @@
   justify-content: space-between;
   gap: 8px;
 }
+.ocean-qa-runtime { display: grid; gap: 3px; margin: 8px 0; color: #9bcac6; font-size: 7px; line-height: 1.3; }
+.ocean-qa-runtime b { color: #dffdfa; font-size: 8px; }
+.ocean-qa-runtime small { overflow: hidden; opacity: .68; text-overflow: ellipsis; white-space: nowrap; }
 
 .ocean-qa-panel header strong { color: #7ffff0; font-size: 11px; letter-spacing: .2em; }
 .ocean-qa-panel header small { margin-left: 10px; color: #84a9aa; text-transform: uppercase; }
