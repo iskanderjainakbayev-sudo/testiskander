@@ -53,6 +53,7 @@ export function createSurfaceWorld(): THREE.Group {
     cloud.name = 'surface-cloud';
     cloud.scale.set(8 + index % 3, 1.2, 3.2);
     cloud.position.set(-95 + index * 31, 27 + index % 2 * 6, -65 + (index % 3) * 42);
+    cloud.userData.baseX = cloud.position.x;
     group.add(cloud);
   }
   return group;
@@ -62,7 +63,7 @@ export function updateSurfaceWorld(group: THREE.Group, time: number): void {
   group.children
     .filter((child) => child.name === 'surface-cloud')
     .forEach((cloud, index) => {
-      cloud.position.x += Math.sin(time * 0.08 + index) * 0.006;
+      cloud.position.x = (cloud.userData.baseX as number) + Math.sin(time * 0.08 + index) * 2.2;
     });
   group.traverse((child) => {
     if (child.name === 'surface-foam') {

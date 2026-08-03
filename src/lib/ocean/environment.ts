@@ -102,10 +102,9 @@ export class OceanEnvironment {
       );
       this.scene.fog.density = THREE.MathUtils.lerp(this.scene.fog.density, targetDensity, blend);
     }
-    this.hemi.intensity = palette.light * (0.38 + climate.daylight * 0.62);
     this.particles.update(time, this.camera);
     updateSurfaceWorld(this.surfaceWorld, time);
-    this.underwaterPost.update(time, Math.max(0, -this.camera.position.y));
+    this.underwaterPost.update(time, -this.camera.position.y);
     const underwaterLight = palette.light * (0.38 + climate.daylight * 0.62);
     const surfaceLight = 0.45 + climate.daylight * 1.85;
     this.hemi.intensity = THREE.MathUtils.lerp(underwaterLight, surfaceLight, surfaceBlend);

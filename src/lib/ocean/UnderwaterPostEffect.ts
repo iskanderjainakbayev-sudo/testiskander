@@ -57,7 +57,7 @@ export class UnderwaterPostEffect {
 
   update(time: number, depth: number): void {
     this.pass.uniforms.uTime.value = time;
-    this.pass.uniforms.uDepth.value = depth;
+    this.pass.uniforms.uDepth.value = Math.max(0, depth);
     this.pass.uniforms.uImmersion.value = THREE.MathUtils.smoothstep(depth, -0.35, 0.45);
     this.pass.enabled = this.qualityEnabled;
   }

@@ -10,6 +10,8 @@ export class PlayerController {
   moving = false;
   private yaw = Math.PI;
   private pitch = 0.08;
+  private targetYaw = Math.PI;
+  private targetPitch = 0.08;
   private readonly velocity = new THREE.Vector3();
   private staminaRecoveryDelay = 0;
   readonly position = new THREE.Vector3(0, -1.2, 2);
@@ -30,6 +32,8 @@ export class PlayerController {
     this.staminaRecoveryDelay = 0;
     this.yaw = Math.PI;
     this.pitch = 0.08;
+    this.targetYaw = this.yaw;
+    this.targetPitch = this.pitch;
     this.syncCamera();
   }
 
@@ -37,8 +41,16 @@ export class PlayerController {
     const [lookX, lookY] = this.input.takeLook();
     const keyLookX = Number(this.input.isDown('ArrowRight')) - Number(this.input.isDown('ArrowLeft'));
     const keyLookY = Number(this.input.isDown('ArrowDown')) - Number(this.input.isDown('ArrowUp'));
-    this.yaw -= lookX * 0.00215 + keyLookX * delta * 1.65;
-    this.pitch = THREE.MathUtils.clamp(this.pitch - lookY * 0.0018 - keyLookY * delta * 1.35, -1.38, 1.38);
+    this.targetYaw -= lookX * 0.00215 + keyLookX * delta * 1.65;
+    this.targetPitch = THREE.MathUtils.clamp(
+      this.targetPitch - lookY * 0.0018 - keyLookY * delta * 1.35,
+      -1.38,
+      1.38,
+    );
+    const lookBlend = 1 - Math.exp(-delta * 24);
+    const yawDelta = Math.atan2(Math.sin(this.targetYaw - this.yaw), Math.cos(this.targetYaw - this.yaw));
+    this.yaw += yawDelta * lookBlend;
+    this.pitch = THREE.MathUtils.lerp(this.pitch, this.targetPitch, lookBlend);
     const forward = new THREE.Vector3(
       -Math.sin(this.yaw) * Math.cos(this.pitch),
       Math.sin(this.pitch),

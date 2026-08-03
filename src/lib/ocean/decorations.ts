@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { createHabitat, type HabitatModules } from './habitat';
+import { hydrateOceanHero } from './OceanHeroModels';
 import { floorAt, seededRandom } from './terrain';
 
 export interface OceanDecor {
@@ -87,6 +88,7 @@ function createPod(): THREE.Group {
   const stripe = new THREE.Mesh(new THREE.TorusGeometry(2.7, 0.32, 8, 24), material(0xf2703f, 0x542211));
   stripe.rotateX(Math.PI / 2);
   group.add(shell, stripe);
+  hydrateOceanHero(group, 'damaged-lifepod');
   group.position.set(0, -1.1, 8);
   return group;
 }
@@ -100,6 +102,7 @@ function createSubmarine(): THREE.Group {
   const fin = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.14, 1.6), material(0xe86e3d));
   fin.position.z = 0.6;
   group.add(hull, glass, fin);
+  hydrateOceanHero(group, 'nereid-micro-sub');
   group.position.set(7, -5, 9);
   group.visible = false;
   return group;

@@ -10,6 +10,7 @@ export function createGodRays(): THREE.Group {
     blending: THREE.AdditiveBlending,
     side: THREE.DoubleSide,
   });
+  group.userData.material = material;
   for (let index = 0; index < 11; index += 1) {
     const height = 25 + index * 2.4;
     const ray = new THREE.Mesh(new THREE.ConeGeometry(1.1 + index * 0.12, height, 8, 1, true), material);
@@ -23,7 +24,10 @@ export function createGodRays(): THREE.Group {
 }
 
 export function updateGodRays(group: THREE.Group, time: number, depth: number): void {
-  group.visible = depth < 72;
+  const fade = 1 - THREE.MathUtils.smoothstep(depth, 48, 72);
+  const material = group.userData.material as THREE.MeshBasicMaterial;
+  material.opacity = 0.035 * fade;
+  group.visible = fade > 0.002;
   group.rotation.y = Math.sin(time * 0.035) * 0.18;
   for (const object of group.children) {
     const phase = object.userData.phase as number;

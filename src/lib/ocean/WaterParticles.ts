@@ -31,14 +31,17 @@ function createLayer(count: number, radius: number, size: number, opacity: numbe
 export class WaterParticles {
   private readonly bubbles = createLayer(150, 95, 0.16, 0.5, 0xc8ffff);
   private readonly marineSnow = createLayer(340, 72, 0.055, 0.34, 0xb8e8d9);
+  private lastTime = 0;
 
   constructor(scene: THREE.Scene) {
     scene.add(this.bubbles.points, this.marineSnow.points);
   }
 
   update(time: number, camera: THREE.Camera): void {
-    this.moveLayer(this.bubbles, 0.035, 47);
-    this.moveLayer(this.marineSnow, -0.004, 36);
+    const delta = this.lastTime === 0 ? 1 / 60 : Math.min(0.05, Math.max(0, time - this.lastTime));
+    this.lastTime = time;
+    this.moveLayer(this.bubbles, 2.1 * delta, 47);
+    this.moveLayer(this.marineSnow, -0.24 * delta, 36);
     this.bubbles.points.position.copy(camera.position).multiplyScalar(0.42);
     this.marineSnow.points.position.copy(camera.position).multiplyScalar(0.7);
     this.marineSnow.points.rotation.y = time * 0.012;
