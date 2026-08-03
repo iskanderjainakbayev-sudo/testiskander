@@ -7,6 +7,8 @@ const rockGeometry = new THREE.IcosahedronGeometry(1, 2);
 const pebbleGeometry = new THREE.IcosahedronGeometry(1, 1);
 const glowGeometry = new THREE.SphereGeometry(1, 10, 7);
 const ringGeometry = new THREE.TorusGeometry(1, 0.1, 6, 20);
+const tipGeometry = new THREE.ConeGeometry(0.62, 3.1, 9);
+const mouthGeometry = new THREE.CircleGeometry(0.72, 12);
 const ventGeometry = new THREE.LatheGeometry([
   new THREE.Vector2(0.9, 0), new THREE.Vector2(1.12, 0.7),
   new THREE.Vector2(0.66, 2.3), new THREE.Vector2(0.78, 4.6),
@@ -73,7 +75,7 @@ function createSpire(random: () => number): THREE.Group {
         height * t + radius, (column - 1) * 0.65),
       new THREE.Vector3(radius, height * 0.16, radius * 0.78), rocks.spire, random() * 4);
     }
-    const tip = new THREE.Mesh(new THREE.ConeGeometry(0.62, 3.1, 9), rocks.spire);
+    const tip = new THREE.Mesh(tipGeometry, rocks.spire);
     tip.position.set(baseX + Math.sin(column) * 0.3, height + 0.35, (column - 1) * 0.65);
     tip.rotation.z = (column - 1) * 0.12;
     group.add(tip);
@@ -99,7 +101,7 @@ function createVent(random: () => number): THREE.Group {
     vent.rotation.z = (random() - 0.5) * 0.1;
     group.add(vent);
     const mouthY = 6.75 * height + 0.035;
-    const mouth = new THREE.Mesh(new THREE.CircleGeometry(0.72, 12), accents.vent);
+    const mouth = new THREE.Mesh(mouthGeometry, accents.vent);
     mouth.rotation.x = -Math.PI / 2;
     mouth.position.set(vent.position.x, mouthY, vent.position.z);
     mouth.scale.setScalar(vent.scale.x);

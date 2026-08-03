@@ -16,7 +16,7 @@ scene.render.image_settings.file_format = "PNG"
 scene.render.filepath = str(PREVIEW)
 scene.world.color = (0.003, 0.008, 0.02)
 
-bpy.ops.object.camera_add(location=(48, 14, -9))
+bpy.ops.object.camera_add(location=(37, -28, -6))
 camera = bpy.context.object
 camera.name = "Preview Camera"
 scene.camera = camera
@@ -29,7 +29,7 @@ def track(obj, point):
 
 from mathutils import Vector
 camera.data.lens = 52
-track(camera, Vector((0, 0, -10)))
+track(camera, Vector((0, 0, -8)))
 
 bpy.ops.object.light_add(type="AREA", location=(4, 9, 7))
 key = bpy.context.object
