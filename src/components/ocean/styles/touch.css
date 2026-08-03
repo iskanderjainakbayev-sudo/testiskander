@@ -62,21 +62,40 @@
 
 .touch-utility button { padding: 0 11px; border-radius: 22px; }
 
-.touch-move {
+.touch-joystick {
   position: absolute;
   bottom: calc(16px + env(safe-area-inset-bottom));
   left: max(16px, env(safe-area-inset-left));
-  display: grid;
-  grid-template: repeat(3, 52px) / repeat(3, 52px);
-  place-items: center;
+  width: 148px;
+  height: 148px;
+  pointer-events: auto;
+  touch-action: none;
+  border: 2px solid #b9fff54d;
+  border-radius: 50%;
+  background: radial-gradient(circle, #0d45527a 0 24%, #05273169 25% 64%, #65f1dd12 65%);
+  box-shadow: inset 0 0 24px #65f1dd12, 0 8px 25px #00101847;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.touch-move button { width: 50px; height: 50px; border-radius: 18px; font-size: 15px; }
-.touch-move .up { grid-area: 1 / 2; }
-.touch-move .left { grid-area: 2 / 1; }
-.touch-move i { grid-area: 2 / 2; width: 24px; height: 24px; border: 1px solid #9ff5e95c; border-radius: 50%; }
-.touch-move .right { grid-area: 2 / 3; }
-.touch-move .down { grid-area: 3 / 2; }
+.touch-joystick .joystick-ring {
+  position: absolute;
+  inset: 20px;
+  border: 1px solid #9ff5e92e;
+  border-radius: 50%;
+}
+
+.touch-joystick span {
+  position: absolute;
+  top: 48px;
+  left: 48px;
+  width: 50px;
+  height: 50px;
+  border: 2px solid #d9fffa9c;
+  border-radius: 50%;
+  background: #2a9c9ecf;
+  box-shadow: inset 0 2px #efffffa8, 0 5px 16px #00171f9c;
+  transition: transform 55ms linear;
+}
 
 .touch-depth {
   position: absolute;
@@ -98,7 +117,6 @@
 }
 
 .touch-actions button { position: absolute; border-radius: 50%; }
-.touch-actions .boost { top: 1px; left: 0; width: 52px; height: 52px; }
 .touch-actions .special-fire { top: 0; right: 26px; width: 54px; height: 54px; border-color: #ff873f; color: #ffe4c8; background: #7b2b1fd9; }
 .touch-actions .interact { bottom: 0; left: 38px; width: 64px; height: 64px; color: #05242b; background: #65f1dd; font-size: 11px; }
 .touch-actions .fire { right: 0; bottom: 0; width: 78px; height: 78px; border-color: #ffd0a1; color: #2d190a; background: #ffb46b; font-size: 12px; }
@@ -113,8 +131,8 @@
 }
 
 @media (max-width: 540px) and (orientation: portrait) {
-  .touch-move { left: 10px; grid-template: repeat(3, 46px) / repeat(3, 46px); }
-  .touch-move button { width: 44px; height: 44px; }
+  .touch-joystick { left: 8px; width: 140px; height: 140px; }
+  .touch-joystick span { top: 44px; left: 44px; }
   .touch-depth { left: 153px; }
   .touch-actions { right: 9px; width: 172px; }
   .touch-utility { right: 10px; }
