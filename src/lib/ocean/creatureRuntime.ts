@@ -27,6 +27,8 @@ export interface CreatureActor {
   ecosystemThreat: CreatureActor | null;
   ecosystemCheckAt: number;
   corpseUntil: number;
+  velocity: THREE.Vector3;
+  turnBank: number;
 }
 
 export interface WeaponHit {
@@ -67,6 +69,8 @@ export function createCreatureActor(
     ecosystemThreat: null,
     ecosystemCheckAt: 0,
     corpseUntil: 0,
+    velocity: new THREE.Vector3(0, 0, -species.speed * .35),
+    turnBank: 0,
   };
 }
 
@@ -167,7 +171,9 @@ export function respawnCreature(creature: CreatureActor): void {
   creature.ecosystemTarget = null;
   creature.ecosystemThreat = null;
   creature.mesh.position.copy(creature.home);
-  creature.mesh.rotation.z = 0;
+  creature.mesh.quaternion.identity();
+  creature.velocity.set(0, 0, -creature.species.speed * .35);
+  creature.turnBank = 0;
   creature.mesh.scale.setScalar(1);
   creature.mesh.visible = true;
 }

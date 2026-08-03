@@ -10,6 +10,7 @@ import type { BiomeId, GraphicsQuality } from './types';
 import { createGodRays, updateGodRays } from './waterEffects';
 import { WaterParticles } from './WaterParticles';
 import { createSurfaceWorld, updateSurfaceWorld } from './surfaceWorld';
+import { UnderwaterPostEffect } from './UnderwaterPostEffect';
 
 const SURFACE_VERTEX = `
   varying vec2 vUv;
@@ -50,6 +51,7 @@ export class OceanEnvironment {
   private readonly godRays = createGodRays();
   private readonly particles: WaterParticles;
   private readonly surfaceWorld = createSurfaceWorld();
+  private readonly underwaterPost = new UnderwaterPostEffect();
 
   constructor(readonly canvas: HTMLCanvasElement) {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
@@ -103,6 +105,7 @@ export class OceanEnvironment {
     this.hemi.intensity = palette.light * (0.38 + climate.daylight * 0.62);
     this.particles.update(time, this.camera);
     updateSurfaceWorld(this.surfaceWorld, time);
+    this.underwaterPost.update(time, Math.max(0, -this.camera.position.y));
     if (this.camera.position.y > 0.12) {
       const surfaceSky = new THREE.Color(climate.phase === 'Night' ? 0x07142e
         : climate.phase === 'Sunset' ? 0xc27865 : 0x78c8dc);
@@ -120,6 +123,7 @@ export class OceanEnvironment {
       : quality === 'Medium' ? 1 : quality === 'High' ? 1.4 : 1.8;
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, pixelRatio));
     this.renderer.shadowMap.enabled = quality === 'High' || quality === 'Ultra';
+    this.underwaterPost.setQuality(quality);
     this.resize();
   }
 
@@ -161,6 +165,7 @@ export class OceanEnvironment {
     composer.addPass(new RenderPass(this.scene, this.camera));
     const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.58, 0.42, 0.78);
     composer.addPass(bloom);
+    composer.addPass(this.underwaterPost.pass);
     composer.addPass(new OutputPass());
     return composer;
   }

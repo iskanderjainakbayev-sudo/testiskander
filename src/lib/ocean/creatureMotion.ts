@@ -12,8 +12,11 @@ export function animateCreature(
   const sleeping = mode === 'sleep';
   const beat = time * (fast ? 10 : sleeping ? 1.2 : 4.5) + phase;
   const injury = healthRatio < .45 ? .58 : 1;
-  mesh.rotation.z = mode === 'dead' ? THREE.MathUtils.lerp(mesh.rotation.z, Math.PI * .72, .04)
-    : Math.sin(beat * .48) * (fast ? .16 : .07);
+  const visual = mesh.getObjectByName('creature-visual') ?? mesh;
+  const bank = mesh.userData.turnBank as number | undefined ?? 0;
+  visual.rotation.z = mode === 'dead' ? THREE.MathUtils.lerp(visual.rotation.z, Math.PI * .72, .04)
+    : THREE.MathUtils.lerp(visual.rotation.z, bank + Math.sin(beat * .48) * (fast ? .1 : .035), .12);
+  visual.position.y = sleeping ? Math.sin(beat) * .025 : Math.sin(beat * .52) * (fast ? .045 : .08);
   const tail = mesh.getObjectByName('swim-tail');
   if (tail) tail.rotation.y = Math.sin(beat) * (fast ? .7 : .38) * injury;
   for (const side of [-1, 1]) {
@@ -46,7 +49,7 @@ export function animateCreature(
   mesh.children.filter((child) => child.name.startsWith('leg-')).forEach((leg, index) => {
     leg.rotation.x = Math.sin(beat * .72 + index) * (fast ? .42 : .18);
   });
-  if (mode === 'warn') mesh.scale.setScalar(1 + Math.sin(time * 9) * .045);
+  if (mode === 'warn') visual.scale.setScalar(1 + Math.sin(time * 9) * .045);
   const hitScale = time < (mesh.userData.hitUntil as number | undefined ?? 0) ? 1.14 : 1;
-  if (mode !== 'warn') mesh.scale.lerp(new THREE.Vector3(hitScale, hitScale, hitScale), 0.22);
+  if (mode !== 'warn') visual.scale.lerp(new THREE.Vector3(hitScale, hitScale, hitScale), 0.22);
 }

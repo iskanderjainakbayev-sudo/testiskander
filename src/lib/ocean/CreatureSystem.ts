@@ -14,6 +14,8 @@ import {
   type CreatureMode,
 } from './creatureRuntime';
 import { floorAt, seededRandom } from './terrain';
+import { updateCreatureLocomotion } from './creatureLocomotion';
+import { CreatureWake } from './CreatureWake';
 
 export interface PredatorAlert {
   name: string;
@@ -30,15 +32,19 @@ export class CreatureSystem {
   private readonly creatures: CreatureActor[] = [];
   private readonly random = seededRandom(8492);
   private readonly raycaster = new THREE.Raycaster();
+  private readonly wake: CreatureWake;
 
   constructor(scene: THREE.Scene) {
     SPECIES.forEach((species, speciesIndex) => {
-      const count = species.isBoss ? 1 : species.pack >= 5 ? 3 : species.pack >= 2 ? 2 : 1;
+      const count = species.isBoss ? 1 : species.pack >= 5 ? 4 : species.pack >= 2 ? 2 : 1;
+      const radius = species.band[0] + this.random() * (species.band[1] - species.band[0]);
+      const angle = this.random() * Math.PI * 2;
+      const schoolCenter = new THREE.Vector3(Math.cos(angle) * radius, 0, 8 + Math.sin(angle) * radius);
       for (let index = 0; index < count; index += 1) {
-        const radius = species.band[0] + this.random() * (species.band[1] - species.band[0]);
-        const angle = this.random() * Math.PI * 2;
-        const x = Math.cos(angle) * radius;
-        const z = 8 + Math.sin(angle) * radius;
+        const spread = count === 1 ? 0 : 2.5 + this.random() * 3.5;
+        const schoolAngle = this.random() * Math.PI * 2;
+        const x = schoolCenter.x + Math.cos(schoolAngle) * spread;
+        const z = schoolCenter.z + Math.sin(schoolAngle) * spread;
         const floor = floorAt(x, z);
         const home = new THREE.Vector3(x, floor + 3 + this.random() * Math.min(14, radius * 0.12), z);
         const mesh = createCreatureModel(species);
@@ -47,6 +53,7 @@ export class CreatureSystem {
         this.creatures.push(createCreatureActor(species, mesh, home, speciesIndex + index * 1.7));
       }
     });
+    this.wake = new CreatureWake(scene);
   }
 
   update(
@@ -83,8 +90,7 @@ export class CreatureSystem {
       const speed = creature.species.speed * speedMultiplier;
       if (direction.lengthSq() > 0.05) {
         direction.normalize();
-        creature.mesh.position.addScaledVector(direction, speed * delta);
-        creature.mesh.lookAt(creature.mesh.position.clone().add(direction));
+        updateCreatureLocomotion(creature, this.creatures, target, speed, delta, time);
       }
       animateCreature(creature.mesh, creature.phase, time, brainIntent.mode, creature.health / creature.maxHealth);
       if (hostile && (!alert || distance < alert.distance)) {
@@ -124,6 +130,7 @@ export class CreatureSystem {
         creature.ecosystemTarget = null;
       }
     }
+    this.wake.update(delta, time, this.creatures);
     return alert;
   }
 
