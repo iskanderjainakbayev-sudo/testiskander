@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import type { GraphicsQuality } from './types';
 

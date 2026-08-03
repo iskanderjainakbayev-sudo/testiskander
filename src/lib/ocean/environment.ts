@@ -12,45 +12,7 @@ import { createGodRays, updateGodRays } from './waterEffects';
 import { WaterParticles } from './WaterParticles';
 import { createSurfaceWorld, updateSurfaceWorld } from './surfaceWorld';
 import { UnderwaterPostEffect } from './UnderwaterPostEffect';
-
-const SURFACE_VERTEX = `
-  varying vec2 vUv;
-  varying vec3 vWorldPosition;
-  varying vec3 vWorldNormal;
-  uniform float uTime;
-  uniform float uWave;
-  void main() {
-    vUv = uv;
-    vec3 p = position;
-    float waveA = sin(p.x * .075 + uTime * 1.15);
-    float waveB = cos(p.y * .055 - uTime * .82);
-    float ripple = sin((p.x + p.y) * .16 + uTime * 1.7) * .18;
-    p.z += (waveA * .62 + waveB * .4 + ripple) * uWave;
-    vWorldPosition = (modelMatrix * vec4(p, 1.)).xyz;
-    vWorldNormal = normalize(mat3(modelMatrix) * vec3(-waveA * .055, -waveB * .045, 1.));
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
-  }
-`;
-
-const SURFACE_FRAGMENT = `
-  varying vec2 vUv;
-  varying vec3 vWorldPosition;
-  varying vec3 vWorldNormal;
-  uniform float uTime;
-  void main() {
-    float waveA = sin(vUv.x * 92. + uTime * 2.7);
-    float waveB = cos(vUv.y * 76. - uTime * 2.1);
-    float microWave = sin((vUv.x + vUv.y) * 170. + uTime * 3.4);
-    float glint = pow(max(0., waveA * waveB * .7 + microWave * .3), 12.);
-    float horizon = smoothstep(0., .85, distance(vUv, vec2(.5)));
-    vec3 viewDirection = normalize(cameraPosition - vWorldPosition);
-    float fresnel = pow(1. - abs(dot(viewDirection, normalize(vWorldNormal))), 3.);
-    vec3 water = mix(vec3(.035, .38, .48), vec3(.24, .88, .83), glint);
-    water = mix(water, vec3(.12, .57, .72), fresnel * .72);
-    water = mix(water, vec3(.03, .25, .34), horizon * .55);
-    gl_FragColor = vec4(water, .5 + fresnel * .22);
-  }
-`;
+import { SURFACE_FRAGMENT, SURFACE_VERTEX } from './oceanSurface';
 
 export class OceanEnvironment {
   readonly scene = new THREE.Scene();
@@ -67,6 +29,8 @@ export class OceanEnvironment {
   private readonly particles: WaterParticles;
   private readonly surfaceWorld = createSurfaceWorld();
   private readonly underwaterPost = new UnderwaterPostEffect();
+  private readonly visualColor = new THREE.Color(0x2c9ea7);
+  private lastVisualTime = 0;
 
   constructor(readonly canvas: HTMLCanvasElement) {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
@@ -84,7 +48,11 @@ export class OceanEnvironment {
     });
     this.sun.position.set(-35, 70, 25);
     this.sun.castShadow = true;
+    this.sun.shadow.bias = -0.00012;
+    this.sun.shadow.normalBias = 0.035;
     this.sun.shadow.mapSize.set(1024, 1024);
+    this.sun.shadow.camera.near = 1;
+    this.sun.shadow.camera.far = 180;
     this.sun.shadow.camera.left = -90;
     this.sun.shadow.camera.right = 90;
     this.sun.shadow.camera.top = 90;
@@ -103,35 +71,44 @@ export class OceanEnvironment {
 
   update(time: number, elapsed: number, biome: BiomeId, lightsOn: boolean): void {
     const climate = getOceanClimate(elapsed);
+    const visualDelta = this.lastVisualTime === 0 ? 1 / 60 : Math.min(0.05, time - this.lastVisualTime);
+    this.lastVisualTime = time;
+    const blend = 1 - Math.exp(-visualDelta * 2.8);
     this.surface.material.uniforms.uTime.value = time;
     this.surface.material.uniforms.uWave.value = climate.waveStrength;
     updateTerrainCaustics(this.terrain, time);
     updateGodRays(this.godRays, time, Math.max(0, -this.camera.position.y));
     this.godRays.position.set(this.camera.position.x, 0, this.camera.position.z);
-    this.sun.position.x = Math.sin(time * 0.025) * 55;
-    this.sun.intensity = (1.65 + climate.daylight * 1.2) * (climate.weather === 'Storm' ? 0.48 : 1);
+    const sunOffsetX = Math.sin(time * 0.025) * 55;
+    this.sun.position.set(this.camera.position.x + sunOffsetX, 70, this.camera.position.z + 25);
+    this.sun.target.position.set(this.camera.position.x, -12, this.camera.position.z);
+    this.sun.target.updateMatrixWorld();
+    this.sun.intensity = (1.65 + climate.daylight * 1.2) * climate.sunMultiplier;
     this.light.intensity = lightsOn ? 48 : 0;
     const palette = BIOME_PALETTES[biome];
-    const color = new THREE.Color(palette.color).multiplyScalar(0.42 + climate.daylight * 0.58);
-    this.scene.background = color;
+    const underwaterColor = new THREE.Color(palette.color).multiplyScalar(0.42 + climate.daylight * 0.58);
+    const surfaceSky = new THREE.Color(climate.phase === 'Night' ? 0x07142e
+      : climate.phase === 'Sunset' ? 0xc27865 : 0x78c8dc);
+    const surfaceBlend = THREE.MathUtils.smoothstep(this.camera.position.y, -0.35, 0.5);
+    const color = underwaterColor.lerp(surfaceSky, surfaceBlend);
+    this.visualColor.lerp(color, blend);
+    this.scene.background = this.visualColor;
     if (this.scene.fog instanceof THREE.FogExp2) {
-      this.scene.fog.color.copy(color);
-      this.scene.fog.density = palette.fog * climate.fogMultiplier;
+      this.scene.fog.color.copy(this.visualColor);
+      const targetDensity = THREE.MathUtils.lerp(
+        palette.fog * climate.fogMultiplier,
+        0.0022 * climate.fogMultiplier,
+        surfaceBlend,
+      );
+      this.scene.fog.density = THREE.MathUtils.lerp(this.scene.fog.density, targetDensity, blend);
     }
     this.hemi.intensity = palette.light * (0.38 + climate.daylight * 0.62);
     this.particles.update(time, this.camera);
     updateSurfaceWorld(this.surfaceWorld, time);
     this.underwaterPost.update(time, Math.max(0, -this.camera.position.y));
-    if (this.camera.position.y > 0.12) {
-      const surfaceSky = new THREE.Color(climate.phase === 'Night' ? 0x07142e
-        : climate.phase === 'Sunset' ? 0xc27865 : 0x78c8dc);
-      this.scene.background = surfaceSky;
-      if (this.scene.fog instanceof THREE.FogExp2) {
-        this.scene.fog.color.copy(surfaceSky);
-        this.scene.fog.density = 0.0022 * climate.fogMultiplier;
-      }
-      this.hemi.intensity = 0.45 + climate.daylight * 1.85;
-    }
+    const underwaterLight = palette.light * (0.38 + climate.daylight * 0.62);
+    const surfaceLight = 0.45 + climate.daylight * 1.85;
+    this.hemi.intensity = THREE.MathUtils.lerp(underwaterLight, surfaceLight, surfaceBlend);
   }
 
   setQuality(quality: GraphicsQuality): void {

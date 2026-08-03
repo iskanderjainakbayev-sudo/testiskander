@@ -7,17 +7,18 @@ export interface OceanClimate {
   daylight: number;
   fogMultiplier: number;
   waveStrength: number;
+  sunMultiplier: number;
 }
 
 const WEATHER: OceanWeather[] = ['Calm', 'Cloudy', 'Rain', 'Storm', 'Heavy Fog', 'High Swell'];
 
-const WEATHER_VALUES: Record<OceanWeather, { fog: number; waves: number }> = {
-  Calm: { fog: 1, waves: 0.85 },
-  Cloudy: { fog: 1.18, waves: 0.85 },
-  Rain: { fog: 1.42, waves: 1.35 },
-  Storm: { fog: 1.42, waves: 2.5 },
-  'Heavy Fog': { fog: 2.25, waves: 0.85 },
-  'High Swell': { fog: 1, waves: 1.9 },
+const WEATHER_VALUES: Record<OceanWeather, { fog: number; waves: number; sun: number }> = {
+  Calm: { fog: 1, waves: 0.85, sun: 1 },
+  Cloudy: { fog: 1.18, waves: 0.85, sun: 0.78 },
+  Rain: { fog: 1.42, waves: 1.35, sun: 0.65 },
+  Storm: { fog: 1.42, waves: 2.5, sun: 0.48 },
+  'Heavy Fog': { fog: 2.25, waves: 0.85, sun: 0.68 },
+  'High Swell': { fog: 1, waves: 1.9, sun: 0.92 },
 };
 
 function smootherstep(value: number): number {
@@ -40,5 +41,7 @@ export function getOceanClimate(elapsed: number): OceanClimate {
     + (WEATHER_VALUES[weather].fog - WEATHER_VALUES[previous].fog) * transition;
   const waveStrength = WEATHER_VALUES[previous].waves
     + (WEATHER_VALUES[weather].waves - WEATHER_VALUES[previous].waves) * transition;
-  return { weather, phase, daylight, fogMultiplier, waveStrength };
+  const sunMultiplier = WEATHER_VALUES[previous].sun
+    + (WEATHER_VALUES[weather].sun - WEATHER_VALUES[previous].sun) * transition;
+  return { weather, phase, daylight, fogMultiplier, waveStrength, sunMultiplier };
 }
