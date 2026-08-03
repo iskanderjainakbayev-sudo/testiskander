@@ -29,7 +29,8 @@ def hull(material):
         polygon.use_smooth = True
     obj = bpy.data.objects.new("tapered-pressure-hull", mesh)
     bpy.context.collection.objects.link(obj)
-    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=1, location=(0,.42,-1.95))
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=16, radius=1,
+                                        location=(0,.42,-1.95))
     cutter = bpy.context.object
     cutter.scale = (.64,.57,.8)
     opening = obj.modifiers.new("canopy pressure aperture", 'BOOLEAN')

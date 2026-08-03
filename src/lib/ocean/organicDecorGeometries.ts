@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-
 function paint(geometry: THREE.BufferGeometry, color: number): THREE.BufferGeometry {
   const value = new THREE.Color(color);
   const colors = new Float32Array(geometry.getAttribute('position').count * 3);
@@ -8,7 +7,6 @@ function paint(geometry: THREE.BufferGeometry, color: number): THREE.BufferGeome
   geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
   return geometry;
 }
-
 function curvedTube(points: THREE.Vector3[], radius: number, color: number): THREE.BufferGeometry {
   return paint(new THREE.TubeGeometry(
     new THREE.CatmullRomCurve3(points), 7, radius, 6, false,
