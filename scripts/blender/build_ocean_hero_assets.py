@@ -5,6 +5,7 @@ from math import pi
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from ocean_hero_utils import reset, mat, uv, cube, cylinder, torus, curve, fin_mesh, parent_all
 from ocean_lifepod_damage import add_lifepod_damage
+from ocean_nereid_details import hull as nereid_hull, cockpit, service_panels, propulsion
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "assets" / "models" / "ocean" / "hero"
@@ -28,7 +29,7 @@ def build_nereid():
     ivory, edge, coral, glass, cyan, red = palette()
     root = bpy.data.objects.new("nereid-micro-sub", None)
     bpy.context.collection.objects.link(root)
-    uv("hydrodynamic-hull", (0, 0, 0), (1.08, 1.0, 2.7), ivory, 48, 24)
+    nereid_hull(ivory).parent = root
     uv("canopy", (0, .36, -1.92), (.75, .67, 1.05), glass, 40, 20)
     torus("canopy-pressure-seal", (0, .29, -1.75), .79, .075, edge)
     curve("orange-keel-stripe", [(-.83, -.18, -1.45), (-.94, -.22, 0), (-.65, -.16, 1.75)], .075, coral)
@@ -45,6 +46,9 @@ def build_nereid():
     cube("dorsal-sensor", (0, 1.02, .25), (.11, .32, .62), edge, .06, (.22, 0, 0))
     uv("sensor-pearl", (0, 1.17, -.35), (.18, .18, .22), cyan, 20, 10)
     torus("aft-service-ring", (0, 0, 1.5), .86, .085, coral)
+    cockpit(root, edge, glass, cyan)
+    service_panels(root, ivory, edge, coral)
+    propulsion(root, edge, coral, cyan)
     parent_all(root)
     export(root, "nereid-micro-sub")
 
