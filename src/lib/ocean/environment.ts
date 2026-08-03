@@ -13,6 +13,7 @@ import { WaterParticles } from './WaterParticles';
 import { createSurfaceWorld, updateSurfaceWorld } from './surfaceWorld';
 import { UnderwaterPostEffect } from './UnderwaterPostEffect';
 import { SURFACE_FRAGMENT, SURFACE_VERTEX } from './oceanSurface';
+import { OceanResolutionScaler } from './OceanResolutionScaler';
 
 export class OceanEnvironment {
   readonly scene = new THREE.Scene();
@@ -30,6 +31,7 @@ export class OceanEnvironment {
   private readonly particles: WaterParticles;
   private readonly surfaceWorld = createSurfaceWorld();
   private readonly underwaterPost = new UnderwaterPostEffect();
+  private readonly resolutionScaler: OceanResolutionScaler;
   private readonly visualColor = new THREE.Color(0x2c9ea7);
   private lastVisualTime = 0;
 
@@ -67,6 +69,7 @@ export class OceanEnvironment {
     this.camera.add(this.light.target);
     this.scene.add(this.camera);
     this.composer = this.createComposer();
+    this.resolutionScaler = new OceanResolutionScaler(this.renderer, this.composer);
     this.resize();
   }
 
@@ -112,11 +115,7 @@ export class OceanEnvironment {
   }
 
   setQuality(quality: GraphicsQuality): void {
-    const pixelRatio = quality === 'Low' ? 0.75
-      : quality === 'Medium' ? 1 : quality === 'High' ? 1.35 : 1.65;
-    const effectivePixelRatio = Math.min(devicePixelRatio, pixelRatio);
-    this.renderer.setPixelRatio(effectivePixelRatio);
-    this.composer.setPixelRatio(effectivePixelRatio);
+    this.resolutionScaler.setQuality(quality);
     this.renderer.shadowMap.enabled = quality === 'High' || quality === 'Ultra';
     this.bloom.enabled = quality !== 'Low';
     this.bloom.strength = quality === 'Medium' ? 0.42 : quality === 'High' ? 0.55 : 0.64;
@@ -140,6 +139,10 @@ export class OceanEnvironment {
 
   render(): void {
     this.composer.render();
+  }
+
+  samplePerformance(delta: number): void {
+    this.resolutionScaler.sample(delta);
   }
 
   private createSurface() {

@@ -151,6 +151,7 @@ export class OceanWorld {
         const blend = 1 - Math.exp(-delta * 1.8);
         this.smoothedFps = THREE.MathUtils.lerp(this.smoothedFps, 1 / delta, blend);
       }
+      this.environment.samplePerformance(delta);
       const time = now / 1000;
       if (!this.running) this.cinematic.updateMenu(time, this.environment.camera);
       else if (!this.paused) this.update(delta, now, time);
