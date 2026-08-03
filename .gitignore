@@ -6,6 +6,8 @@ dist-ssr
 .env.local
 .DS_Store
 *.log
+__pycache__/
+*.pyc
 .vercel
 supabase/.temp
 supabase/.branches
