@@ -95,6 +95,10 @@ export class OceanWorld {
     this.input.setVirtualKey(code, active);
   }
 
+  setVirtualMove(x: number, forward: number): void {
+    this.input.setVirtualMove(x, forward);
+  }
+
   craft(recipeId: RecipeId): boolean {
     const result = this.actions.craft(recipeId);
     this.publish(performance.now());

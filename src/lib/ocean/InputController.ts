@@ -7,6 +7,8 @@ export class InputController {
   private lookTouchId: number | null = null;
   private touchX = 0;
   private touchY = 0;
+  private virtualMoveX = 0;
+  private virtualMoveForward = 0;
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
@@ -42,6 +44,10 @@ export class InputController {
     return result;
   }
 
+  virtualMove(): [number, number] {
+    return [this.virtualMoveX, this.virtualMoveForward];
+  }
+
   requestLock(): void {
     this.canvas.focus();
     if (document.pointerLockElement === this.canvas || !this.canvas.requestPointerLock) return;
@@ -64,6 +70,11 @@ export class InputController {
     } else {
       this.virtualKeys.delete(code);
     }
+  }
+
+  setVirtualMove(x: number, forward: number): void {
+    this.virtualMoveX = Math.max(-1, Math.min(1, x));
+    this.virtualMoveForward = Math.max(-1, Math.min(1, forward));
   }
 
   dispose(): void {
@@ -112,6 +123,8 @@ export class InputController {
     this.keys.clear();
     this.virtualKeys.clear();
     this.pressed.clear();
+    this.virtualMoveX = 0;
+    this.virtualMoveForward = 0;
   };
 
   private readonly handleLockChange = () => {
@@ -132,8 +145,8 @@ export class InputController {
   private readonly onTouchMove = (event: TouchEvent) => {
     const touch = Array.from(event.changedTouches).find((item) => item.identifier === this.lookTouchId);
     if (!touch) return;
-    this.lookX += (touch.clientX - this.touchX) * 0.72;
-    this.lookY += (touch.clientY - this.touchY) * 0.72;
+    this.lookX += (touch.clientX - this.touchX) * 1.18;
+    this.lookY += (touch.clientY - this.touchY) * 1.18;
     this.touchX = touch.clientX;
     this.touchY = touch.clientY;
     event.preventDefault();

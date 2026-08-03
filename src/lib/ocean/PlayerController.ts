@@ -46,10 +46,11 @@ export class PlayerController {
     );
     const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
     const movement = new THREE.Vector3();
-    if (this.input.isDown('KeyW')) movement.add(forward);
-    if (this.input.isDown('KeyS')) movement.sub(forward);
-    if (this.input.isDown('KeyD')) movement.add(right);
-    if (this.input.isDown('KeyA')) movement.sub(right);
+    const [stickX, stickForward] = this.input.virtualMove();
+    const forwardInput = stickForward + Number(this.input.isDown('KeyW')) - Number(this.input.isDown('KeyS'));
+    const sideInput = stickX + Number(this.input.isDown('KeyD')) - Number(this.input.isDown('KeyA'));
+    movement.addScaledVector(forward, THREE.MathUtils.clamp(forwardInput, -1, 1));
+    movement.addScaledVector(right, THREE.MathUtils.clamp(sideInput, -1, 1));
     if (this.input.isDown('Space')) movement.y += 1;
     if (this.input.isDown('ControlLeft') || this.input.isDown('ControlRight')) movement.y -= 1;
     const moving = movement.lengthSq() > 0;
@@ -69,7 +70,8 @@ export class PlayerController {
     const sprint = this.accelerating ? (inSub ? 1.55 : 1.72) : 1;
     const battery = inSub && state.subBattery <= 0 ? 0.24 : 1;
     const speed = (inSub ? 11.5 : 5.1 * fins) * sprint * battery;
-    if (moving) movement.normalize().multiplyScalar(speed);
+    const movementStrength = Math.min(1, movement.length());
+    if (moving) movement.normalize().multiplyScalar(speed * movementStrength);
     this.velocity.lerp(movement, 1 - Math.exp(-delta * (inSub ? 3.8 : 5.5)));
     this.position.addScaledVector(this.velocity, delta);
     const radius = Math.hypot(this.position.x, this.position.z - 8);

@@ -110,6 +110,7 @@ export function OceanGame() {
         <TouchControls
           activeWeapon={snapshot.activeWeapon}
           onKey={(code, active) => worldRef.current?.setVirtualKey(code, active)}
+          onMove={(x, forward) => worldRef.current?.setVirtualMove(x, forward)}
           onPause={() => open('pause')}
         />
       )}
