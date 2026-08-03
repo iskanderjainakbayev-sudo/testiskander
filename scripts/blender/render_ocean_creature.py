@@ -15,7 +15,10 @@ scene.render.resolution_y = 520
 scene.render.resolution_percentage = 100
 scene.render.image_settings.file_format = "PNG"
 scene.render.filepath = str(preview)
-scene.world.color = (0.002, 0.012, 0.025)
+scene.world.use_nodes = True
+background = scene.world.node_tree.nodes.get("Background")
+background.inputs["Color"].default_value = (0.001, 0.012, 0.022, 1)
+background.inputs["Strength"].default_value = .22
 
 
 def point_at(obj, target):
@@ -41,6 +44,13 @@ fill.data.energy = 330
 fill.data.color = (1, 0.2, 0.06)
 fill.data.size = 4
 point_at(fill, Vector((0, 0, 0)))
+
+bpy.ops.object.light_add(type="AREA", location=(0, 4, -2))
+rim = bpy.context.object
+rim.data.energy = 420
+rim.data.color = (0.02, 0.75, 0.92)
+rim.data.size = 3
+point_at(rim, Vector((0, 0, 0)))
 
 preview.parent.mkdir(parents=True, exist_ok=True)
 bpy.ops.render.render(write_still=True)

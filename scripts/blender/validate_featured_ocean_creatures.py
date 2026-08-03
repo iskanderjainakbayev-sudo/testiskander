@@ -14,7 +14,7 @@ for name, path in (("reef-fang", ASSETS / "fish" / "reef-fang.glb"),
     names = {obj.name for obj in bpy.context.scene.objects}
     required = {"swim-tail", "swim-fin-1", "swim-fin--1"}
     if name == "reef-fang":
-        required |= {"weak-point-eye-1", "weak-point-eye--1"}
+        required |= {"weak-point-pupil-1", "weak-point-pupil--1", "articulated-lower-jaw"}
     else:
         required |= {"dragon-segment-00", "dragon-segment-17"}
     missing = required - names
