@@ -159,7 +159,7 @@ export class OceanEnvironment {
       side: THREE.DoubleSide,
       depthWrite: false,
     });
-    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(620, 620, 112, 112), material);
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(620, 620, 160, 160), material);
     mesh.rotateX(-Math.PI / 2);
     mesh.position.y = 0.15;
     mesh.renderOrder = 1;
