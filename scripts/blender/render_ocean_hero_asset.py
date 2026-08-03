@@ -30,7 +30,8 @@ for location, energy, color, size in [
     bpy.context.collection.objects.link(light)
     light.rotation_euler = (Vector((0, 0, 0)) - light.location).to_track_quat('-Z', 'Y').to_euler()
 
-bpy.ops.object.camera_add(location=(8.5, 5.4, -9.5))
+camera_location = (11.5, 7.2, -15.5) if name == "damaged-lifepod" else (8.5, 5.4, -9.5)
+bpy.ops.object.camera_add(location=camera_location)
 camera = bpy.context.object
 camera.rotation_euler = (Vector((0, 0, 0)) - camera.location).to_track_quat('-Z', 'Y').to_euler()
 camera.data.lens = 58
@@ -45,3 +46,12 @@ scene.render.film_transparent = False
 scene.view_settings.look = 'AgX - Medium High Contrast'
 bpy.ops.render.render(write_still=True)
 print(f"PREVIEW {output}")
+if name == "damaged-lifepod":
+    damage = Vector((1.75, .12, -2.35))
+    camera.location = (7.2, 3.6, -9.4)
+    camera.rotation_euler = (damage - camera.location).to_track_quat('-Z', 'Y').to_euler()
+    camera.data.lens = 72
+    closeup = Path("/tmp/damaged-lifepod-damage-preview.png")
+    scene.render.filepath = str(closeup)
+    bpy.ops.render.render(write_still=True)
+    print(f"DAMAGE_PREVIEW {closeup}")

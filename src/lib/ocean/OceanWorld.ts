@@ -11,7 +11,7 @@ import { OceanControls } from './OceanControls';
 import { OceanInteraction } from './OceanInteraction';
 import { OceanSessionActions } from './OceanSessionActions';
 import { OceanState } from './OceanState';
-import { OceanVisualQa, type OceanQaStats, type OceanQaViewId } from './OceanVisualQa';
+import { OceanVisualQa, type OceanQaStats } from './OceanVisualQa';
 import { PlayerController } from './PlayerController';
 import type { GraphicsQuality, Interactable, OceanSnapshot, RecipeId, WorldEvent } from './types';
 import { WorldContent } from './WorldContent';
@@ -41,7 +41,7 @@ export class OceanWorld {
   private lastSave = 0;
   private smoothedFps = 60;
   private failed = false;
-  private readonly visualQa: OceanVisualQa | null;
+  readonly visualQa: OceanVisualQa | null;
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -133,14 +133,6 @@ export class OceanWorld {
 
   setQuality(quality: GraphicsQuality): void {
     this.environment.setQuality(quality);
-  }
-
-  selectQaView(view: OceanQaViewId): void {
-    this.visualQa?.select(view);
-  }
-
-  profileQaView(): void {
-    this.visualQa?.startProfile();
   }
 
   dispose(): void {
