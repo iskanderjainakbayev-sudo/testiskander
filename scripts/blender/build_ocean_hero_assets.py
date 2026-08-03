@@ -83,6 +83,10 @@ def build_lifepod():
 
 
 def export(root, name):
+    for obj in bpy.context.scene.objects:
+        if obj.type == 'MESH':
+            for polygon in obj.data.polygons:
+                polygon.use_smooth = True
     bpy.context.view_layer.objects.active = root
     bpy.ops.wm.save_as_mainfile(filepath=str(OUT / f"{name}.blend"))
     bpy.ops.export_scene.gltf(filepath=str(OUT / f"{name}.glb"), export_format='GLB',

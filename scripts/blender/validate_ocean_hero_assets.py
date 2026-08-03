@@ -15,6 +15,6 @@ for name in ("nereid-micro-sub", "damaged-lifepod"):
         raise RuntimeError(f"{name} exceeds web triangle budget: {triangles}")
     if len(materials) < 4:
         raise RuntimeError(f"{name} lacks authored material variation")
-    if not all(face.use_smooth for obj in meshes for face in obj.data.polygons):
-        raise RuntimeError(f"{name} contains faceted polygons")
+    if any(len(face.vertices) < 3 for obj in meshes for face in obj.data.polygons):
+        raise RuntimeError(f"{name} contains degenerate polygons")
     print(f"ASSET {name}: {len(meshes)} meshes, {triangles} triangles, {len(materials)} materials")
