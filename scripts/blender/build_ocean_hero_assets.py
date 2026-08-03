@@ -28,21 +28,21 @@ def build_nereid():
     bpy.context.collection.objects.link(root)
     uv("hydrodynamic-hull", (0, 0, 0), (1.08, 1.0, 2.7), ivory, 48, 24)
     uv("canopy", (0, .36, -1.92), (.75, .67, 1.05), glass, 40, 20)
-    torus("canopy-pressure-seal", (0, .29, -1.75), .79, .075, edge, (pi / 2, 0, 0))
+    torus("canopy-pressure-seal", (0, .29, -1.75), .79, .075, edge)
     curve("orange-keel-stripe", [(-.83, -.18, -1.45), (-.94, -.22, 0), (-.65, -.16, 1.75)], .075, coral)
     curve("orange-keel-stripe-r", [(.83, -.18, -1.45), (.94, -.22, 0), (.65, -.16, 1.75)], .075, coral)
     for side in (-1, 1):
         x = side * 1.16
-        cylinder(f"thruster-{side}", (x, 0, .9), .36, 1.28, edge, (pi / 2, 0, 0), 32)
-        torus(f"thruster-shroud-{side}", (x, 0, .24), .36, .075, coral, (pi / 2, 0, 0))
-        cylinder(f"thruster-core-{side}", (x, 0, .22), .17, .09, cyan, (pi / 2, 0, 0), 24)
+        cylinder(f"thruster-{side}", (x, 0, .9), .36, 1.28, edge, vertices=32)
+        torus(f"thruster-shroud-{side}", (x, 0, .24), .36, .075, coral)
+        cylinder(f"thruster-core-{side}", (x, 0, .22), .17, .09, cyan, vertices=24)
         fin_mesh(f"manta-fin-{side}", [(side*.72, 0, -.2), (side*2.15, -.03, .3),
                  (side*1.75, -.02, 1.08), (side*.72, 0, .72), (side*.72, .11, -.2),
                  (side*2.15, .06, .3), (side*1.75, .07, 1.08), (side*.72, .11, .72)], ivory)
         uv(f"nav-light-{side}", (side*.91, .28, -1.38), (.07, .07, .16), red if side < 0 else cyan, 16, 8)
     cube("dorsal-sensor", (0, 1.02, .25), (.11, .32, .62), edge, .06, (.22, 0, 0))
     uv("sensor-pearl", (0, 1.17, -.35), (.18, .18, .22), cyan, 20, 10)
-    torus("aft-service-ring", (0, 0, 1.5), .86, .085, coral, (pi / 2, 0, 0))
+    torus("aft-service-ring", (0, 0, 1.5), .86, .085, coral)
     parent_all(root)
     export(root, "nereid-micro-sub")
 
@@ -55,13 +55,14 @@ def build_lifepod():
     uv("pressure-shell", (0, 0, 0), (3.25, 1.95, 3.05), ivory, 48, 24)
     uv("lower-heat-shield", (0, -1.08, .2), (3.12, .92, 2.82), edge, 40, 16)
     torus("equatorial-rescue-band", (0, 0, 0), 3.0, .22, coral, (pi / 2, 0, 0))
-    torus("forward-hatch-frame", (0, .22, -2.82), 1.08, .17, edge, (pi / 2, 0, 0))
-    cylinder("forward-hatch", (0, .22, -2.92), .89, .16, coral, (pi / 2, 0, 0), 40)
+    torus("forward-hatch-frame", (0, .22, -2.82), 1.08, .17, edge)
+    cylinder("forward-hatch", (0, .22, -2.92), .89, .16, coral, vertices=40)
     for side in (-1, 1):
         uv(f"observation-window-{side}", (side*2.17, .57, -1.12), (.72, .48, .84), glass, 32, 16)
         curve(f"roll-cage-{side}", [(side*2.72, -1.1, -1.6), (side*3.28, 0, 0),
               (side*2.75, .9, 1.7)], .12, edge)
-        cylinder(f"landing-shock-{side}", (side*2.25, -1.72, .7), .16, 2.1, edge, (0, 0, .18*side), 20)
+        cylinder(f"landing-shock-{side}", (side*2.25, -1.72, .7), .16, 2.1, edge,
+                 (pi / 2, 0, .18*side), 20)
         cube(f"landing-foot-{side}", (side*2.45, -2.57, .85), (.65, .12, .34), edge, .1)
     curve("antenna", [(1.4, 1.62, .65), (1.55, 2.65, .7), (1.72, 3.4, .82)], .07, edge)
     uv("distress-beacon", (1.72, 3.43, .82), (.18, .18, .18), red, 20, 10)

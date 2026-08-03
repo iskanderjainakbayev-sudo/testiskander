@@ -22,11 +22,18 @@ function createIsland(x: number, z: number, scale: number): THREE.Group {
   }
   const foam = new THREE.Mesh(
     new THREE.RingGeometry(5.2 * scale, 7.1 * scale, 42),
-    new THREE.MeshBasicMaterial({ color: 0xd8fff9, transparent: true, opacity: 0.3, side: THREE.DoubleSide }),
+    new THREE.MeshBasicMaterial({
+      color: 0xd8fff9,
+      transparent: true,
+      opacity: 0.3,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+    }),
   );
   foam.rotation.x = -Math.PI / 2;
   foam.position.y = 0.23;
   foam.name = 'surface-foam';
+  foam.renderOrder = 2;
   group.add(foam);
   group.position.set(x, 0, z);
   return group;

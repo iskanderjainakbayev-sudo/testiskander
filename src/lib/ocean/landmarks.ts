@@ -18,7 +18,15 @@ function createTablet(): THREE.Group {
   );
   const screen = new THREE.Mesh(
     new THREE.PlaneGeometry(0.56, 0.78),
-    new THREE.MeshBasicMaterial({ color: 0x8dfff1, transparent: true, opacity: 0.88 }),
+    new THREE.MeshBasicMaterial({
+      color: 0x8dfff1,
+      transparent: true,
+      opacity: 0.88,
+      depthWrite: false,
+      polygonOffset: true,
+      polygonOffsetFactor: -2,
+      polygonOffsetUnits: -2,
+    }),
   );
   screen.rotation.x = -Math.PI / 2;
   screen.position.y = 0.07;
@@ -68,4 +76,3 @@ export function createLandmarks(scene: THREE.Scene, decor: OceanDecor): Interact
   });
   return interactions;
 }
-

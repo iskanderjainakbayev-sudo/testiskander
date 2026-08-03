@@ -35,7 +35,7 @@ export function getOceanClimate(elapsed: number): OceanClimate {
   const weatherProgress = Math.max(0, elapsed) / 48;
   const weatherIndex = Math.floor(weatherProgress) % WEATHER.length;
   const weather = WEATHER[weatherIndex];
-  const previous = WEATHER[(weatherIndex + WEATHER.length - 1) % WEATHER.length];
+  const previous = elapsed < 48 ? WEATHER[0] : WEATHER[(weatherIndex + WEATHER.length - 1) % WEATHER.length];
   const transition = smootherstep(Math.min(1, (weatherProgress % 1) * 4));
   const fogMultiplier = WEATHER_VALUES[previous].fog
     + (WEATHER_VALUES[weather].fog - WEATHER_VALUES[previous].fog) * transition;

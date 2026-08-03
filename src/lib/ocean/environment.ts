@@ -19,6 +19,7 @@ export class OceanEnvironment {
   readonly camera = new THREE.PerspectiveCamera(76, 1, 0.08, 520);
   readonly renderer: THREE.WebGLRenderer;
   private readonly composer: EffectComposer;
+  private readonly bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.58, 0.42, 0.78);
   readonly light = new THREE.SpotLight(0xbffcff, 0, 32, Math.PI / 5, 0.7);
   private readonly sun = new THREE.DirectionalLight(0xd9fff5, 2.7);
   private readonly hemi = new THREE.HemisphereLight(0x8dfff1, 0x08292e, 1.4);
@@ -112,9 +113,13 @@ export class OceanEnvironment {
 
   setQuality(quality: GraphicsQuality): void {
     const pixelRatio = quality === 'Low' ? 0.75
-      : quality === 'Medium' ? 1 : quality === 'High' ? 1.4 : 1.8;
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio, pixelRatio));
+      : quality === 'Medium' ? 1 : quality === 'High' ? 1.35 : 1.65;
+    const effectivePixelRatio = Math.min(devicePixelRatio, pixelRatio);
+    this.renderer.setPixelRatio(effectivePixelRatio);
+    this.composer.setPixelRatio(effectivePixelRatio);
     this.renderer.shadowMap.enabled = quality === 'High' || quality === 'Ultra';
+    this.bloom.enabled = quality !== 'Low';
+    this.bloom.strength = quality === 'Medium' ? 0.42 : quality === 'High' ? 0.55 : 0.64;
     this.underwaterPost.setQuality(quality);
     this.resize();
   }
@@ -149,14 +154,14 @@ export class OceanEnvironment {
     const mesh = new THREE.Mesh(new THREE.PlaneGeometry(620, 620, 48, 48), material);
     mesh.rotateX(-Math.PI / 2);
     mesh.position.y = 0.15;
+    mesh.renderOrder = 1;
     return mesh;
   }
 
   private createComposer(): EffectComposer {
     const composer = new EffectComposer(this.renderer);
     composer.addPass(new RenderPass(this.scene, this.camera));
-    const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.58, 0.42, 0.78);
-    composer.addPass(bloom);
+    composer.addPass(this.bloom);
     composer.addPass(this.underwaterPost.pass);
     composer.addPass(new OutputPass());
     return composer;

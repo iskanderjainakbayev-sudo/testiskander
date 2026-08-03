@@ -49,9 +49,16 @@ function createResourceMesh(id: ResourceId): THREE.Group {
   if (!['stone', 'scrap', 'copper'].includes(id)) {
     const halo = new THREE.Mesh(
       new THREE.RingGeometry(0.65, 0.72, 18),
-      new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.28, side: THREE.DoubleSide }),
+      new THREE.MeshBasicMaterial({
+        color,
+        transparent: true,
+        opacity: 0.28,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+      }),
     );
     halo.rotateX(-Math.PI / 2);
+    halo.renderOrder = 1;
     group.add(halo);
   }
   return group;
