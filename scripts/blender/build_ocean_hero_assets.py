@@ -14,11 +14,11 @@ bpy.context.preferences.filepaths.save_version = 0
 
 def palette():
     return (
-        mat("warm ceramic hull", (.57, .62, .58), metallic=.32, roughness=.2),
-        mat("graphite pressure frame", (.025, .055, .06), metallic=.78, roughness=.2),
+        mat("warm ceramic hull", (.43, .49, .47), metallic=.32, roughness=.24),
+        mat("graphite pressure frame", (.055, .11, .12), metallic=.7, roughness=.26),
         mat("rescue orange", (.86, .16, .045), metallic=.25, roughness=.26),
         mat("polarized canopy", (.015, .19, .25), metallic=.35, roughness=.08,
-            emission=(.015, .11, .15), alpha=.82),
+            emission=(.003, .018, .024), alpha=.18),
         mat("cyan navigation light", (.05, .7, .8), roughness=.18, emission=(.03, .8, 1)),
         mat("port navigation light", (.8, .025, .01), roughness=.2, emission=(1, .01, 0)),
     )
@@ -30,12 +30,12 @@ def build_nereid():
     root = bpy.data.objects.new("nereid-micro-sub", None)
     bpy.context.collection.objects.link(root)
     nereid_hull(ivory).parent = root
-    uv("canopy", (0, .36, -1.92), (.75, .67, 1.05), glass, 40, 20)
-    torus("canopy-pressure-seal", (0, .29, -1.75), .79, .075, edge)
+    uv("canopy", (0, .34, -1.96), (.67, .5, .88), glass, 40, 20)
+    torus("canopy-pressure-seal", (0, .29, -1.76), .67, .068, edge)
     curve("orange-keel-stripe", [(-.83, -.18, -1.45), (-.94, -.22, 0), (-.65, -.16, 1.75)], .075, coral)
     curve("orange-keel-stripe-r", [(.83, -.18, -1.45), (.94, -.22, 0), (.65, -.16, 1.75)], .075, coral)
     for side in (-1, 1):
-        x = side * 1.16
+        x = side * 1.42
         cylinder(f"thruster-{side}", (x, 0, .9), .36, 1.28, edge, vertices=32)
         torus(f"thruster-shroud-{side}", (x, 0, .24), .36, .075, coral)
         cylinder(f"thruster-core-{side}", (x, 0, .22), .17, .09, cyan, vertices=24)
@@ -46,6 +46,9 @@ def build_nereid():
     cube("dorsal-sensor", (0, 1.02, .25), (.11, .32, .62), edge, .06, (.22, 0, 0))
     uv("sensor-pearl", (0, 1.17, -.35), (.18, .18, .22), cyan, 20, 10)
     torus("aft-service-ring", (0, 0, 1.5), .86, .085, coral)
+    for z, radius in ((-.5,1.04),(.68,.98)):
+        seam = torus(f"pressure-panel-seam-{z}", (0,0,z), radius,.025,edge)
+        seam.scale.y = .9
     cockpit(root, edge, glass, cyan)
     service_panels(root, ivory, edge, coral)
     propulsion(root, edge, coral, cyan)

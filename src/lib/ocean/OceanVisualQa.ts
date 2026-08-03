@@ -34,7 +34,7 @@ export interface OceanQaStats {
   browser: string;
 }
 
-const EMPTY_STATS: OceanQaStats = {
+export const EMPTY_OCEAN_QA_STATS: OceanQaStats = {
   view: 'menu', phase: 'idle', secondsLeft: 0, sampleCount: 0,
   p50Ms: 0, p95Ms: 0, p99Ms: 0, averageFps: 0, onePercentLowFps: 0,
   droppedFramePercent: 0, drawCalls: 0, triangles: 0,
@@ -71,7 +71,7 @@ export class OceanVisualQa {
     private readonly publish: (stats: OceanQaStats) => void,
   ) {
     this.rendererLabel = rendererName(renderer);
-    this.publish({ ...EMPTY_STATS });
+    this.publish({ ...EMPTY_OCEAN_QA_STATS });
   }
 
   setQuality(quality: GraphicsQuality): void {

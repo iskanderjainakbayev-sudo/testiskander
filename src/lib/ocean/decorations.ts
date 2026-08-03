@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { createHabitat, type HabitatModules } from './habitat';
 import { hydrateOceanHero } from './OceanHeroModels';
-import { floorAt, seededRandom } from './terrain';
+import { createBiomeDecorField } from './biomeDecorField';
 
 export interface OceanDecor {
   plants: THREE.Object3D[];
@@ -15,64 +15,10 @@ function material(color: number, emissive = 0): THREE.MeshStandardMaterial {
   return new THREE.MeshStandardMaterial({ color, emissive, emissiveIntensity: emissive ? 1.8 : 0, roughness: 0.72 });
 }
 
-function createCoral(random: () => number): THREE.Group {
-  const group = new THREE.Group();
-  const colors = [0xff8b7b, 0xffcc66, 0x8cf1c5, 0xb895ff];
-  for (let arm = 0; arm < 4 + random() * 4; arm += 1) {
-    const height = 0.5 + random() * 1.8;
-    const mesh = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.16, height, 6), material(colors[arm % colors.length]));
-    mesh.position.set((random() - 0.5) * 0.8, height / 2, (random() - 0.5) * 0.8);
-    mesh.rotation.z = (random() - 0.5) * 0.45;
-    group.add(mesh);
-  }
-  return group;
-}
-
-function createKelp(random: () => number): THREE.Group {
-  const group = new THREE.Group();
-  for (let stem = 0; stem < 3; stem += 1) {
-    const height = 5 + random() * 7;
-    const mesh = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.24, height, 7), material(0x2fbd88, 0x0a4f3d));
-    mesh.position.set((stem - 1) * 0.45, height / 2, (random() - 0.5) * 0.5);
-    mesh.userData.phase = random() * Math.PI * 2;
-    group.add(mesh);
-    for (let leaf = 1; leaf < 4; leaf += 1) {
-      const frond = new THREE.Mesh(new THREE.SphereGeometry(0.55, 6, 4), material(0x7cf7af, 0x175d36));
-      frond.scale.set(0.25, 1.2, 0.12);
-      frond.position.set(stem * 0.25 - 0.3, height * leaf / 5, 0);
-      group.add(frond);
-    }
-  }
-  return group;
-}
-
-function createCrystal(random: () => number): THREE.Group {
-  const group = new THREE.Group();
-  for (let shard = 0; shard < 3 + random() * 4; shard += 1) {
-    const height = 1.2 + random() * 3.5;
-    const mesh = new THREE.Mesh(new THREE.ConeGeometry(0.25 + random() * 0.25, height, 5), material(0x3ae1ff, 0x158fb7));
-    mesh.position.set((random() - 0.5) * 1.6, height / 2, (random() - 0.5) * 1.6);
-    mesh.rotation.z = (random() - 0.5) * 0.35;
-    group.add(mesh);
-  }
-  return group;
-}
-
 export function createDecorations(scene: THREE.Scene): OceanDecor {
-  const random = seededRandom(77421);
-  const plants: THREE.Object3D[] = [];
-  for (let index = 0; index < 186; index += 1) {
-    const radius = 8 + random() * 262;
-    const angle = random() * Math.PI * 2;
-    const x = Math.cos(angle) * radius;
-    const z = 8 + Math.sin(angle) * radius;
-    const object = radius < 38 || (radius > 90 && index % 5 === 0)
-      ? createCoral(random) : radius < 92 || index % 3 === 0 ? createKelp(random) : createCrystal(random);
-    object.position.set(x, floorAt(x, z), z);
-    object.rotation.y = random() * Math.PI * 2;
-    scene.add(object);
-    plants.push(object);
-  }
+  const biomeDecor = createBiomeDecorField();
+  const plants: THREE.Object3D[] = [biomeDecor];
+  scene.add(biomeDecor);
   const pod = createPod();
   const submarine = createSubmarine();
   const rocket = createRocket();

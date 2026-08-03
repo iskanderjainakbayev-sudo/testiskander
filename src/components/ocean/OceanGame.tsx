@@ -16,6 +16,7 @@ import { PausePanel } from './PausePanel';
 import { PdaPanel } from './PdaPanel';
 import { TouchControls } from './TouchControls';
 import { savedOceanQuality, type OceanScreen } from './oceanUiState';
+import { SubTransitionOverlay } from './SubTransitionOverlay';
 import { useOceanVisualQa } from './useOceanVisualQa';
 import './styles/foundation.css';
 import './styles/hud.css';
@@ -114,6 +115,7 @@ export function OceanGame() {
       {screen !== 'menu' && <OceanHud snapshot={snapshot} />}
       <DiveCinematicOverlay visible={showDiveCinematic && screen === 'playing'} />
       <OceanMoments snapshot={snapshot} active={screen === 'playing' && !showDiveCinematic} />
+      <SubTransitionOverlay inSub={snapshot.inSub} active={screen === 'playing'} />
       {screen === 'playing' && (
         <TouchControls
           activeWeapon={snapshot.activeWeapon}

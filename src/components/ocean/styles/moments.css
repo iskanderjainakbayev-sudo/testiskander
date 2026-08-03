@@ -29,3 +29,12 @@
   18%, 75% { opacity: 1; backdrop-filter: blur(10px); }
   100% { opacity: 0; background: #b8fff3; }
 }
+.sub-transition { position: absolute; z-index: 19; inset: 0; overflow: hidden; pointer-events: none; animation: sub-transition-clear 2.1s ease-in-out forwards; }
+.sub-transition-iris { position: absolute; inset: -20%; background: radial-gradient(circle, transparent 0 12%, #031b25de 29%, #010a10 48%); animation: sub-iris 2.1s cubic-bezier(.65,0,.2,1) forwards; }
+.sub-transition.is-exiting .sub-transition-iris { animation-direction: reverse; }
+.sub-transition section { position: absolute; right: 7vw; bottom: 10vh; display: grid; gap: 5px; text-align: right; animation: sub-label 2.1s ease-in-out forwards; }
+.sub-transition small { color: #73c9c2; font-size: 7px; letter-spacing: .2em; }
+.sub-transition b { color: #e8fffc; font-size: 11px; letter-spacing: .16em; }
+@keyframes sub-iris { 0% { transform: scale(2.4); } 46% { transform: scale(.35); } 100% { transform: scale(2.4); opacity: 0; } }
+@keyframes sub-label { 0%, 100% { opacity: 0; transform: translateY(8px); } 34%, 72% { opacity: 1; transform: none; } }
+@keyframes sub-transition-clear { 0%, 84% { opacity: 1; } 100% { opacity: 0; } }

@@ -30,7 +30,7 @@ for location, energy, color, size in [
     bpy.context.collection.objects.link(light)
     light.rotation_euler = (Vector((0, 0, 0)) - light.location).to_track_quat('-Z', 'Y').to_euler()
 
-camera_location = (11.5, 7.2, -15.5) if name == "damaged-lifepod" else (8.5, 5.4, -9.5)
+camera_location = (11.5, 7.2, -15.5) if name == "damaged-lifepod" else (12, 5.5, -8)
 bpy.ops.object.camera_add(location=camera_location)
 camera = bpy.context.object
 camera.rotation_euler = (Vector((0, 0, 0)) - camera.location).to_track_quat('-Z', 'Y').to_euler()
@@ -57,9 +57,9 @@ if name == "damaged-lifepod":
     print(f"DAMAGE_PREVIEW {closeup}")
 if name == "nereid-micro-sub":
     views = [
-        ("side", (10.5,2.2,0), (0,0,0), 62),
-        ("rear", (7.5,3.6,10), (0,0,.55), 64),
-        ("cockpit-detail", (5.2,3.2,-7.4), (0,.2,-1.65), 74),
+        ("side", (16,4,0), (0,0,0), 58),
+        ("rear", (12,5.5,13), (0,0,.55), 58),
+        ("cockpit-detail", (3.6,2.2,-7.2), (0,.2,-1.8), 70),
     ]
     for label, location, target, lens in views:
         camera.location, camera.data.lens = location, lens

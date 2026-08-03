@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { updateBiomeDecorField } from './biomeDecorField';
 import type { OceanDecor } from './decorations';
 import { createExplorationSites, type ExplorationSite } from './explorationSites';
 import { createLandmarks } from './landmarks';
@@ -66,7 +67,7 @@ export class WorldContent {
       }
     }
     for (const plant of this.decor.plants) {
-      plant.rotation.z = Math.sin(time * 0.55 + plant.position.x) * 0.025;
+      updateBiomeDecorField(plant, time);
     }
   }
 
