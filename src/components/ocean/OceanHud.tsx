@@ -3,6 +3,7 @@ import { formatTime } from '../../lib/ocean/progression';
 import type { OceanSnapshot, ResourceId } from '../../lib/ocean/types';
 import { SurvivalMeters } from './SurvivalMeters';
 import { ObjectiveNavigator } from './ObjectiveNavigator';
+import { getMultiToolSpec } from '../../lib/ocean/multitoolCatalog';
 
 const QUICK_RESOURCES: ResourceId[] = ['copper', 'crystal', 'oil', 'scrap', 'gem', 'meat'];
 
@@ -12,6 +13,7 @@ function compassPoint(heading: number): string {
 }
 
 export function OceanHud({ snapshot }: { snapshot: OceanSnapshot }) {
+  const tool = getMultiToolSpec(snapshot.activeWeapon);
   return (
     <div className="ocean-hud" aria-live="polite">
       <div className="ocean-lens" />
@@ -87,15 +89,13 @@ export function OceanHud({ snapshot }: { snapshot: OceanSnapshot }) {
       <div className="ocean-reticle"><i /></div>
       {snapshot.damageFlash && <div className="damage-flash" />}
       <div className={`weapon-status${snapshot.weaponReady ? ' is-ready' : ''}`}>
-        {snapshot.activeWeapon === 'gun' ? '1 · TIDEBREAKER TRI-BLASTER' : '2 · ABYSS FINBLADE'}
-        <b>{snapshot.weaponReady ? 'READY' : snapshot.activeWeapon === 'gun' ? 'CYCLING' : 'RECOVERING'}</b>
-        {snapshot.activeWeapon === 'gun' && (
-          <small className={snapshot.specialWeaponReady ? 'is-ready' : ''}>
-            [ X ] MAELSTROM SHOT {snapshot.specialWeaponReady ? 'CHARGED' : 'RECHARGING'}
-          </small>
-        )}
+        <small>PELAGIC // MODULAR TOOL</small>
+        <span>{tool.name}</span>
+        <b>{snapshot.weaponReady ? 'READY' : snapshot.toolBattery < tool.cost ? 'CELL EMPTY' : 'CYCLING'}</b>
+        <div className="tool-meter"><i style={{ width: `${snapshot.toolBattery}%` }} /></div>
+        <em>{Math.ceil(snapshot.toolBattery)}% CELL · {Math.round(snapshot.toolTemperature)}° CORE</em>
       </div>
-      <div className="ocean-controls">1 GUN · 2 KNIFE · LMB / R USE · X DRAGONBREAKER · H EAT MEAT · SHIFT ACCELERATE · {formatTime(snapshot.elapsed)}</div>
+      <div className="ocean-controls">1 LANCE · 2 SPEAR · 3 PULSE · 4 SCAN · 5 MEND · LMB USE · X QUICK PULSE · C SWAP CELL · {formatTime(snapshot.elapsed)}</div>
       {snapshot.inSub && <div className="sub-frame" />}
       {snapshot.oxygen < 22 && !snapshot.inSub && <div className="oxygen-warning">OXYGEN CRITICAL</div>}
     </div>

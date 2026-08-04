@@ -150,6 +150,26 @@
 .oxygen-warning { bottom: 102px; color: #ff826f; animation: ocean-blink .55s infinite alternate; }
 .ocean-controls { position: absolute; right: 27px; bottom: 26px; color: #9ccac6; font-size: 7px; letter-spacing: .1em; }
 
+.weapon-status {
+  position: absolute;
+  left: 28px;
+  bottom: 28px;
+  display: grid;
+  width: 220px;
+  padding: 11px 13px;
+  border-left: 2px solid #ff9f59;
+  background: linear-gradient(90deg, #001c24c7, #001c2412);
+}
+
+.weapon-status.is-ready { border-color: var(--aqua); }
+.weapon-status small { color: #6ba9a7; font-size: 7px; letter-spacing: .18em; }
+.weapon-status span { margin-top: 4px; color: #e6fffc; font-size: 11px; font-weight: 800; letter-spacing: .09em; }
+.weapon-status b { position: absolute; top: 13px; right: 12px; color: #ff9f59; font-size: 7px; letter-spacing: .12em; }
+.weapon-status.is-ready b { color: #75fff1; }
+.weapon-status em { margin-top: 5px; color: #8dc6c2; font-size: 7px; font-style: normal; letter-spacing: .1em; }
+.tool-meter { height: 3px; margin-top: 8px; overflow: hidden; background: #40615f61; }
+.tool-meter i { display: block; height: 100%; background: linear-gradient(90deg, #4db8c5, #83fff0); box-shadow: 0 0 8px #75fff1; transition: width .2s; }
+
 .sub-readout {
   position: absolute;
   right: 28px;
@@ -174,5 +194,6 @@
   .ocean-climate { top: 70px; right: 16px; }
   .ocean-site { display: none; }
   .ocean-controls { display: none; }
+  .weapon-status { left: 16px; bottom: 18px; width: 190px; }
   .sub-readout { right: 16px; bottom: 18px; }
 }
