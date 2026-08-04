@@ -23,6 +23,9 @@ BUILDERS = {
 
 
 def build(creature):
+    # Reef Fang has a dedicated articulated hero-quality builder.
+    if creature["asset_id"] == "reef-fang":
+        return
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.object.delete(use_global=False)
     asset_id = creature["asset_id"]
