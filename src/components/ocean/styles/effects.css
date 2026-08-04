@@ -62,36 +62,10 @@
   transition: width .16s;
 }
 
-.weapon-status {
-  position: absolute;
-  right: 27px;
-  bottom: 40px;
-  color: #8aa9a8;
-  font-size: 8px;
-  letter-spacing: .13em;
-}
-
-.weapon-status b { margin-left: 7px; color: #ffb46b; }
-.weapon-status.is-ready b { color: #65f1dd; text-shadow: 0 0 8px #65f1dd; }
-.weapon-status small {
-  display: block;
-  margin-top: 5px;
-  color: #896c56;
-  font-size: 7px;
-  letter-spacing: .11em;
-}
-.weapon-status small.is-ready {
-  color: #ffb04f;
-  text-shadow: 0 0 9px #ff7b32;
-  animation: weapon-charge 1.35s infinite alternate;
-}
-
 @keyframes ocean-hit { from { opacity: 1; } to { opacity: 0; } }
 @keyframes predator-in { from { opacity: 0; transform: translateX(12px); } }
 @keyframes predator-pulse { to { filter: brightness(1.55); transform: scale(1.025); } }
-@keyframes weapon-charge { to { filter: brightness(1.55); } }
 
 @media (max-width: 700px) {
   .predator-alert { top: 112px; right: 16px; }
-  .weapon-status { right: 16px; bottom: 154px; }
 }

@@ -39,7 +39,9 @@ export const DEFAULT_SNAPSHOT: OceanSnapshot = {
   threatHealth: 0,
   threatMaxHealth: 0,
   threatIsBoss: false,
-  activeWeapon: 'gun',
+  activeWeapon: 'mining',
   weaponReady: true,
   specialWeaponReady: true,
+  toolBattery: 100,
+  toolTemperature: 18,
 };
