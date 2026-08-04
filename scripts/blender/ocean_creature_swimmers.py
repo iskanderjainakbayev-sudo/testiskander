@@ -3,7 +3,7 @@ from ocean_creature_utils import cone, empty, eyes, fin, glowing_spots, parent, 
 
 
 def fish(root, mats, rng, plan="fish"):
-    skin, glow, eye, pupil = mats
+    skin, glow, eye, pupil = mats[:4]
     long = 1.25 + rng.random() * .42
     deep = .5 + rng.random() * .2
     if plan == "whale":
@@ -28,7 +28,7 @@ def fish(root, mats, rng, plan="fish"):
 
 
 def ray(root, mats, rng):
-    skin, glow, eye, pupil = mats
+    skin, glow, eye, pupil = mats[:4]
     parent(uv("ray-body", (0, 0, 0), (.82, 1.18, .2), skin, 28, 14), root)
     for side in (-1, 1):
         fin(f"swim-fin-{side}", (side * .55, 0, 0), (1.25, 1.2, .07), (0, 0, side * pi / 2), skin, root)
@@ -39,7 +39,7 @@ def ray(root, mats, rng):
 
 
 def eel(root, mats, rng):
-    skin, glow, eye, pupil = mats
+    skin, glow, eye, pupil = mats[:4]
     count = 11
     for index in range(count):
         taper = 1 - index / (count * 1.22)
@@ -54,7 +54,7 @@ def eel(root, mats, rng):
 
 
 def puffer(root, mats, rng):
-    skin, glow, eye, pupil = mats
+    skin, glow, eye, pupil = mats[:4]
     parent(uv("body", (0, 0, 0), (.9, 1.0, .82), skin, 28, 14), root)
     eyes(root, eye, pupil, .55, -.75, .2, .15)
     tail(root, skin, (0, .92, 0), .55)

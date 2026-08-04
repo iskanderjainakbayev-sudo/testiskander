@@ -1,5 +1,4 @@
 import bpy
-from mathutils import Vector
 
 
 def rgb(value):
@@ -15,8 +14,12 @@ def material(name, color, emission=None, strength=0.0, metallic=0.0, roughness=0
     node.inputs["Roughness"].default_value = roughness
     node.inputs["Metallic"].default_value = metallic
     if "Coat Weight" in node.inputs:
-        node.inputs["Coat Weight"].default_value = 0.32
-        node.inputs["Coat Roughness"].default_value = 0.22
+        node.inputs["Coat Weight"].default_value = 0.46
+        node.inputs["Coat Roughness"].default_value = 0.16
+    if "IOR" in node.inputs:
+        node.inputs["IOR"].default_value = 1.38
+    if "Specular IOR Level" in node.inputs:
+        node.inputs["Specular IOR Level"].default_value = .42
     if emission is not None:
         node.inputs["Emission Color"].default_value = (*rgb(emission), 1)
         node.inputs["Emission Strength"].default_value = strength
@@ -58,6 +61,20 @@ def cone(name, location, scale, rotation, mat, vertices=12):
     return obj
 
 
+def torus(name, location, scale, rotation, mat, major=.72, minor=.035):
+    bpy.ops.mesh.primitive_torus_add(
+        major_radius=major, minor_radius=minor, major_segments=20, minor_segments=6,
+        location=location, rotation=rotation,
+    )
+    obj = bpy.context.object
+    obj.name = name
+    obj.scale = scale
+    obj.data.materials.append(mat)
+    for polygon in obj.data.polygons:
+        polygon.use_smooth = True
+    return obj
+
+
 def fin(name, location, scale, rotation, mat, root):
     pivot = empty(name, location, root)
     blade = cone(f"{name}-blade", (0, 0, 0), scale, rotation, mat, 3)
@@ -67,9 +84,14 @@ def fin(name, location, scale, rotation, mat, root):
 
 def eyes(root, eye_mat, pupil_mat, wide=.46, forward=-1.12, height=.16, size=.12):
     for side in (-1, 1):
-        parent(uv(f"weak-point-eye-{side}", (side * wide, forward, height), (size, .075, size), eye_mat, 16, 8), root)
+        parent(uv(f"eye-glow-{side}", (side * wide, forward + .012, height),
+                  (size * 1.32, .06, size * 1.32), eye_mat, 16, 8), root)
+        parent(uv(f"weak-point-eye-{side}", (side * wide, forward - .012, height),
+                  (size, .075, size), eye_mat, 16, 8), root)
         parent(uv(f"pupil-{side}", (side * wide, forward - .073, height),
-                  (size * .48, .014, size * .56), pupil_mat, 12, 6), root)
+                  (size * .42, .014, size * .62), pupil_mat, 12, 6), root)
+        parent(uv(f"eye-catchlight-{side}", (side * wide - side * size * .14, forward - .089,
+                  height + size * .24), (size * .13, .009, size * .13), eye_mat, 8, 4), root)
 
 
 def tail(root, skin, location=(0, 1.42, 0), size=1.0):

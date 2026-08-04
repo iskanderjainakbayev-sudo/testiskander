@@ -3,7 +3,7 @@ from ocean_creature_utils import cone, eyes, fin, glowing_spots, parent, tail, u
 
 
 def turtle(root, mats, rng):
-    skin, glow, eye, pupil = mats
+    skin, glow, eye, pupil = mats[:4]
     parent(uv("shell", (0, .1, .16), (.9, 1.18, .42), skin, 28, 14), root)
     parent(uv("shell-inlay", (0, .1, .5), (.68, .86, .055), glow, 20, 10), root)
     parent(uv("head", (0, -1.02, .02), (.36, .46, .34), skin, 20, 10), root)
@@ -14,7 +14,7 @@ def turtle(root, mats, rng):
 
 
 def jelly(root, mats, rng):
-    skin, glow, eye, pupil = mats
+    skin, glow, eye, pupil = mats[:4]
     parent(uv("bell", (0, 0, .25), (.86, .86, .64), skin, 28, 14), root)
     parent(uv("luminous-core", (0, 0, .2), (.36, .36, .42), glow, 18, 9), root)
     for index in range(8):
@@ -24,7 +24,7 @@ def jelly(root, mats, rng):
 
 
 def squid(root, mats, rng):
-    skin, glow, eye, pupil = mats
+    skin, glow, eye, pupil = mats[:4]
     parent(uv("mantle", (0, .28, .15), (.62, 1.05, .68), skin, 28, 14), root)
     eyes(root, eye, pupil, .4, -.52, .18, .13)
     for side in (-1, 1):
@@ -37,7 +37,7 @@ def squid(root, mats, rng):
 
 
 def crab(root, mats, rng):
-    skin, glow, eye, pupil = mats
+    skin, glow, eye, pupil = mats[:4]
     parent(uv("shell", (0, 0, .12), (1.0, .72, .46), skin, 24, 12), root)
     parent(uv("shell-inlay", (0, 0, .5), (.58, .42, .05), glow, 18, 9), root)
     eyes(root, eye, pupil, .4, -.58, .34, .105)
@@ -50,7 +50,7 @@ def crab(root, mats, rng):
 
 
 def shrimp(root, mats, rng):
-    skin, glow, eye, pupil = mats
+    skin, glow, eye, pupil = mats[:4]
     for index in range(6):
         taper = 1 - index * .11
         parent(uv(f"body-segment-{index}", (0, index * .3, 0), (.38 * taper, .36, .3 * taper), skin, 18, 9), root)
@@ -63,7 +63,7 @@ def shrimp(root, mats, rng):
 
 
 def slug(root, mats, rng):
-    skin, glow, eye, pupil = mats
+    skin, glow, eye, pupil = mats[:4]
     parent(uv("body", (0, 0, 0), (.58, 1.15, .3), skin, 24, 12), root)
     parent(uv("mantle-glow", (0, .05, .28), (.38, .72, .055), glow, 18, 9), root)
     eyes(root, eye, pupil, .25, -.92, .18, .075)
