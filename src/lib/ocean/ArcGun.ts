@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { BulletEffects } from './BulletEffects';
 import type { CreatureSystem } from './CreatureSystem';
 import type { WeaponHit } from './creatureRuntime';
+import { addGoldSpike, extrudedProfile, oceanWeaponMaterials, prepareViewModel } from './weaponModelParts';
 
 export interface GunShot {
   fired: boolean;
@@ -64,31 +65,38 @@ export class ArcGun {
   }
 
   private buildModel(): void {
-    const metal = new THREE.MeshStandardMaterial({ color: 0x172d39, metalness: 0.9, roughness: 0.22 });
-    const grip = new THREE.MeshStandardMaterial({ color: 0xc8522f, roughness: 0.6 });
-    const aqua = new THREE.MeshBasicMaterial({ color: 0x6fffee });
-    const amber = new THREE.MeshBasicMaterial({ color: 0xffa84f });
-    const barrel = new THREE.Mesh(new THREE.CapsuleGeometry(0.058, 0.58, 6, 10), metal);
+    const body = extrudedProfile([
+      [-0.13, 0.33], [0.12, 0.29], [0.15, 0.05], [0.1, -0.15],
+      [0.17, -0.37], [0.04, -0.46], [-0.12, -0.33], [-0.08, -0.12], [-0.2, 0.05],
+    ], 0.11, oceanWeaponMaterials.abyssMetal);
+    body.position.set(0, -0.01, -0.05);
+    const barrel = new THREE.Mesh(new THREE.CapsuleGeometry(0.052, 0.58, 6, 10), oceanWeaponMaterials.abyssMetal);
     barrel.rotation.x = Math.PI / 2;
-    const handle = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.3, 0.13), grip);
-    handle.position.set(0, -0.18, 0.13);
-    this.core.geometry = new THREE.IcosahedronGeometry(0.058, 1);
-    this.core.material = amber;
-    this.core.position.z = -0.3;
+    barrel.position.set(0.02, 0.08, -0.37);
+    const handle = new THREE.Mesh(new THREE.CapsuleGeometry(0.055, 0.25, 5, 8), oceanWeaponMaterials.grip);
+    handle.rotation.set(Math.PI / 2, 0, -0.34);
+    handle.position.set(-0.07, -0.2, 0.17);
+    const pressureRing = new THREE.Mesh(new THREE.TorusGeometry(0.135, 0.025, 8, 24), oceanWeaponMaterials.gold);
+    pressureRing.rotation.y = Math.PI / 2;
+    pressureRing.position.set(-0.07, 0.025, -0.12);
+    this.core.geometry = new THREE.SphereGeometry(0.075, 12, 8);
+    this.core.material = oceanWeaponMaterials.glow;
+    this.core.position.set(-0.07, 0.025, -0.12);
     for (let index = 0; index < 3; index += 1) {
-      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.08 + index * 0.026, 0.009, 7, 20), index === 1 ? amber : aqua);
-      ring.position.z = -0.28 - index * 0.045;
-      ring.rotation.set(index * 0.5, index * 0.65, 0);
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.055 + index * 0.018, 0.006, 6, 18), oceanWeaponMaterials.glow);
+      ring.position.z = -0.55 - index * 0.045;
+      ring.rotation.set(index * 0.45, index * 0.6, 0);
       this.rings.add(ring);
     }
-    this.muzzleFlash.position.z = -0.58;
-    this.model.add(barrel, handle, this.core, this.rings, this.muzzleFlash);
-    this.model.position.set(0.34, -0.27, -0.74);
-    this.model.rotation.set(-0.05, -0.08, -0.04);
-    this.model.traverse((object) => {
-      object.renderOrder = 20;
-      if (object instanceof THREE.Mesh) object.material.depthTest = false;
+    [-2.1, -1.25, -0.35, 0.5, 1.35, 2.2].forEach((angle) => {
+      const position = new THREE.Vector3(-0.07, 0.025, -0.12).add(new THREE.Vector3(Math.cos(angle) * 0.17, Math.sin(angle) * 0.17, 0));
+      addGoldSpike(this.model, position, angle - Math.PI / 2, 0.09);
     });
+    this.muzzleFlash.position.z = -0.58;
+    this.model.add(body, barrel, handle, pressureRing, this.core, this.rings, this.muzzleFlash);
+    this.model.position.set(0.36, -0.29, -0.74);
+    this.model.rotation.set(-0.04, -0.12, -0.05);
+    prepareViewModel(this.model);
   }
 
 }

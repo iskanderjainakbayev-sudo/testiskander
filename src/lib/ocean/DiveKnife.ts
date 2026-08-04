@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import type { CreatureSystem } from './CreatureSystem';
 import type { WeaponHit } from './creatureRuntime';
+import { addGoldSpike, extrudedProfile, oceanWeaponMaterials, prepareViewModel } from './weaponModelParts';
 
 export class DiveKnife {
   readonly model = new THREE.Group();
@@ -8,30 +9,31 @@ export class DiveKnife {
   private swingStartedAt = 0;
 
   constructor() {
-    const blade = new THREE.Mesh(
-      new THREE.ConeGeometry(0.055, 0.58, 4),
-      new THREE.MeshStandardMaterial({ color: 0xd9ffff, metalness: 0.95, roughness: 0.12 }),
-    );
-    blade.rotation.x = -Math.PI / 2;
-    blade.position.z = -0.28;
-    const edge = new THREE.Mesh(
-      new THREE.BoxGeometry(0.018, 0.028, 0.5),
-      new THREE.MeshBasicMaterial({ color: 0x70fff0 }),
-    );
-    edge.position.set(0.045, 0, -0.25);
+    const blade = extrudedProfile([
+      [0, -0.48], [0.09, -0.34], [0.12, -0.08], [0.08, 0.25],
+      [0.14, 0.4], [0, 0.34], [-0.14, 0.4], [-0.08, 0.2], [-0.11, -0.18],
+    ], 0.045, oceanWeaponMaterials.blade);
+    blade.position.z = -0.4;
+    const ridge = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.025, 0.72), oceanWeaponMaterials.gold);
+    ridge.position.set(0, -0.005, -0.42);
     const grip = new THREE.Mesh(
-      new THREE.CapsuleGeometry(0.045, 0.22, 5, 8),
-      new THREE.MeshStandardMaterial({ color: 0x1d3037, roughness: 0.72 }),
+      new THREE.CapsuleGeometry(0.05, 0.24, 5, 8), oceanWeaponMaterials.grip,
     );
     grip.rotation.x = Math.PI / 2;
     grip.position.z = 0.14;
-    this.model.add(blade, edge, grip);
+    const guard = extrudedProfile([
+      [-0.2, -0.08], [-0.1, 0.08], [0, 0.02], [0.1, 0.08], [0.2, -0.08], [0, -0.02],
+    ], 0.06, oceanWeaponMaterials.gold);
+    guard.position.z = -0.01;
+    const pommel = new THREE.Mesh(new THREE.IcosahedronGeometry(0.065, 0), oceanWeaponMaterials.gold);
+    pommel.position.z = 0.31;
+    this.model.add(blade, ridge, guard, grip, pommel);
+    [[-0.14, -0.02, 1.15], [0.14, -0.02, -1.15], [-0.12, -0.68, 1.15], [0.12, -0.68, -1.15]].forEach(([x, z, angle]) => {
+      addGoldSpike(this.model, new THREE.Vector3(x, 0, z), angle, 0.1);
+    });
     this.model.position.set(0.4, -0.34, -0.68);
     this.model.rotation.set(-0.12, -0.12, -0.28);
-    this.model.traverse((object) => {
-      object.renderOrder = 20;
-      if (object instanceof THREE.Mesh) object.material.depthTest = false;
-    });
+    prepareViewModel(this.model);
   }
 
   attack(now: number, origin: THREE.Vector3, direction: THREE.Vector3, creatures: CreatureSystem): WeaponHit | null | undefined {

@@ -87,11 +87,11 @@ export function OceanHud({ snapshot }: { snapshot: OceanSnapshot }) {
       <div className="ocean-reticle"><i /></div>
       {snapshot.damageFlash && <div className="damage-flash" />}
       <div className={`weapon-status${snapshot.weaponReady ? ' is-ready' : ''}`}>
-        {snapshot.activeWeapon === 'gun' ? '1 · ABYSS ARC CANNON' : '2 · PRESSURE KNIFE'}
+        {snapshot.activeWeapon === 'gun' ? '1 · TIDEBREAKER PISTOL' : '2 · ABYSS FINBLADE'}
         <b>{snapshot.weaponReady ? 'READY' : snapshot.activeWeapon === 'gun' ? 'CYCLING' : 'RECOVERING'}</b>
         {snapshot.activeWeapon === 'gun' && (
           <small className={snapshot.specialWeaponReady ? 'is-ready' : ''}>
-            [ X ] DRAGONBREAKER {snapshot.specialWeaponReady ? 'CHARGED' : 'RECHARGING'}
+            [ X ] MAELSTROM SHOT {snapshot.specialWeaponReady ? 'CHARGED' : 'RECHARGING'}
           </small>
         )}
       </div>
