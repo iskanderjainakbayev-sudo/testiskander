@@ -5,7 +5,8 @@ from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[2]
 name = sys.argv[sys.argv.index("--") + 1]
-asset = ROOT / "assets" / "models" / "ocean" / "hero" / f"{name}.glb"
+folder = "weapons" if name == "tidebreaker-blaster" else "hero"
+asset = ROOT / "assets" / "models" / "ocean" / folder / f"{name}.glb"
 output = Path("/tmp") / f"{name}-preview.png"
 
 bpy.ops.object.select_all(action='SELECT')
@@ -30,11 +31,12 @@ for location, energy, color, size in [
     bpy.context.collection.objects.link(light)
     light.rotation_euler = (Vector((0, 0, 0)) - light.location).to_track_quat('-Z', 'Y').to_euler()
 
-camera_location = (11.5, 7.2, -15.5) if name == "damaged-lifepod" else (12, 5.5, -8)
+camera_location = ((4.2, 4.8, 2.9) if name == "tidebreaker-blaster" else
+                   (11.5, 7.2, -15.5) if name == "damaged-lifepod" else (12, 5.5, -8))
 bpy.ops.object.camera_add(location=camera_location)
 camera = bpy.context.object
 camera.rotation_euler = (Vector((0, 0, 0)) - camera.location).to_track_quat('-Z', 'Y').to_euler()
-camera.data.lens = 58
+camera.data.lens = 64 if name == "tidebreaker-blaster" else 58
 bpy.context.scene.camera = camera
 
 scene = bpy.context.scene
