@@ -13,6 +13,7 @@
     "validate:odyssey": "node scripts/validate-odyssey.mjs",
     "preview": "vite preview",
     "assets:weapons": "node scripts/create-tactical-assets.mjs",
+    "assets:ocean-weapon": "/Applications/Blender.app/Contents/MacOS/Blender --background --python scripts/blender/build_tidebreaker.py",
     "db:login": "supabase login",
     "db:link": "supabase link",
     "db:new": "supabase migration new",
