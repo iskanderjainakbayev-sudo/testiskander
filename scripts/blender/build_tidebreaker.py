@@ -60,10 +60,11 @@ def build():
 
     drum = bpy.data.objects.new("energy-drum", None)
     bpy.context.collection.objects.link(drum)
-    cylinder("drum-shell", (.28, -.04, -.48), .29, .24, blue, (0, pi / 2, 0), 32).parent = drum
-    cylinder("drum-face", (.41, -.04, -.48), .23, .025, dark, (0, pi / 2, 0), 32).parent = drum
-    torus("charge-ring", (.43, -.04, -.48), .205, .025, cyan, (0, pi / 2, 0)).parent = drum
-    cylinder("drum-core", (.445, -.04, -.48), .07, .03, cyan, (0, pi / 2, 0), 24).parent = drum
+    drum.location = (.28, -.04, -.48)
+    cylinder("drum-shell", (0, 0, 0), .29, .24, blue, (0, pi / 2, 0), 32).parent = drum
+    cylinder("drum-face", (.13, 0, 0), .23, .025, dark, (0, pi / 2, 0), 32).parent = drum
+    torus("charge-ring", (.15, 0, 0), .205, .025, cyan, (0, pi / 2, 0)).parent = drum
+    cylinder("drum-core", (.165, 0, 0), .07, .03, cyan, (0, pi / 2, 0), 24).parent = drum
     drum.parent = root
 
     cube("carry-rail", (0, -.08, .48), (.25, .38, .09), dark, .08, (-.08, 0, 0))
