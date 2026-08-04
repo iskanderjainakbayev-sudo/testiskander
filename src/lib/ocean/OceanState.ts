@@ -82,6 +82,18 @@ export class OceanState {
     this.inventory.meat += amount;
   }
 
+  repair(amount: number): number {
+    const restored = Math.min(amount, 100 - this.health);
+    this.health += restored;
+    return restored;
+  }
+
+  usePowerCell(): boolean {
+    if (this.inventory.cell <= 0) return false;
+    this.inventory.cell -= 1;
+    return true;
+  }
+
   eatMeat(): string {
     if (this.inventory.meat <= 0) return 'No fish meat in inventory';
     this.inventory.meat -= 1;

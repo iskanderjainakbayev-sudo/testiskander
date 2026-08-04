@@ -16,6 +16,8 @@ interface SnapshotOptions {
   damageFlash: boolean;
   weaponReady: boolean;
   specialWeaponReady: boolean;
+  toolBattery: number;
+  toolTemperature: number;
   activeWeapon: OceanWeapon;
   objectiveTarget: { position: import('three').Vector3; label: string };
   nearbySite: { name: string; distance: number };
@@ -86,5 +88,7 @@ export function createSnapshot(
     activeWeapon: options.activeWeapon,
     weaponReady: options.weaponReady,
     specialWeaponReady: options.specialWeaponReady,
+    toolBattery: options.toolBattery,
+    toolTemperature: options.toolTemperature,
   };
 }

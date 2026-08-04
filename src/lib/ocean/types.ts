@@ -16,7 +16,7 @@ export type BiomeId =
   | 'Crystal Caverns' | 'Ancient Ruins' | 'Volcanic Depths' | 'Frozen Ocean'
   | 'Bioluminescent Abyss' | 'Black Trench';
 export type GraphicsQuality = 'Low' | 'Medium' | 'High' | 'Ultra';
-export type OceanWeapon = 'gun' | 'knife';
+export type OceanWeapon = import('./multitoolCatalog').MultiToolModule;
 
 export interface Recipe {
   id: RecipeId;
@@ -84,6 +84,8 @@ export interface OceanSnapshot {
   activeWeapon: OceanWeapon;
   weaponReady: boolean;
   specialWeaponReady: boolean;
+  toolBattery: number;
+  toolTemperature: number;
 }
 
 export interface Interactable {

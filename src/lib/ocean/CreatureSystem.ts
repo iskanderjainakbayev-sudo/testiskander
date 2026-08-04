@@ -144,4 +144,22 @@ export class CreatureSystem {
     return hitCreatureInCone(this.creatures, origin, direction, range, damage, time);
   }
 
+  repulse(origin: THREE.Vector3, direction: THREE.Vector3, range: number, force: number, time: number): number {
+    const facing = direction.clone().normalize();
+    let affected = 0;
+    this.creatures.forEach((creature) => {
+      const offset = creature.mesh.position.clone().sub(origin);
+      const distance = offset.length();
+      if (!creature.mesh.visible || creature.health <= 0 || distance > range || offset.normalize().dot(facing) < .12) return;
+      const strength = force * (1 - distance / range) + 1;
+      creature.mesh.position.addScaledVector(offset, strength);
+      creature.velocity.addScaledVector(offset, strength * 1.8);
+      creature.mode = 'retreat';
+      creature.modeUntil = time + 2.4;
+      creature.provokedUntil = Math.max(creature.provokedUntil, time + 4);
+      affected += 1;
+    });
+    return affected;
+  }
+
 }

@@ -228,6 +228,8 @@ export class OceanWorld {
       damageFlash: this.combat.damageFlashing(now),
       weaponReady: this.combat.weaponReady(now),
       specialWeaponReady: this.combat.specialWeaponReady(now),
+      toolBattery: this.combat.toolBattery,
+      toolTemperature: this.combat.toolTemperature,
       objectiveTarget,
       nearbySite: this.content.nearestSite(this.player.position),
     }));
