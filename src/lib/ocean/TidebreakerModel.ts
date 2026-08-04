@@ -37,7 +37,7 @@ export function hydrateTidebreaker(target: THREE.Group, onReady: (rig: Tidebreak
         .map((name) => model.getObjectByName(name)).filter(isObject),
       chargeRing: model.getObjectByName('charge-ring') ?? null,
       drum: model.getObjectByName('energy-drum') ?? null,
-      emitters: model.children.flatMap(() => findEmitters(model)),
+      emitters: findEmitters(model),
     });
   });
 }

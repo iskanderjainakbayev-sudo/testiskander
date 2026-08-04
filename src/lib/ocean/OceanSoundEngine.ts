@@ -24,12 +24,12 @@ export class OceanSoundEngine {
     this.master = null;
   }
 
-  tone(start: number, end: number, life: number, level: number, delay = 0): void {
+  tone(start: number, end: number, life: number, level: number, delay = 0, wave: OscillatorType = 'sine'): void {
     if (!this.context || !this.master) return;
     const now = this.context.currentTime + delay;
     const oscillator = this.context.createOscillator();
     const gain = this.context.createGain();
-    oscillator.type = 'sine';
+    oscillator.type = wave;
     oscillator.frequency.setValueAtTime(start, now);
     oscillator.frequency.exponentialRampToValueAtTime(end, now + life);
     gain.gain.setValueAtTime(0.0001, now);
@@ -40,14 +40,14 @@ export class OceanSoundEngine {
     oscillator.stop(now + life);
   }
 
-  noise(life: number, level: number, frequency: number): void {
+  noise(life: number, level: number, frequency: number, delay = 0, kind: BiquadFilterType = 'lowpass'): void {
     if (!this.context || !this.master || !this.noiseBuffer) return;
     const source = this.context.createBufferSource();
     const filter = this.context.createBiquadFilter();
     const gain = this.context.createGain();
-    const now = this.context.currentTime;
+    const now = this.context.currentTime + delay;
     source.buffer = this.noiseBuffer;
-    filter.type = 'lowpass';
+    filter.type = kind;
     filter.frequency.setValueAtTime(frequency, now);
     gain.gain.setValueAtTime(level, now);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + life);

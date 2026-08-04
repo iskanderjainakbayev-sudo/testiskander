@@ -28,13 +28,20 @@ export class OceanAudio {
   }
 
   gunshot(): void {
-    this.engine.noise(0.11, 0.16, 680);
-    this.engine.tone(210, 58, 0.2, 0.085);
+    this.engine.noise(.07, .15, 1450, 0, 'bandpass');
+    this.engine.tone(760, 95, .16, .07, 0, 'sawtooth');
+    this.engine.tone(118, 48, .26, .08, .018);
+    this.engine.noise(.18, .045, 420, .035);
+    this.engine.tone(980, 420, .1, .025, .07, 'triangle');
   }
 
   specialShot(): void {
-    this.engine.noise(0.28, 0.22, 1100);
-    [74, 148, 296].forEach((note, index) => this.engine.tone(note, note * 0.45, 0.48, 0.075, index * 0.025));
+    this.engine.tone(90, 880, .38, .07, 0, 'sawtooth');
+    this.engine.noise(.34, .2, 1350, .08, 'bandpass');
+    [82, 164, 328].forEach((note, index) =>
+      this.engine.tone(note * 3.5, note * .42, .58, .065, .1 + index * .025, 'triangle'));
+    this.engine.tone(54, 38, .72, .11, .12);
+    this.engine.noise(.42, .045, 260, .2);
   }
 
   knifeSwing(): void {
@@ -48,8 +55,9 @@ export class OceanAudio {
   }
 
   weaponSwitch(): void {
-    this.engine.tone(280, 520, 0.09, 0.035);
-    this.engine.tone(170, 240, 0.08, 0.025, 0.07);
+    this.engine.tone(210, 560, .1, .035, 0, 'triangle');
+    this.engine.tone(480, 760, .08, .025, .08, 'square');
+    this.engine.noise(.045, .035, 900, .045, 'bandpass');
   }
 
   weaponHit(): void {
