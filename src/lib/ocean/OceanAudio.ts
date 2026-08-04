@@ -1,4 +1,5 @@
 import { OceanSoundEngine } from './OceanSoundEngine';
+import type { MultiToolModule } from './multitoolCatalog';
 
 export class OceanAudio {
   private readonly engine = new OceanSoundEngine();
@@ -58,6 +59,29 @@ export class OceanAudio {
     this.engine.tone(210, 560, .1, .035, 0, 'triangle');
     this.engine.tone(480, 760, .08, .025, .08, 'square');
     this.engine.noise(.045, .035, 900, .045, 'bandpass');
+  }
+
+  multiTool(module: MultiToolModule): void {
+    if (module === 'mining') {
+      this.engine.tone(920, 440, .13, .038, 0, 'sawtooth');
+      this.engine.noise(.09, .035, 1500, 0, 'bandpass');
+    } else if (module === 'harpoon') {
+      this.engine.noise(.16, .1, 380);
+      this.engine.tone(180, 64, .28, .07, 0, 'triangle');
+    } else if (module === 'repulsor') {
+      this.engine.tone(84, 34, .65, .13);
+      this.engine.noise(.38, .16, 220, .03);
+    } else if (module === 'scanner') {
+      [330, 540, 810].forEach((note, index) => this.engine.tone(note, note * 1.6, .38, .026, index * .08, 'sine'));
+    } else {
+      this.engine.noise(.34, .035, 2100, 0, 'bandpass');
+      this.engine.tone(460, 980, .32, .035, 0, 'square');
+    }
+  }
+
+  toolRecharge(): void {
+    this.engine.noise(.28, .045, 520, 0, 'bandpass');
+    [180, 260, 390, 620].forEach((note, index) => this.engine.tone(note, note * 1.12, .18, .028, index * .1, 'triangle'));
   }
 
   weaponHit(): void {

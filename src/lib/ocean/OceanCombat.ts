@@ -7,6 +7,7 @@ import type { OceanState } from './OceanState';
 import type { PlayerController } from './PlayerController';
 import type { OceanEnvironment } from './environment';
 import { getOceanClimate } from './climate';
+import type { MultiToolModule } from './multitoolCatalog';
 
 export class OceanCombat {
   private readonly creatures: CreatureSystem;
@@ -37,12 +38,22 @@ export class OceanCombat {
     inSub: boolean,
     lightsOn: boolean,
   ): void {
-    const wantsSpecial = this.input.consume('KeyX');
-    const wantsShot = this.input.consume('Mouse0') || this.input.consume('KeyR');
-    if (this.input.consume('Digit1')) this.equip('gun', inSub);
-    if (this.input.consume('Digit2')) this.equip('knife', inSub);
-    if ((wantsSpecial || wantsShot) && !inSub) this.fire(now, player, wantsSpecial);
-    this.weapons.update(now, inSub);
+    const wantsPulse = this.input.consume('KeyX');
+    const wantsShot = this.input.isDown('Mouse0') || this.input.consume('KeyR');
+    const modules: MultiToolModule[] = ['mining', 'harpoon', 'repulsor', 'scanner', 'repair'];
+    modules.forEach((module, index) => {
+      if (this.input.consume(`Digit${index + 1}`)) this.equip(module, now);
+    });
+    if (wantsPulse) {
+      this.equip('repulsor', now);
+      if (!inSub) this.fire(now, player);
+    } else if (wantsShot && !inSub) this.fire(now, player);
+    if (this.input.consume('KeyC')) this.recharge(now);
+    this.weapons.update(now, inSub, {
+      moving: player.moving,
+      accelerating: player.accelerating,
+      lowOxygen: this.state.oxygen < 22,
+    });
     const climate = getOceanClimate(this.state.elapsed);
     this.threat = this.creatures.update(delta, time, player.position, inSub, {
       lightsOn,
@@ -73,6 +84,8 @@ export class OceanCombat {
   }
 
   get activeWeapon() { return this.weapons.active; }
+  get toolBattery() { return this.weapons.battery; }
+  get toolTemperature() { return this.weapons.temperature; }
 
   damageFlashing(now: number): boolean {
     return now < this.damageFlashUntil;
@@ -82,18 +95,20 @@ export class OceanCombat {
     this.weapons.dispose(this.camera);
   }
 
-  private fire(now: number, player: PlayerController, special: boolean): void {
-    const shot = this.weapons.use(now, player.position, player.forward(), this.creatures, special);
+  private fire(now: number, player: PlayerController): void {
+    const shot = this.weapons.use(now, player.position, player.forward(), this.creatures);
     if (!shot.fired) return;
-    this.weaponNoiseUntil = now + (shot.weapon === 'knife' ? 500 : 2200);
-    if (shot.special) this.explosionUntil = now + 3200;
-    if (shot.weapon === 'knife') this.audio.knifeSwing();
-    else if (shot.special) this.audio.specialShot();
-    else this.audio.gunshot();
-    if (shot.special) this.toast('DRAGONBREAKER PULSE', 900);
+    this.weaponNoiseUntil = now + (shot.weapon === 'scanner' || shot.weapon === 'repair' ? 350 : 1700);
+    if (shot.weapon === 'repulsor') this.explosionUntil = now + 2100;
+    this.audio.multiTool(shot.weapon);
+    if (shot.weapon === 'scanner') this.toast('Echo sweep complete · signatures mapped', 1300);
+    if (shot.weapon === 'repulsor') this.toast(`Pressure wave · ${shot.repelled} targets displaced`, 1100);
+    if (shot.repaired > 0) {
+      const restored = this.state.repair(shot.repaired);
+      this.toast(restored > 0 ? `Suit integrity +${Math.round(restored)}` : 'Suit integrity nominal', 1100);
+    }
     if (!shot.hit) return;
-    if (shot.weapon === 'knife') this.audio.knifeHit();
-    else this.audio.weaponHit();
+    this.audio.weaponHit();
     const hit = shot.hit;
     if (hit.killed) {
       const meat = hit.isBoss ? 5 : 1;
@@ -101,11 +116,25 @@ export class OceanCombat {
       this.toast(`${hit.name} neutralized · +${meat} fish meat`, hit.isBoss ? 2600 : 1700);
       return;
     }
-    const message = `${shot.special ? 'Critical pulse · ' : ''}${hit.name} · ${Math.ceil(hit.health)}/${hit.maxHealth}`;
+    const message = `${shot.weapon === 'harpoon' ? 'Tether impact · ' : ''}${hit.name} · ${Math.ceil(hit.health)}/${hit.maxHealth}`;
     this.toast(message, hit.isBoss ? 2200 : 1300);
   }
 
-  private equip(weapon: 'gun' | 'knife', hidden: boolean): void {
-    if (this.weapons.equip(weapon, hidden)) this.audio.weaponSwitch();
+  private equip(weapon: MultiToolModule, now: number): void {
+    if (this.weapons.equip(weapon, now)) this.audio.weaponSwitch();
+  }
+
+  private recharge(now: number): void {
+    if (this.weapons.battery > 92) {
+      this.toast('Power cell already charged', 900);
+      return;
+    }
+    if (!this.state.usePowerCell()) {
+      this.toast('No spare power cell', 1100);
+      return;
+    }
+    this.weapons.recharge(now);
+    this.audio.toolRecharge();
+    this.toast('Power cell replaced · 100%', 1300);
   }
 }
